@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ page.title | default: "M. Emre Gündüz · Software Engineer" }}</title>
+<meta name="description" content="M. Emre Gündüz — Software Engineer based in Bonn, Germany.">
+{% if page.noindex %}<meta name="robots" content="noindex">{% endif %}
+<script>try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
+</head>
+<body>
+<main{% if page.wide %} class="wide"{% endif %}>
+  <nav>
+    {% assign links = "/|Resume,/projects/|Projects,/photography/|Photography" | split: "," %}
+    {% for l in links %}{% assign p = l | split: "|" %}
+    <a href="{{ p[0] | relative_url }}"{% if page.url == p[0] %} aria-current="page"{% endif %}>{{ p[1] }}</a>
+    {% endfor %}
+    <button class="theme" type="button" aria-label="Toggle light and dark theme">◐ Theme</button>
+  </nav>
+{{ content }}
+</main>
+<script>
+  document.querySelector('.theme').onclick = () => {
+    const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const cur = document.documentElement.dataset.theme || (dark ? 'dark' : 'light');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  };
+</script>
+</body>
+</html>

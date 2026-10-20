@@ -1,0 +1,170 @@
+---
+title: Admin · M. Emre Gündüz
+noindex: true
+---
+<div class="admin">
+<header>
+  <h1>Admin</h1>
+  <p class="lead">Changes are committed to GitHub and go live about a minute later.</p>
+</header>
+
+<section id="login">
+  <h2>Sign in</h2>
+  <form>
+    <label>GitHub token
+      <input type="password" name="token" autocomplete="off" required>
+    </label>
+    <button>Sign in</button>
+  </form>
+  <p class="meta">Create a <a href="https://github.com/settings/personal-access-tokens/new">fine-grained token</a> with access to only the <code>emreguenduez.github.io</code> repository and <strong>Contents: Read and write</strong>. It's kept only in this browser.</p>
+  <p class="status"></p>
+</section>
+
+<div id="panel" hidden>
+  <section>
+    <h2>Add photo</h2>
+    <form id="upload">
+      <label>Photo <input type="file" name="file" accept="image/*" required></label>
+      <label>Title <input name="title" placeholder="Rhine at sunset" required></label>
+      <label>Date <input type="date" name="date" required></label>
+      <button>Upload</button>
+    </form>
+    <p class="meta">Resized to 2000px and re-saved as JPEG in your browser, which also removes location data.</p>
+    <p class="status" id="upload-status"></p>
+  </section>
+
+  <section>
+    <h2>Photos</h2>
+    <div class="thumbs" id="photos"></div>
+  </section>
+
+  <section>
+    <h2>Projects</h2>
+    <form id="projects">
+      <textarea name="yaml" spellcheck="false"></textarea>
+      <button>Save projects</button>
+    </form>
+    <p class="status" id="projects-status"></p>
+  </section>
+
+  <section>
+    <button type="button" id="logout">Sign out</button>
+  </section>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<script>
+  const API = 'https://api.github.com/repos/emreguenduez/emreguenduez.github.io/contents/';
+  const $ = s => document.querySelector(s);
+  let token = '';
+  try { token = localStorage.getItem('gh-token') || ''; } catch (e) {}
+
+  async function gh(path, opts = {}) {
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
+      body: opts.body && JSON.stringify(opts.body),
+    });
+    if (res.status === 404 && !opts.method) return null;
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || res.statusText);
+    return res.json();
+  }
+  const b64 = bytes => { let s = ''; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s); };
+  const toText = b64str => new TextDecoder().decode(Uint8Array.from(atob(b64str.replace(/\n/g, '')), c => c.charCodeAt(0)));
+  const slug = s => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  async function start() {
+    try {
+      await gh('_data/projects.yml').then(f => {
+        $('#projects').yaml.value = f ? toText(f.content) : '';
+        $('#projects').dataset.sha = f ? f.sha : '';
+      });
+    } catch (e) {
+      $('#login .status').textContent = 'Sign-in failed: ' + e.message;
+      return;
+    }
+    try { localStorage.setItem('gh-token', token); } catch (e) {}
+    $('#login').hidden = true;
+    $('#panel').hidden = false;
+    $('#upload').date.valueAsDate = new Date();
+    loadPhotos();
+  }
+
+  async function loadPhotos() {
+    const files = ((await gh('photos')) || []).filter(f => /\.(jpe?g|png|webp|avif|gif)$/i.test(f.name)).reverse();
+    $('#photos').replaceChildren(...files.map(f => {
+      const fig = document.createElement('figure');
+      fig.innerHTML = '<img loading="lazy" alt=""><span></span><button type="button">Delete</button>';
+      fig.querySelector('img').src = f.download_url;
+      fig.querySelector('span').textContent = f.name;
+      fig.querySelector('button').onclick = async () => {
+        if (!confirm('Delete ' + f.name + '?')) return;
+        try {
+          await gh(f.path, { method: 'DELETE', body: { message: 'Delete photo ' + f.name, sha: f.sha } });
+          fig.remove();
+        } catch (err) { alert('Delete failed: ' + err.message); }
+      };
+      return fig;
+    }));
+    if (!files.length) $('#photos').textContent = 'No photos yet.';
+  }
+
+  // Re-encoding through a canvas shrinks the file and drops EXIF metadata such as GPS location.
+  async function resize(file, max = 2000) {
+    const img = await createImageBitmap(file);
+    const k = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.88));
+    return new Uint8Array(await blob.arrayBuffer());
+  }
+
+  $('#login form').onsubmit = e => { e.preventDefault(); token = e.target.token.value.trim(); start(); };
+  $('#logout').onclick = () => { try { localStorage.removeItem('gh-token'); } catch (e) {} location.reload(); };
+
+  $('#upload').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target, status = $('#upload-status');
+    const name = f.date.value + '-' + (slug(f.title.value) || 'photo') + '.jpg';
+    f.querySelector('button').disabled = true;
+    try {
+      status.textContent = 'Resizing…';
+      const bytes = await resize(f.file.files[0]);
+      status.textContent = 'Uploading…';
+      if (await gh('photos/' + name)) throw new Error(name + ' already exists, pick another title');
+      await gh('photos/' + name, { method: 'PUT', body: { message: 'Add photo ' + name, content: b64(bytes) } });
+      status.textContent = 'Uploaded ' + name + '. It will appear on the gallery in about a minute.';
+      f.file.value = ''; f.title.value = '';
+      loadPhotos();
+    } catch (err) {
+      status.textContent = 'Upload failed: ' + err.message;
+    }
+    f.querySelector('button').disabled = false;
+  };
+
+  $('#projects').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target, status = $('#projects-status');
+    try {
+      const data = jsyaml.load(f.yaml.value);
+      if (data != null && !Array.isArray(data)) throw new Error('the file must be a list of projects');
+      (data || []).forEach((p, i) => { if (!p || !p.name) throw new Error('project ' + (i + 1) + ' has no name'); });
+    } catch (err) {
+      status.textContent = 'Not saved, ' + err.message;
+      return;
+    }
+    try {
+      const res = await gh('_data/projects.yml', { method: 'PUT', body: {
+        message: 'Update projects', content: b64(new TextEncoder().encode(f.yaml.value)), sha: f.dataset.sha || undefined,
+      } });
+      f.dataset.sha = res.content.sha;
+      status.textContent = 'Saved. Projects page updates in about a minute.';
+    } catch (err) {
+      status.textContent = 'Save failed: ' + err.message;
+    }
+  };
+
+  if (token) start();
+</script>

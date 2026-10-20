@@ -1,0 +1,14 @@
+# Add a project by copying a block below. Only "name" is required.
+# image: put a screenshot in /projects/ and write e.g. /projects/eksperone.png
+
+- name: EksperOne
+  year: 2026
+  description: SaaS and desktop software for vehicle damage appraisal offices. Offline plate recognition cut photo-sorting time from 40 to 5 minutes; now in use at 2 offices.
+  tags: [C#, YOLOv9, .NET 10, PostgreSQL, React, TypeScript, Docker]
+  url: https://eksperone.com
+
+- name: Schengen Visa Appointment Bot
+  year: 2022
+  description: A Puppeteer bot that checks iData's appointment endpoint for the nearest free Schengen visa slot, instead of refreshing the site by hand.
+  tags: [JavaScript, Puppeteer, Node.js]
+  repo: https://github.com/emreguenduez/idatarandevu
