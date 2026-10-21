@@ -18,18 +18,21 @@ wide: true
     <button>Sign in</button>
   </form>
   <p class="meta">Create a <a href="https://github.com/settings/personal-access-tokens/new">fine-grained token</a> with access to only the <code>emreguenduez.github.io</code> repository and <strong>Contents: Read and write</strong>. It's kept only in this browser.</p>
-  <p class="status"></p>
+  <p class="status" role="alert"></p>
 </section>
 
 <div id="panel" hidden>
-  <div class="tabs" role="tablist">
-    <button type="button" role="tab" data-tab="books">Photo books</button>
-    <button type="button" role="tab" data-tab="library">Photo library</button>
-    <button type="button" role="tab" data-tab="resume">Resume</button>
-    <button type="button" role="tab" data-tab="projects">Projects</button>
+  <div class="tabbar">
+    <div class="tabs" role="tablist" aria-label="Admin sections">
+      <button type="button" role="tab" id="tab-books" aria-controls="panel-books" data-tab="books">Photo books</button>
+      <button type="button" role="tab" id="tab-library" aria-controls="panel-library" data-tab="library">Photo library</button>
+      <button type="button" role="tab" id="tab-resume" aria-controls="panel-resume" data-tab="resume">Resume</button>
+      <button type="button" role="tab" id="tab-projects" aria-controls="panel-projects" data-tab="projects">Projects</button>
+    </div>
+    <button type="button" class="quiet" id="logout">Sign out</button>
   </div>
 
-  <div data-panel="books">
+  <div data-panel="books" role="tabpanel" id="panel-books" aria-labelledby="tab-books">
   <section id="shelf">
     <h2>Photo books</h2>
     <div class="books" id="book-list"></div>
@@ -40,7 +43,7 @@ wide: true
       <button type="button" id="ed-back">← All books</button>
       <button type="button" id="ed-preview">Preview book</button>
     </div>
-    <p class="status" id="ed-status"></p>
+    <p class="status" id="ed-status" role="status"></p>
     <div class="ed">
       <ol class="strip" id="strip" aria-label="Pages"></ol>
       <div class="canvas pagebox" id="canvas"></div>
@@ -49,29 +52,34 @@ wide: true
   </section>
   </div>
 
-  <div data-panel="library">
+  <div data-panel="library" role="tabpanel" id="panel-library" aria-labelledby="tab-library">
   <section id="library">
     <h2>Photo library</h2>
     <div class="toolbar">
-      <label><span>Upload photos</span><input type="file" accept="image/*" multiple id="lib-upload"></label>
+      <label class="filebtn"><input type="file" accept="image/*" multiple id="lib-upload">Upload photos</label>
+      <span class="meta">or drop image files anywhere on this tab</span>
     </div>
-    <p class="meta">Photos are resized to 2000px and re-saved as JPEG in your browser, which also removes location data.</p>
-    <p class="status" id="lib-status"></p>
+    <p class="meta">Photos are resized to 2000px and re-saved as JPEG in your browser, which also removes location data. Deleting a photo removes it from GitHub right away.</p>
+    <p class="status" id="lib-status" role="status"></p>
     <div class="thumbs" id="lib"></div>
   </section>
   </div>
 
-  <div data-panel="resume">
+  <div data-panel="resume" role="tabpanel" id="panel-resume" aria-labelledby="tab-resume">
   <section>
     <h2>Resume</h2>
     <p class="meta">Write <code>**bold**</code> for emphasis and <code>[text](https://link)</code> for links. The preview updates as you type; empty sections are hidden.</p>
-    <div class="cv-ed">
+    <div class="segmented" role="group" aria-label="Show">
+      <button type="button" data-cv-view="form" aria-pressed="true">Edit</button>
+      <button type="button" data-cv-view="preview" aria-pressed="false">Preview</button>
+    </div>
+    <div class="cv-ed" data-view="form">
       <div class="cv-form" id="cv-form"></div>
       <div class="cv-preview" aria-label="Resume preview"><div id="cv-preview"></div></div>
     </div>
   </section>
   <div class="savebar" id="cv-savebar" hidden>
-    <span id="cv-status">You have unsaved changes to your resume.</span>
+    <span id="cv-status" role="status">You have unsaved changes to your resume.</span>
     <span class="toolbar">
       <button type="button" id="cv-discard">Discard</button>
       <button type="button" class="primary" id="cv-save">Save &amp; publish</button>
@@ -79,23 +87,26 @@ wide: true
   </div>
   </div>
 
-  <div data-panel="projects">
+  <div data-panel="projects" role="tabpanel" id="panel-projects" aria-labelledby="tab-projects">
   <section>
     <h2>Projects</h2>
+    <p class="meta">One block per project, in the order they appear on the site. Only <code>name</code> is required; <code>year</code>, <code>description</code>, <code>tags</code>, <code>url</code>, <code>repo</code> and <code>image</code> are optional.</p>
     <form id="projects">
-      <textarea name="yaml" spellcheck="false"></textarea>
-      <button>Save projects</button>
+      <label><span>projects.yml</span><textarea name="yaml" spellcheck="false" aria-describedby="projects-status"></textarea></label>
     </form>
-    <p class="status" id="projects-status"></p>
+    <p class="status" id="projects-status" role="status"></p>
   </section>
+  <div class="savebar" id="pj-savebar" hidden>
+    <span id="pj-status" role="status">You have unsaved changes to your projects.</span>
+    <span class="toolbar">
+      <button type="button" id="pj-discard">Discard</button>
+      <button type="button" class="primary" id="pj-save">Save &amp; publish</button>
+    </span>
+  </div>
   </div>
 
-  <section>
-    <button type="button" id="logout">Sign out</button>
-  </section>
-
   <div class="savebar" id="savebar" hidden>
-    <span id="save-status">You have unsaved changes to your photo books.</span>
+    <span id="save-status" role="status">You have unsaved changes to your photo books.</span>
     <span class="toolbar">
       <button type="button" id="discard">Discard</button>
       <button type="button" class="primary" id="save">Save &amp; publish</button>
@@ -103,12 +114,12 @@ wide: true
   </div>
 </div>
 
-<dialog class="picker" id="picker" aria-label="Choose photos">
+<dialog class="picker" id="picker" aria-labelledby="pick-title">
   <div class="toolbar">
-    <h2 style="margin:0">Choose photo</h2>
-    <label style="margin-left:auto"><span class="meta">Upload new</span><input type="file" accept="image/*" multiple id="pick-upload"></label>
+    <h2 id="pick-title">Choose photo</h2>
+    <label class="filebtn"><input type="file" accept="image/*" multiple id="pick-upload">Upload new</label>
   </div>
-  <p class="status" id="pick-status"></p>
+  <p class="status" id="pick-status" role="status"></p>
   <div class="thumbs" id="pick-grid"></div>
   <div class="toolbar">
     <button type="button" id="pick-cancel">Cancel</button>
@@ -137,19 +148,46 @@ wide: true
   const NO_WRITE = 'This token can read your site but not save to it. On GitHub, go to Settings → Developer settings → Fine-grained tokens, edit the token, set Repository access to only emreguenduez.github.io and Repository permissions → Contents to "Read and write", then sign in again.';
 
   // ---------- GitHub API ----------
+  // Turns GitHub's replies into sentences that say what to do next.
+  function explain(status, msg) {
+    if (/not accessible by (personal access|integration)/i.test(msg)) return NO_WRITE;
+    if (status === 401) return 'GitHub didn\'t accept this token. It may have expired or been deleted; create a new one and sign in again.';
+    if (status === 409 || /does not match/i.test(msg)) return 'This file was changed somewhere else (another tab, or on GitHub) after you opened it.';
+    if (status === 413 || /too large/i.test(msg)) return 'The file is too large for GitHub.';
+    if (status === 403 && /rate limit/i.test(msg)) return 'GitHub is limiting requests for a while. Wait a few minutes and try again.';
+    if (status >= 500) return 'GitHub had a problem (' + status + '). Try again in a moment.';
+    return msg;
+  }
   async function gh(path, opts = {}) {
-    const res = await fetch(path.startsWith('https:') ? path : API + path, {
-      ...opts,
-      cache: 'no-store',
-      headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
-      body: opts.body && JSON.stringify(opts.body),
-    });
+    let res;
+    try {
+      res = await fetch(path.startsWith('https:') ? path : API + path, {
+        ...opts,
+        cache: 'no-store',
+        headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
+        body: opts.body && JSON.stringify(opts.body),
+      });
+    } catch (e) {
+      throw new Error('Couldn\'t reach GitHub. Check your internet connection and try again.');
+    }
     if (res.status === 404 && !opts.method) return null;
     if (!res.ok) {
       const msg = (await res.json().catch(() => ({}))).message || res.statusText;
-      throw new Error(/not accessible by (personal access|integration)/i.test(msg) ? NO_WRITE : msg);
+      const err = new Error(explain(res.status, msg));
+      err.conflict = res.status === 409 || /does not match/i.test(msg);
+      throw err;
     }
     return res.json();
+  }
+
+  // Saves a text file. After a conflict, `force` saves over the other version using its current sha.
+  async function saveFile(path, text, sha, message, force) {
+    if (force) sha = (await gh(path))?.sha;
+    const res = await gh(path, { method: 'PUT', body: { message, content: b64(new TextEncoder().encode(text)), sha: sha || undefined } });
+    return res.content.sha;
+  }
+  function failText(err) {
+    return 'Not saved. ' + err.message + (err.conflict ? ' Press "Save over it" to replace that version with yours.' : '');
   }
   const b64 = bytes => { let s = ''; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s); };
   const toText = b64str => new TextDecoder().decode(Uint8Array.from(atob(b64str.replace(/\n/g, '')), c => c.charCodeAt(0)));
@@ -170,15 +208,28 @@ wide: true
     $('#savebar').hidden = !dirty();
     $('#save-status').textContent = 'You have unsaved changes to your photo books.';
   }
-  addEventListener('beforeunload', e => { if (dirty() || cvDirty()) e.preventDefault(); });
+  const anyDirty = () => dirty() || cvDirty() || pjDirty();
+  addEventListener('beforeunload', e => { if (anyDirty()) e.preventDefault(); });
 
   // ---------- Tabs ----------
+  const tabs = [...document.querySelectorAll('[data-tab]')];
   function showTab(name) {
+    if (!tabs.some(t => t.dataset.tab === name)) name = 'books';
     document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== name);
-    document.querySelectorAll('[data-tab]').forEach(t => t.setAttribute('aria-selected', t.dataset.tab === name));
+    tabs.forEach(t => { const on = t.dataset.tab === name; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; });
     try { sessionStorage.setItem('admin-tab', name); } catch (e) {}
   }
-  document.querySelectorAll('[data-tab]').forEach(t => t.onclick = () => showTab(t.dataset.tab));
+  tabs.forEach((t, i) => {
+    t.onclick = () => showTab(t.dataset.tab);
+    t.onkeydown = e => {
+      const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      const to = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : step ? (i + step + tabs.length) % tabs.length : -1;
+      if (to < 0) return;
+      e.preventDefault();
+      showTab(tabs[to].dataset.tab);
+      tabs[to].focus();
+    };
+  });
 
   // ---------- Sign in ----------
   async function start() {
@@ -188,13 +239,14 @@ wide: true
       cv = resume ? JSON.parse(toText(resume.content)) : { name: '', role: '', contact: [], sections: [] };
       cvSha = resume ? resume.sha : '';
       cvSaved = JSON.stringify(cv);
-      $('#projects').yaml.value = proj ? toText(proj.content) : '';
-      $('#projects').dataset.sha = proj ? proj.sha : '';
+      pjSaved = $('#projects').yaml.value = proj ? toText(proj.content) : '';
+      pjSha = proj ? proj.sha : '';
       books = data ? JSON.parse(toText(data.content) || '[]') : [];
       booksSha = data ? data.sha : '';
       savedJSON = JSON.stringify(books);
     } catch (e) {
-      $('#login .status').textContent = e.message === NO_WRITE ? e.message : 'Sign-in failed: ' + e.message;
+      $('#login .status').textContent = e.message === NO_WRITE ? e.message : 'Couldn\'t sign in. ' + e.message;
+      $('#login .status').classList.add('error');
       return;
     }
     try { localStorage.setItem('gh-token', token); } catch (e) {}
@@ -207,9 +259,10 @@ wide: true
   }
   $('#login form').onsubmit = e => { e.preventDefault(); token = e.target.token.value.trim(); start(); };
   $('#logout').onclick = () => {
-    if ((dirty() || cvDirty()) && !confirm('Discard unsaved changes and sign out?')) return;
+    if (anyDirty() && !confirm('Discard unsaved changes and sign out?')) return;
     savedJSON = JSON.stringify(books);
     cvSaved = JSON.stringify(cv);
+    pjSaved = $('#projects').yaml.value;
     try { localStorage.removeItem('gh-token'); } catch (e) {}
     location.reload();
   };
@@ -256,18 +309,31 @@ wide: true
     const b = book();
     const strip = $('#strip');
     const lis = [];
-    const cover = bookEl('li');
-    cover.append(bookBox(renderBookCover(b, src)), bookEl('span', '', 'Cover'));
-    cover.setAttribute('aria-selected', sel === -1);
-    cover.onclick = () => select(-1);
-    lis.push(cover);
+    // Each entry is a button: Enter selects it, Alt+arrow keys move the page.
+    const entry = (i, pageBox, label) => {
+      const li = bookEl('li');
+      const btn = bookEl('button', 'strip-btn');
+      btn.type = 'button';
+      btn.dataset.page = i;
+      if (sel === i) btn.setAttribute('aria-current', 'true');
+      btn.setAttribute('aria-label', label + (i >= 0 ? '. Alt plus arrow keys to move' : ''));
+      btn.append(pageBox, bookEl('span', '', label));
+      btn.onclick = () => select(i);
+      if (i >= 0) btn.onkeydown = e => {
+        if (!e.altKey) return;
+        const step = { ArrowUp: -1, ArrowLeft: -1, ArrowDown: 1, ArrowRight: 1 }[e.key];
+        if (!step) return;
+        e.preventDefault();
+        movePage(i, i + step);
+      };
+      li.append(btn);
+      return li;
+    };
+    lis.push(entry(-1, bookBox(renderBookCover(b, src)), 'Cover'));
 
     b.pages.forEach((p, i) => {
-      const li = bookEl('li');
-      li.append(bookBox(renderBookPage(p, src)), bookEl('span', '', 'Page ' + (i + 1)));
-      li.setAttribute('aria-selected', sel === i);
+      const li = entry(i, bookBox(renderBookPage(p, src)), 'Page ' + (i + 1));
       li.draggable = true;
-      li.onclick = () => select(i);
       li.ondragstart = e => { e.dataTransfer.setData('text/plain', i); e.dataTransfer.effectAllowed = 'move'; };
       li.ondragover = e => {
         e.preventDefault();
@@ -278,10 +344,11 @@ wide: true
       li.ondragleave = () => li.classList.remove('drop-after', 'drop-before');
       li.ondrop = e => {
         e.preventDefault();
+        const after = li.classList.contains('drop-after');
         li.classList.remove('drop-after', 'drop-before');
         if (isFileDrag(e)) return;
         const from = +e.dataTransfer.getData('text/plain');
-        let to = i + (li.classList.contains('drop-after') ? 1 : 0);
+        let to = i + (after ? 1 : 0);
         if (from < to) to--;
         movePage(from, to);
       };
@@ -303,8 +370,11 @@ wide: true
     const tools = bookEl('li');
     tools.style.cursor = 'default';
     tools.append(addPage, addMany);
+    const hadFocus = strip.contains(document.activeElement);
     strip.replaceChildren(...lis, tools);
-    strip.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    const current = strip.querySelector('[aria-current="true"]');
+    current?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (hadFocus) current?.focus(); // keep the keyboard on the page that just moved
   }
 
   function select(i) { sel = i; drawEditor(); }
@@ -335,8 +405,11 @@ wide: true
     if (!slot) return;
     const i = slot.dataset.slot;
     if (e.target.closest('.slot-x')) return setSlot(i, '');
-    const picked = await pick(false);
+    const b = book();
+    const current = i === 'cover' ? b.cover : (b.pages[sel].photos || [])[+i];
+    const picked = await pick(false, current);
     if (picked) setSlot(i, picked[0]);
+    $('#canvas').querySelector('[data-slot="' + i + '"] .slot-pick')?.focus();
   };
   // Dropping an image file on a photo spot uploads it and puts it there.
   $('#canvas').ondragover = e => {
@@ -397,6 +470,7 @@ wide: true
         field('Subtitle', b.subtitle, v => b.subtitle = v),
         colorLabel,
         bookEl('p', 'meta', 'Click the photo area on the cover to choose a cover photo, or drop an image file on it.'),
+        ...(b.cover ? [field('Describe the cover photo (for screen readers)', b.coverAlt, v => b.coverAlt = v)] : []),
         button('Delete this book', () => {
           if (!confirm('Delete "' + (b.title || 'Untitled') + '"? It disappears from the site once you save.')) return;
           books.splice(cur, 1);
@@ -418,20 +492,33 @@ wide: true
     layoutLabel.style.display = 'grid'; layoutLabel.style.gap = '6px';
     layoutLabel.append(bookEl('span', '', 'Layout'), layouts);
 
-    const moves = bookEl('div', 'toolbar');
-    const up = button('↑ Move up', () => movePage(sel, sel - 1));
-    const down = button('↓ Move down', () => movePage(sel, sel + 1));
+    // Moving sits next to the page title so it stays in reach on a phone, above the long settings.
+    const head = bookEl('div', 'props-head');
+    const up = button('Earlier', () => movePage(sel, sel - 1), 'mini');
+    const down = button('Later', () => movePage(sel, sel + 1), 'mini');
+    up.setAttribute('aria-label', 'Move page earlier');
+    down.setAttribute('aria-label', 'Move page later');
     up.disabled = sel === 0;
     down.disabled = sel === b.pages.length - 1;
-    moves.append(up, down,
-      button('Duplicate', () => { b.pages.splice(sel + 1, 0, structuredClone(p)); sel++; changed(); drawEditor(); }));
+    const moves = bookEl('span', 'toolbar');
+    moves.append(up, down);
+    head.append(bookEl('h3', '', 'Page ' + (sel + 1) + ' of ' + b.pages.length), moves);
+
+    const n = BOOK_LAYOUTS[p.layout || 'single'].slots;
+    const alts = [];
+    for (let i = 0; i < n; i++) {
+      if (!(p.photos || [])[i]) continue;
+      alts.push(field(n > 1 ? 'Describe photo ' + (i + 1) : 'Describe the photo', (p.alts || [])[i], v => { p.alts = p.alts || []; p.alts[i] = v; }));
+    }
+    if (alts.length) alts.unshift(bookEl('p', 'meta', 'For people using screen readers. If left empty, the caption is used.'));
 
     props.replaceChildren(
-      bookEl('h3', '', 'Page ' + (sel + 1) + ' of ' + b.pages.length),
+      head,
       layoutLabel,
       field(p.layout === 'text' ? 'Text' : 'Caption (optional)', p.text, v => p.text = v, 'textarea'),
-      bookEl('p', 'meta', 'Click a photo spot on the page to choose a photo, or drop an image file on it. Drag pages in the strip to reorder them.'),
-      moves,
+      ...alts,
+      bookEl('p', 'meta', 'Click a photo spot on the page to choose a photo, or drop an image file on it. Drag pages in the strip, or select one and press Alt with an arrow key, to reorder.'),
+      button('Duplicate page', () => { b.pages.splice(sel + 1, 0, structuredClone(p)); sel++; changed(); drawEditor(); }),
       button('Delete page', () => {
         if (b.pages.length === 1) return alert('A book needs at least one page.');
         b.pages.splice(sel, 1);
@@ -453,23 +540,24 @@ wide: true
         b.id = id;
       }
       ids.add(b.id);
-      b.pages.forEach(p => { p.photos = (p.photos || []).slice(0, BOOK_LAYOUTS[p.layout]?.slots ?? 1); });
+      b.pages.forEach(p => {
+        const n = BOOK_LAYOUTS[p.layout]?.slots ?? 1;
+        p.photos = (p.photos || []).slice(0, n);
+        if (p.alts) p.alts = p.alts.slice(0, n);
+      });
     });
     btn.disabled = true;
     $('#save-status').textContent = 'Saving…';
     try {
-      const res = await gh('_data/books.json', { method: 'PUT', body: {
-        message: 'Update photo books',
-        content: b64(new TextEncoder().encode(JSON.stringify(books, null, 2) + '\n')),
-        sha: booksSha || undefined,
-      } });
-      booksSha = res.content.sha;
+      booksSha = await saveFile('_data/books.json', JSON.stringify(books, null, 2) + '\n', booksSha, 'Update photo books', btn.dataset.force);
       savedJSON = JSON.stringify(books);
-      $('#savebar').hidden = true;
-      $('#lib-status').textContent = 'Photo books saved. The site updates in about a minute.';
+      delete btn.dataset.force;
+      btn.textContent = 'Save & publish';
+      $('#save-status').textContent = 'Saved. Your photo books update on the site in about a minute.';
+      setTimeout(() => { $('#savebar').hidden = !dirty(); }, 3000);
     } catch (err) {
-      $('#save-status').textContent = 'Save failed: ' + err.message +
-        (/does not match|sha/i.test(err.message) ? ' (books were changed elsewhere; reload the page)' : '');
+      $('#save-status').textContent = failText(err);
+      if (err.conflict) { btn.dataset.force = '1'; btn.textContent = 'Save over it'; }
     }
     btn.disabled = false;
   };
@@ -497,16 +585,18 @@ wide: true
       const fig = bookEl('figure');
       const img = bookEl('img');
       img.src = src(f.path); img.alt = ''; img.loading = 'lazy';
-      fig.append(img, bookEl('span', '', f.name), button('Delete', async () => {
+      const del = button('Delete', async () => {
         const used = usedIn(f.path);
-        const msg = used.length ? f.name + ' is used in: ' + used.join(', ') + '. Delete anyway? It will show as an empty spot.' : 'Delete ' + f.name + '?';
+        const msg = 'Delete ' + f.name + ' from GitHub? This can\'t be undone here.' + (used.length ? ' It is used in: ' + used.join(', ') + ', where it will show as an empty spot.' : '');
         if (!confirm(msg)) return;
         try {
           await gh(f.path.slice(1), { method: 'DELETE', body: { message: 'Delete photo ' + f.name, sha: f.sha } });
           library = library.filter(x => x !== f);
           drawLibrary();
-        } catch (err) { alert('Delete failed: ' + err.message); }
-      }));
+        } catch (err) { $('#lib-status').textContent = 'Not deleted. ' + err.message; }
+      }, 'danger mini');
+      del.setAttribute('aria-label', 'Delete ' + f.name);
+      fig.append(img, bookEl('span', '', f.name), del);
       return fig;
     }));
     if (!library.length) $('#lib').textContent = 'No photos yet.';
@@ -566,9 +656,9 @@ wide: true
 
   // ---------- Photo picker ----------
   // Resolves to an array of chosen paths, or null if cancelled. Single mode returns on the first click.
-  function pick(multi) {
+  function pick(multi, current = '') {
     const dlg = $('#picker'), grid = $('#pick-grid'), chosen = [];
-    $('#picker h2').textContent = multi ? 'Choose photos (one page each)' : 'Choose a photo';
+    $('#pick-title').textContent = multi ? 'Choose photos (one page each)' : 'Choose a photo';
     $('#pick-ok').hidden = !multi;
     $('#pick-status').textContent = library.length ? '' : 'Your library is empty. Upload a photo to get started.';
     return new Promise(resolve => {
@@ -581,8 +671,8 @@ wide: true
           btn.setAttribute('aria-pressed', at < 0);
           $('#pick-ok').textContent = 'Add ' + chosen.length + ' page' + (chosen.length === 1 ? '' : 's');
         });
-        btn.setAttribute('aria-pressed', chosen.includes(f.path));
-        btn.setAttribute('aria-label', f.name);
+        btn.setAttribute('aria-pressed', multi ? chosen.includes(f.path) : f.path === current);
+        btn.setAttribute('aria-label', f.name + (!multi && f.path === current ? ' (current photo)' : ''));
         const img = bookEl('img');
         img.src = src(f.path); img.alt = ''; img.loading = 'lazy';
         btn.append(img);
@@ -742,21 +832,22 @@ wide: true
     btn.disabled = true;
     $('#cv-status').textContent = 'Saving…';
     try {
-      const res = await gh('_data/resume.json', { method: 'PUT', body: {
-        message: 'Update resume',
-        content: b64(new TextEncoder().encode(JSON.stringify(cv, null, 2) + '\n')),
-        sha: cvSha || undefined,
-      } });
-      cvSha = res.content.sha;
+      cvSha = await saveFile('_data/resume.json', JSON.stringify(cv, null, 2) + '\n', cvSha, 'Update resume', btn.dataset.force);
       cvSaved = JSON.stringify(cv);
+      delete btn.dataset.force;
+      btn.textContent = 'Save & publish';
       $('#cv-status').textContent = 'Saved. Your resume updates in about a minute.';
-      setTimeout(() => { $('#cv-savebar').hidden = !cvDirty(); }, 2500);
+      setTimeout(() => { $('#cv-savebar').hidden = !cvDirty(); }, 3000);
     } catch (err) {
-      $('#cv-status').textContent = 'Save failed: ' + err.message +
-        (/does not match|sha/i.test(err.message) ? ' (the resume was changed elsewhere; reload the page)' : '');
+      $('#cv-status').textContent = failText(err);
+      if (err.conflict) { btn.dataset.force = '1'; btn.textContent = 'Save over it'; }
     }
     btn.disabled = false;
   };
+  document.querySelectorAll('[data-cv-view]').forEach(b => b.onclick = () => {
+    $('.cv-ed').dataset.view = b.dataset.cvView;
+    document.querySelectorAll('[data-cv-view]').forEach(o => o.setAttribute('aria-pressed', o === b));
+  });
   $('#cv-discard').onclick = () => {
     if (!confirm('Discard all unsaved changes to your resume?')) return;
     cv = JSON.parse(cvSaved);
@@ -764,26 +855,42 @@ wide: true
   };
 
   // ---------- Projects ----------
-  $('#projects').onsubmit = async e => {
-    e.preventDefault();
-    const f = e.target, status = $('#projects-status');
+  let pjSaved = '', pjSha = '';
+  const pjDirty = () => $('#projects').yaml.value !== pjSaved;
+  $('#projects').yaml.oninput = () => {
+    $('#pj-savebar').hidden = !pjDirty();
+    $('#pj-status').textContent = 'You have unsaved changes to your projects.';
+  };
+  $('#projects').onsubmit = e => e.preventDefault();
+  $('#pj-save').onclick = async () => {
+    const btn = $('#pj-save'), text = $('#projects').yaml.value, status = $('#pj-status');
     try {
-      const data = jsyaml.load(f.yaml.value);
-      if (data != null && !Array.isArray(data)) throw new Error('the file must be a list of projects');
-      (data || []).forEach((p, i) => { if (!p || !p.name) throw new Error('project ' + (i + 1) + ' has no name'); });
+      const data = jsyaml.load(text);
+      if (data != null && !Array.isArray(data)) throw new Error('The file must be a list: start each project with "- name:".');
+      (data || []).forEach((p, i) => { if (!p || !p.name) throw new Error('Project ' + (i + 1) + ' has no name.'); });
     } catch (err) {
-      status.textContent = 'Not saved, ' + err.message;
+      status.textContent = 'Not saved. ' + (err.mark ? 'There is a mistake on line ' + (err.mark.line + 1) + ': ' + err.reason + '.' : err.message);
       return;
     }
+    btn.disabled = true;
+    status.textContent = 'Saving…';
     try {
-      const res = await gh('_data/projects.yml', { method: 'PUT', body: {
-        message: 'Update projects', content: b64(new TextEncoder().encode(f.yaml.value)), sha: f.dataset.sha || undefined,
-      } });
-      f.dataset.sha = res.content.sha;
-      status.textContent = 'Saved. Projects page updates in about a minute.';
+      pjSha = await saveFile('_data/projects.yml', text, pjSha, 'Update projects', btn.dataset.force);
+      pjSaved = text;
+      delete btn.dataset.force;
+      btn.textContent = 'Save & publish';
+      status.textContent = 'Saved. The projects page updates in about a minute.';
+      setTimeout(() => { $('#pj-savebar').hidden = !pjDirty(); }, 3000);
     } catch (err) {
-      status.textContent = 'Save failed: ' + err.message;
+      status.textContent = failText(err);
+      if (err.conflict) { btn.dataset.force = '1'; btn.textContent = 'Save over it'; }
     }
+    btn.disabled = false;
+  };
+  $('#pj-discard').onclick = () => {
+    if (!confirm('Discard your unsaved changes to the projects?')) return;
+    $('#projects').yaml.value = pjSaved;
+    $('#pj-savebar').hidden = true;
   };
 
   if (token) start();

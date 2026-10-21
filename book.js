@@ -16,22 +16,32 @@ function bookEl(tag, cls, text) {
   return e;
 }
 
-function bookSlot(path, src, editable, i) {
+const BOOK_X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
+
+// One photo spot. `alt` describes the photo; '' marks it decorative. In the editor the whole spot is a button.
+function bookSlot(path, src, editable, i, alt = '') {
   const f = bookEl('figure', 'slot');
   f.dataset.slot = i;
+  const name = i === 'cover' ? 'cover photo' : 'photo ' + (i + 1);
   if (path) {
     const img = bookEl('img');
     img.src = src(path);
-    img.alt = '';
+    img.alt = alt;
     f.append(img);
-    if (editable) {
-      const x = bookEl('button', 'slot-x', '×');
+  }
+  if (editable) {
+    const pickBtn = bookEl('button', 'slot-pick');
+    pickBtn.type = 'button';
+    pickBtn.setAttribute('aria-label', (path ? 'Replace ' : 'Choose ') + name);
+    if (!path) pickBtn.append(bookEl('span', 'slot-empty', '+ Add photo'));
+    f.append(pickBtn);
+    if (path) {
+      const x = bookEl('button', 'slot-x');
       x.type = 'button';
-      x.setAttribute('aria-label', 'Remove photo');
+      x.innerHTML = BOOK_X_ICON;
+      x.setAttribute('aria-label', 'Remove ' + name);
       f.append(x);
     }
-  } else if (editable) {
-    f.append(bookEl('span', 'slot-empty', '+ Add photo'));
   }
   return f;
 }
@@ -40,7 +50,7 @@ function renderBookCover(book, src = p => p, editable = false) {
   const page = bookEl('div', 'bpage bcover');
   const inner = bookEl('div', 'bin');
   inner.style.background = book.color || '#2b3a42'; // on the inner box: PageFlip overwrites the page's own style
-  inner.append(bookSlot(book.cover, src, editable, 'cover'));
+  inner.append(bookSlot(book.cover, src, editable, 'cover', book.coverAlt || ''));
   inner.append(bookEl('p', 'ctitle', book.title || 'Untitled'));
   if (book.subtitle) inner.append(bookEl('p', 'csub', book.subtitle));
   page.append(inner);
@@ -63,11 +73,11 @@ function renderBookPage(page, src = p => p, editable = false) {
   const n = BOOK_LAYOUTS[layout].slots;
   if (n) {
     const slots = bookEl('div', 'slots');
-    for (let i = 0; i < n; i++) slots.append(bookSlot((page.photos || [])[i], src, editable, i));
+    for (let i = 0; i < n; i++) slots.append(bookSlot((page.photos || [])[i], src, editable, i, (page.alts || [])[i] || page.text || ''));
     inner.append(slots);
   }
   if (page.text) inner.append(bookEl('p', 'btext', page.text));
-  else if (editable && layout === 'text') inner.append(bookEl('p', 'btext slot-empty', 'Type your text in the panel →'));
+  else if (editable && layout === 'text') inner.append(bookEl('p', 'btext slot-empty', 'Add the text in the page settings'));
   el.append(inner);
   return el;
 }

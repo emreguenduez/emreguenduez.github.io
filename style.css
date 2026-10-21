@@ -27,6 +27,7 @@
   --muted: #625a4e;
   --accent: #1d5a43;
   --line: #e0d9cb;
+  --danger: #a63a26;
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
@@ -39,6 +40,7 @@
     --muted: #a59d8f;
     --accent: #8bcaab;
     --line: #2e2b26;
+    --danger: #ee8c77;
     color-scheme: dark;
   }
 }
@@ -48,6 +50,7 @@
   --muted: #a59d8f;
   --accent: #8bcaab;
   --line: #2e2b26;
+  --danger: #ee8c77;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -64,7 +67,7 @@ body {
 ::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 input, textarea { caret-color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
-main { max-width: 640px; margin: 0 auto; padding: 40px 20px 0; }
+main { max-width: 640px; margin: 0 auto; padding: 40px max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left)); }
 a { color: inherit; text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:hover { color: var(--accent); text-decoration-color: var(--accent); }
 h1, h2, h3 { text-wrap: balance; }
@@ -143,7 +146,7 @@ nav a[aria-current] { color: var(--text); font-weight: 600; text-decoration: und
 .theme:hover { color: var(--text); }
 .theme svg { width: 18px; height: 18px; }
 footer {
-  max-width: 640px; margin: 88px auto 0; padding: 22px 20px 40px; border-top: 1px solid var(--line);
+  max-width: 640px; margin: 88px auto 0; padding: 22px max(20px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); border-top: 1px solid var(--line);
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; font-size: 0.875rem; color: var(--muted);
 }
 footer nav { margin: 0; gap: 4px 18px; font-size: inherit; }
@@ -227,7 +230,8 @@ main.wide + footer { max-width: 1100px; }
 }
 .viewer button:hover { background: rgb(255 255 255 / 0.2); }
 .viewer button svg { width: 22px; height: 22px; }
-.viewer .close { position: fixed; top: 16px; right: 16px; }
+.viewer .close { position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); }
+@media (max-width: 600px) { .viewer .close { top: auto; bottom: max(16px, env(safe-area-inset-bottom)); } .viewer[open] { padding-bottom: 64px; } }
 .viewer h2 { position: fixed; top: 22px; left: 22px; right: 80px; margin: 0; font-size: 1.35rem; color: #ece6db; }
 
 /* Projects: an index, not a grid of equal cards */
@@ -266,8 +270,11 @@ main.wide + footer { max-width: 1100px; }
 .admin button { cursor: pointer; justify-self: start; border-color: var(--accent); color: var(--accent); }
 .admin button:hover:not(:disabled) { background: var(--accent); color: var(--bg); }
 .admin button:disabled { opacity: 0.5; cursor: default; }
-.admin button.danger { border-color: #c4553f; color: #c4553f; }
-.admin button.danger:hover { background: #c4553f; color: #fff; }
+.admin button.danger { border-color: var(--danger); color: var(--danger); }
+.admin button.danger:hover:not(:disabled) { background: var(--danger); color: var(--bg); }
+.admin button.quiet { border-color: transparent; color: var(--muted); }
+.admin button.quiet:hover { background: none; color: var(--text); border-color: var(--line); }
+.admin .status.error { color: var(--danger); }
 .admin button.primary { background: var(--accent); color: var(--bg); }
 .admin .status { min-height: 1.6em; color: var(--muted); }
 .admin .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
@@ -288,31 +295,44 @@ main.wide + footer { max-width: 1100px; }
   box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.4);
 }
 .admin .savebar button { border-color: var(--bg); color: var(--bg); background: none; }
+.admin .savebar button { white-space: nowrap; }
+@media (max-width: 600px) { .savebar { flex-wrap: wrap; } .savebar > .toolbar { margin-left: auto; } }
 .admin .savebar button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 
 /* Book editor: page strip | page canvas | properties */
 .ed { display: grid; grid-template-columns: 112px minmax(0, 1fr) 280px; gap: 24px; align-items: start; margin-top: 20px; }
 .strip { list-style: none; margin: 0; padding: 4px; display: grid; gap: 10px; max-height: 78vh; overflow-y: auto; }
-.strip li { display: grid; gap: 4px; font-size: 0.75rem; color: var(--muted); text-align: center; cursor: pointer; }
+.strip li { display: grid; gap: 4px; }
+.admin .strip-btn {
+  display: grid; gap: 4px; width: 100%; padding: 0; border: 0; border-radius: 4px; background: none;
+  font-size: 0.75rem; color: var(--muted); text-align: center;
+}
+.admin .strip-btn:hover:not(:disabled) { background: none; color: var(--text); }
 .strip .pagebox { border-radius: 3px; overflow: hidden; outline: 1px solid var(--line); pointer-events: none; }
-.strip li[aria-selected="true"] .pagebox { outline: 3px solid var(--accent); }
-.strip li[aria-selected="true"] { color: var(--accent); font-weight: 600; }
+.strip-btn[aria-current="true"] .pagebox { outline: 3px solid var(--accent); }
+.admin .strip-btn[aria-current="true"] { color: var(--accent); font-weight: 600; }
 .strip li.drop-before .pagebox { box-shadow: 0 -6px 0 -2px var(--accent); }
 .strip li.drop-after .pagebox { box-shadow: 0 6px 0 -2px var(--accent); }
 .strip li[draggable="true"] { cursor: grab; }
 .strip .add { padding: 6px; font-size: 0.8rem; justify-self: stretch; }
 .canvas { max-width: min(520px, calc((100vh - 110px) * 0.75)); width: 100%; margin: 0 auto; box-shadow: 0 2px 4px rgb(0 0 0 / 0.12), 0 16px 40px -16px rgb(0 0 0 / 0.4); }
-.canvas .slot { cursor: pointer; }
+.admin .slot-pick { position: absolute; inset: 0; width: 100%; padding: 0; border: 0; border-radius: 0; background: none; cursor: pointer; }
+.admin .slot-pick:hover:not(:disabled) { background: none; }
+.admin .slot-pick:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 .canvas .slot:hover, .canvas .slot.dropping { outline: 3px solid var(--accent); outline-offset: -3px; }
-.canvas .slot-x {
-  position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 999px; border: 0;
-  background: rgb(0 0 0 / 0.6); color: #fff; font: 16px/1 system-ui; cursor: pointer; opacity: 0;
+.admin .canvas .slot-x {
+  position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 36px; height: 36px; padding: 0;
+  border: 0; border-radius: 999px; background: rgb(0 0 0 / 0.62); color: #fff; opacity: 0; transition: opacity 0.15s;
 }
-.canvas .slot:hover .slot-x, .canvas .slot-x:focus-visible { opacity: 1; }
+.admin .canvas .slot-x:hover { background: rgb(0 0 0 / 0.8); color: #fff; }
+.canvas .slot-x svg { width: 18px; height: 18px; }
+.canvas .slot:hover .slot-x, .canvas .slot:focus-within .slot-x { opacity: 1; }
+@media (hover: none) { .canvas .slot-x { opacity: 1; } } /* touch screens can't hover to reveal it */
 .props { display: grid; gap: 16px; }
 .props h3 { margin: 0; font-size: 1rem; }
-.layouts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-.admin .layouts button { padding: 4px; display: grid; gap: 4px; font-size: 0.7rem; color: var(--muted); border-color: var(--line); justify-self: stretch; }
+.props-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.layouts { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+.admin .layouts button { padding: 6px; display: grid; gap: 4px; font-size: 0.75rem; color: var(--muted); border-color: var(--line); justify-self: stretch; }
 .admin .layouts button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .admin .layouts button:hover { background: none; color: var(--accent); }
 .layouts .pagebox { pointer-events: none; outline: 1px solid var(--line); }
@@ -336,7 +356,16 @@ main.wide + footer { max-width: 1100px; }
 .picker .thumbs { max-height: 56vh; overflow-y: auto; margin: 14px 0; }
 
 /* Admin tabs */
-.tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--line); }
+[data-panel] > section { border-top: none; margin-top: 28px; padding-top: 0; } /* the tab bar already draws the line */
+.tabbar { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
+.tabs { display: flex; gap: 4px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.admin .tabs button { white-space: nowrap; min-height: 44px; }
+@media (max-width: 600px) {
+  .tabbar { flex-wrap: wrap; gap: 0; }
+  #logout { order: -1; margin-left: auto; }
+  .tabs { flex-basis: 100%; mask-image: linear-gradient(90deg, #000 85%, transparent); } /* the fade hints there are more tabs */
+  .admin .tabs button { padding: 10px 11px; }
+}
 .admin .tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted); padding: 10px 14px; margin-bottom: -1px; }
 .admin .tabs button:hover { background: none; color: var(--accent); }
 .admin .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
@@ -367,3 +396,24 @@ main.wide + footer { max-width: 1100px; }
   .cv-ed { grid-template-columns: 1fr; }
   .cv-preview { position: static; max-height: none; }
 }
+
+/* File inputs look like the other buttons; the input stays focusable for keyboard users */
+.filebtn {
+  position: relative; display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px;
+  border: 1px solid var(--accent); border-radius: 6px; color: var(--accent); cursor: pointer; font-size: 0.9375rem;
+}
+.filebtn:hover { background: var(--accent); color: var(--bg); }
+.filebtn input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
+.filebtn:focus-within { outline: 2px solid var(--accent); outline-offset: 3px; }
+.picker .toolbar h2 { margin: 0; flex: 1; }
+
+/* Resume editor: on narrow screens, Edit and Preview take turns instead of stacking */
+.segmented { display: none; margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; padding: 3px; width: max-content; }
+.admin .segmented button { border: 0; border-radius: 6px; padding: 6px 16px; min-height: 36px; color: var(--muted); background: none; }
+.admin .segmented button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+@media (max-width: 900px) {
+  .segmented { display: flex; }
+  .cv-ed[data-view="form"] .cv-preview, .cv-ed[data-view="preview"] .cv-form { display: none; }
+}
+/* iOS zooms into inputs smaller than 16px */
+@media (pointer: coarse) { .admin input, .admin textarea, .admin select, .admin #projects textarea { font-size: 16px; } }
