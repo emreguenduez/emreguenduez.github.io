@@ -4,14 +4,12 @@ Personal site: resume (`index.html`), projects and photography. Built by GitHub 
 
 ## Admin
 
-Go to `/admin/` and sign in with a fine-grained GitHub token (only this repo, Contents: Read and write). From there you can upload or delete photos and edit projects. Uploads are resized and stripped of location data in the browser.
+Go to `/admin/` and sign in with a fine-grained GitHub token (only this repo, Contents: Read and write).
 
-## Add a photo by hand
-
-Drop the image into `photos/` (on GitHub: open the folder → **Add file → Upload files**).
-
-- Name it `YYYY-MM-DD-short-title.jpg`: photos are shown newest first, and the caption becomes "Short title".
-- Resize before uploading so the page loads fast, e.g. on a Mac: `sips -Z 2000 photo.jpg`
+- **Photo books** (shown on `/photography/`): create a book, pick a cover photo, title and color, then add pages. Each page has a layout (one photo, full bleed, two, four, or text) and an optional caption. Drag pages in the strip to reorder them. "Save & publish" commits `_data/books.json`.
+- **Photo library**: upload or delete photos in `photos/`. Uploads are resized and stripped of location data in the browser.
+- **Resume** (the home page): edit `_data/resume.json` with a form and live preview. Use `**bold**` and `[text](https://link)` in text.
+- **Projects**: edit `_data/projects.yml`.
 
 ## Add a project by hand
 

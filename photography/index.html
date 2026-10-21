@@ -4,54 +4,39 @@ wide: true
 ---
 <header>
   <h1>Photography</h1>
-  <p class="lead">Photos I've taken.</p>
+  <p class="lead">Photo books of places I've been. Open one and flip through.</p>
 </header>
 
-{%- comment -%}
-  Every image in /photos/ shows up here, newest first when named like 2026-10-20-rhine-sunset.jpg.
-  The caption comes from the file name, with the date prefix dropped.
-{%- endcomment -%}
-{% assign files = site.static_files | where_exp: "f", "f.path contains '/photos/'" | sort: "name" | reverse %}
-<div class="gallery">
-{%- for f in files %}
-  {%- assign ext = f.extname | downcase %}
-  {%- unless "|.jpg|.jpeg|.png|.webp|.avif|.gif|" contains ext %}{% continue %}{% endunless %}
-  {%- assign b = f.basename %}
-  {%- assign year = b | slice: 0, 4 | plus: 0 %}
-  {%- if year > 1900 and b.size > 11 %}{% assign b = b | slice: 11, 999 %}{% endif %}
-  {%- assign caption = b | replace: "-", " " | replace: "_", " " | capitalize %}
-  <a href="{{ f.path | relative_url }}"><img src="{{ f.path | relative_url }}" alt="{{ caption | escape }}" loading="lazy" decoding="async"></a>
-{%- else %}
-  <p class="empty">No photos yet.</p>
-{%- endfor %}
-</div>
+<div class="books" id="books"></div>
+<p class="empty" id="no-books" hidden>No photo books yet.</p>
 
-<dialog class="lightbox" aria-label="Photo viewer">
-  <img alt="">
-  <p></p>
-  <button class="close" type="button" aria-label="Close">×</button>
-  <button class="prev" type="button" aria-label="Previous photo">‹</button>
-  <button class="next" type="button" aria-label="Next photo">›</button>
-</dialog>
+<dialog class="viewer" aria-label="Photo book"></dialog>
 
+<script id="books-data" type="application/json">{{ site.data.books | jsonify | replace: "</", "<\/" }}</script>
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script src="{{ '/book.js' | relative_url }}"></script>
 <script>
-  const links = [...document.querySelectorAll('.gallery a')];
-  const box = document.querySelector('.lightbox');
-  const img = box.querySelector('img'), cap = box.querySelector('p');
-  let i = 0;
-  const show = n => {
-    i = (n + links.length) % links.length;
-    img.src = links[i].href;
-    img.alt = cap.textContent = links[i].querySelector('img').alt;
+  const books = JSON.parse(document.getElementById('books-data').textContent || '[]') || [];
+  const viewer = document.querySelector('.viewer');
+  viewer.innerHTML = BOOK_VIEWER_HTML;
+  const src = p => '{{ site.baseurl }}' + p;
+
+  document.getElementById('books').append(...books.map(b => {
+    const a = bookEl('a', 'book');
+    a.href = '#' + b.id;
+    a.append(bookBox(renderBookCover(b, src)));
+    a.append(bookEl('h3', '', b.title || 'Untitled'));
+    a.append(bookEl('span', 'meta', (b.pages || []).length + ' pages'));
+    return a;
+  }));
+  document.getElementById('no-books').hidden = books.length > 0;
+
+  // The hash (#book-id) opens a book, so links to a single book can be shared.
+  const route = () => {
+    const b = books.find(b => '#' + b.id === location.hash);
+    if (b && !viewer.open) openBook(viewer, b, src);
   };
-  links.forEach((a, n) => a.addEventListener('click', e => { e.preventDefault(); show(n); box.showModal(); }));
-  box.querySelector('.prev').onclick = () => show(i - 1);
-  box.querySelector('.next').onclick = () => show(i + 1);
-  box.querySelector('.close').onclick = () => box.close();
-  box.addEventListener('click', e => { if (e.target === box) box.close(); });
-  document.addEventListener('keydown', e => {
-    if (!box.open) return;
-    if (e.key === 'ArrowLeft') show(i - 1);
-    if (e.key === 'ArrowRight') show(i + 1);
-  });
+  viewer.addEventListener('close', () => history.replaceState(null, '', location.pathname));
+  addEventListener('hashchange', route);
+  route();
 </script>

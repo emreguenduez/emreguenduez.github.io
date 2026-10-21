@@ -1,11 +1,12 @@
 ---
 title: Admin · M. Emre Gündüz
 noindex: true
+wide: true
 ---
 <div class="admin">
 <header>
   <h1>Admin</h1>
-  <p class="lead">Changes are committed to GitHub and go live about a minute later.</p>
+  <p class="lead">Changes are committed to GitHub and go live about a minute after saving.</p>
 </header>
 
 <section id="login">
@@ -21,23 +22,63 @@ noindex: true
 </section>
 
 <div id="panel" hidden>
-  <section>
-    <h2>Add photo</h2>
-    <form id="upload">
-      <label>Photo <input type="file" name="file" accept="image/*" required></label>
-      <label>Title <input name="title" placeholder="Rhine at sunset" required></label>
-      <label>Date <input type="date" name="date" required></label>
-      <button>Upload</button>
-    </form>
-    <p class="meta">Resized to 2000px and re-saved as JPEG in your browser, which also removes location data.</p>
-    <p class="status" id="upload-status"></p>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="books">Photo books</button>
+    <button type="button" role="tab" data-tab="library">Photo library</button>
+    <button type="button" role="tab" data-tab="resume">Resume</button>
+    <button type="button" role="tab" data-tab="projects">Projects</button>
+  </div>
+
+  <div data-panel="books">
+  <section id="shelf">
+    <h2>Photo books</h2>
+    <div class="books" id="book-list"></div>
   </section>
 
-  <section>
-    <h2>Photos</h2>
-    <div class="thumbs" id="photos"></div>
+  <section id="editor" hidden>
+    <div class="toolbar">
+      <button type="button" id="ed-back">← All books</button>
+      <button type="button" id="ed-preview">Preview book</button>
+    </div>
+    <div class="ed">
+      <ol class="strip" id="strip" aria-label="Pages"></ol>
+      <div class="canvas pagebox" id="canvas"></div>
+      <div class="props" id="props"></div>
+    </div>
   </section>
+  </div>
 
+  <div data-panel="library">
+  <section id="library">
+    <h2>Photo library</h2>
+    <div class="toolbar">
+      <label><span>Upload photos</span><input type="file" accept="image/*" multiple id="lib-upload"></label>
+    </div>
+    <p class="meta">Photos are resized to 2000px and re-saved as JPEG in your browser, which also removes location data.</p>
+    <p class="status" id="lib-status"></p>
+    <div class="thumbs" id="lib"></div>
+  </section>
+  </div>
+
+  <div data-panel="resume">
+  <section>
+    <h2>Resume</h2>
+    <p class="meta">Write <code>**bold**</code> for emphasis and <code>[text](https://link)</code> for links. The preview updates as you type; empty sections are hidden.</p>
+    <div class="cv-ed">
+      <div class="cv-form" id="cv-form"></div>
+      <div class="cv-preview" aria-label="Resume preview"><div id="cv-preview"></div></div>
+    </div>
+  </section>
+  <div class="savebar" id="cv-savebar" hidden>
+    <span id="cv-status">You have unsaved changes to your resume.</span>
+    <span class="toolbar">
+      <button type="button" id="cv-discard">Discard</button>
+      <button type="button" class="primary" id="cv-save">Save &amp; publish</button>
+    </span>
+  </div>
+  </div>
+
+  <div data-panel="projects">
   <section>
     <h2>Projects</h2>
     <form id="projects">
@@ -46,23 +87,55 @@ noindex: true
     </form>
     <p class="status" id="projects-status"></p>
   </section>
+  </div>
 
   <section>
     <button type="button" id="logout">Sign out</button>
   </section>
-</div>
+
+  <div class="savebar" id="savebar" hidden>
+    <span id="save-status">You have unsaved changes to your photo books.</span>
+    <span class="toolbar">
+      <button type="button" id="discard">Discard</button>
+      <button type="button" class="primary" id="save">Save &amp; publish</button>
+    </span>
+  </div>
 </div>
 
+<dialog class="picker" id="picker" aria-label="Choose photos">
+  <div class="toolbar">
+    <h2 style="margin:0">Choose photo</h2>
+    <label style="margin-left:auto"><span class="meta">Upload new</span><input type="file" accept="image/*" multiple id="pick-upload"></label>
+  </div>
+  <p class="status" id="pick-status"></p>
+  <div class="thumbs" id="pick-grid"></div>
+  <div class="toolbar">
+    <button type="button" id="pick-cancel">Cancel</button>
+    <button type="button" class="primary" id="pick-ok" hidden>Add selected</button>
+  </div>
+</dialog>
+
+</div>
+<dialog class="viewer" aria-label="Book preview"></dialog>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script src="{{ '/book.js' | relative_url }}"></script>
+<script src="{{ '/resume.js' | relative_url }}"></script>
 <script>
-  const API = 'https://api.github.com/repos/emreguenduez/emreguenduez.github.io/contents/';
+  const REPO = 'emreguenduez/emreguenduez.github.io';
+  const API = 'https://api.github.com/repos/' + REPO + '/contents/';
+  const RAW = 'https://raw.githubusercontent.com/' + REPO + '/main';
+  const COLORS = ['#2b3a42', '#1f4e3d', '#7a2e2e', '#3b3355', '#8a6a3b', '#d8d2c4', '#111111'];
   const $ = s => document.querySelector(s);
   let token = '';
   try { token = localStorage.getItem('gh-token') || ''; } catch (e) {}
 
+  // ---------- GitHub API ----------
   async function gh(path, opts = {}) {
     const res = await fetch(API + path, {
       ...opts,
+      cache: 'no-store',
       headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
       body: opts.body && JSON.stringify(opts.body),
     });
@@ -74,12 +147,43 @@ noindex: true
   const toText = b64str => new TextDecoder().decode(Uint8Array.from(atob(b64str.replace(/\n/g, '')), c => c.charCodeAt(0)));
   const slug = s => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
+  // Fresh uploads are shown from memory until GitHub serves them.
+  const localSrc = {};
+  const src = p => localSrc[p] || RAW + p;
+
+  // ---------- State ----------
+  let books = [], savedJSON = '[]', booksSha = '';
+  let library = []; // [{ path: '/photos/x.jpg', name, sha }]
+  let cur = -1;     // index of the book being edited
+  let sel = -1;     // selected page index, -1 = cover
+  const book = () => books[cur];
+  const dirty = () => JSON.stringify(books) !== savedJSON;
+  function changed() {
+    $('#savebar').hidden = !dirty();
+    $('#save-status').textContent = 'You have unsaved changes to your photo books.';
+  }
+  addEventListener('beforeunload', e => { if (dirty() || cvDirty()) e.preventDefault(); });
+
+  // ---------- Tabs ----------
+  function showTab(name) {
+    document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== name);
+    document.querySelectorAll('[data-tab]').forEach(t => t.setAttribute('aria-selected', t.dataset.tab === name));
+    try { sessionStorage.setItem('admin-tab', name); } catch (e) {}
+  }
+  document.querySelectorAll('[data-tab]').forEach(t => t.onclick = () => showTab(t.dataset.tab));
+
+  // ---------- Sign in ----------
   async function start() {
     try {
-      await gh('_data/projects.yml').then(f => {
-        $('#projects').yaml.value = f ? toText(f.content) : '';
-        $('#projects').dataset.sha = f ? f.sha : '';
-      });
+      const [proj, data, resume] = await Promise.all([gh('_data/projects.yml'), gh('_data/books.json'), gh('_data/resume.json')]);
+      cv = resume ? JSON.parse(toText(resume.content)) : { name: '', role: '', contact: [], sections: [] };
+      cvSha = resume ? resume.sha : '';
+      cvSaved = JSON.stringify(cv);
+      $('#projects').yaml.value = proj ? toText(proj.content) : '';
+      $('#projects').dataset.sha = proj ? proj.sha : '';
+      books = data ? JSON.parse(toText(data.content) || '[]') : [];
+      booksSha = data ? data.sha : '';
+      savedJSON = JSON.stringify(books);
     } catch (e) {
       $('#login .status').textContent = 'Sign-in failed: ' + e.message;
       return;
@@ -87,27 +191,298 @@ noindex: true
     try { localStorage.setItem('gh-token', token); } catch (e) {}
     $('#login').hidden = true;
     $('#panel').hidden = false;
-    $('#upload').date.valueAsDate = new Date();
-    loadPhotos();
+    drawShelf();
+    drawCv();
+    showTab(sessionStorage.getItem('admin-tab') || 'books');
+    loadLibrary();
+  }
+  $('#login form').onsubmit = e => { e.preventDefault(); token = e.target.token.value.trim(); start(); };
+  $('#logout').onclick = () => {
+    if ((dirty() || cvDirty()) && !confirm('Discard unsaved changes and sign out?')) return;
+    savedJSON = JSON.stringify(books);
+    cvSaved = JSON.stringify(cv);
+    try { localStorage.removeItem('gh-token'); } catch (e) {}
+    location.reload();
+  };
+
+  // ---------- Bookshelf ----------
+  function drawShelf() {
+    $('#shelf').hidden = false;
+    $('#editor').hidden = true;
+    const items = books.map((b, i) => {
+      const btn = bookEl('button', 'book');
+      btn.type = 'button';
+      btn.append(bookBox(renderBookCover(b, src)), bookEl('h3', '', b.title || 'Untitled'), bookEl('span', 'meta', (b.pages || []).length + ' pages · Edit'));
+      btn.onclick = () => edit(i);
+      return btn;
+    });
+    const add = bookEl('button', 'book new-book');
+    add.type = 'button';
+    const box = bookEl('div', 'pagebox', '+');
+    add.append(box, bookEl('h3', '', 'New photo book'));
+    add.onclick = () => {
+      books.push({ id: '', title: 'New photo book', subtitle: String(new Date().getFullYear()), color: COLORS[books.length % COLORS.length], cover: '', pages: [{ layout: 'single', photos: [], text: '' }] });
+      changed();
+      edit(books.length - 1);
+    };
+    $('#book-list').replaceChildren(...items, add);
   }
 
-  async function loadPhotos() {
-    const files = ((await gh('photos')) || []).filter(f => /\.(jpe?g|png|webp|avif|gif)$/i.test(f.name)).reverse();
-    $('#photos').replaceChildren(...files.map(f => {
-      const fig = document.createElement('figure');
-      fig.innerHTML = '<img loading="lazy" alt=""><span></span><button type="button">Delete</button>';
-      fig.querySelector('img').src = f.download_url;
-      fig.querySelector('span').textContent = f.name;
-      fig.querySelector('button').onclick = async () => {
-        if (!confirm('Delete ' + f.name + '?')) return;
-        try {
-          await gh(f.path, { method: 'DELETE', body: { message: 'Delete photo ' + f.name, sha: f.sha } });
-          fig.remove();
-        } catch (err) { alert('Delete failed: ' + err.message); }
+  // ---------- Editor ----------
+  function edit(i) {
+    cur = i; sel = -1;
+    $('#shelf').hidden = true;
+    $('#editor').hidden = false;
+    drawEditor();
+    $('#editor').scrollIntoView({ block: 'start' });
+  }
+  $('#ed-back').onclick = drawShelf;
+  $('#ed-preview').onclick = () => openBook($('.viewer'), book(), src);
+  $('.viewer').innerHTML = BOOK_VIEWER_HTML;
+
+  function drawEditor() { drawStrip(); drawCanvas(); drawProps(); }
+  function redraw() { changed(); drawStrip(); drawCanvas(); } // after content edits; leaves form fields alone
+
+  function drawStrip() {
+    const b = book();
+    const strip = $('#strip');
+    const lis = [];
+    const cover = bookEl('li');
+    cover.append(bookBox(renderBookCover(b, src)), bookEl('span', '', 'Cover'));
+    cover.setAttribute('aria-selected', sel === -1);
+    cover.onclick = () => select(-1);
+    lis.push(cover);
+
+    b.pages.forEach((p, i) => {
+      const li = bookEl('li');
+      li.append(bookBox(renderBookPage(p, src)), bookEl('span', '', 'Page ' + (i + 1)));
+      li.setAttribute('aria-selected', sel === i);
+      li.draggable = true;
+      li.onclick = () => select(i);
+      li.ondragstart = e => { e.dataTransfer.setData('text/plain', i); e.dataTransfer.effectAllowed = 'move'; };
+      li.ondragover = e => {
+        e.preventDefault();
+        const after = e.offsetY > li.offsetHeight / 2;
+        li.classList.toggle('drop-after', after);
+        li.classList.toggle('drop-before', !after);
       };
+      li.ondragleave = () => li.classList.remove('drop-after', 'drop-before');
+      li.ondrop = e => {
+        e.preventDefault();
+        const from = +e.dataTransfer.getData('text/plain');
+        let to = i + (li.classList.contains('drop-after') ? 1 : 0);
+        if (from < to) to--;
+        movePage(from, to);
+      };
+      lis.push(li);
+    });
+
+    const addPage = bookEl('button', 'add', '+ Page');
+    addPage.type = 'button';
+    addPage.onclick = () => { b.pages.splice(sel + 1, 0, { layout: 'single', photos: [], text: '' }); sel++; changed(); drawEditor(); };
+    const addMany = bookEl('button', 'add', '+ Pages from photos');
+    addMany.type = 'button';
+    addMany.onclick = async () => {
+      const picked = await pick(true);
+      if (!picked || !picked.length) return;
+      b.pages.splice(sel + 1, 0, ...picked.map(path => ({ layout: 'single', photos: [path], text: '' })));
+      sel += picked.length;
+      changed(); drawEditor();
+    };
+    const tools = bookEl('li');
+    tools.style.cursor = 'default';
+    tools.append(addPage, addMany);
+    strip.replaceChildren(...lis, tools);
+    strip.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+
+  function select(i) { sel = i; drawEditor(); }
+
+  function movePage(from, to) {
+    const pages = book().pages;
+    if (to < 0 || to >= pages.length || from === to) return;
+    pages.splice(to, 0, pages.splice(from, 1)[0]);
+    sel = to;
+    changed(); drawEditor();
+  }
+
+  function drawCanvas() {
+    const b = book();
+    const pageEl = sel === -1 ? renderBookCover(b, src, true) : renderBookPage(b.pages[sel], src, true);
+    $('#canvas').replaceChildren(pageEl);
+  }
+
+  // Clicking a photo slot on the big page opens the picker; × removes the photo.
+  $('#canvas').onclick = async e => {
+    const slot = e.target.closest('.slot');
+    if (!slot) return;
+    const b = book(), i = slot.dataset.slot;
+    const set = path => {
+      if (i === 'cover') b.cover = path;
+      else { const p = b.pages[sel]; p.photos = p.photos || []; p.photos[+i] = path; }
+    };
+    if (e.target.closest('.slot-x')) set('');
+    else {
+      const picked = await pick(false);
+      if (!picked) return;
+      set(picked[0]);
+    }
+    redraw();
+  };
+
+  function field(label, value, oninput, tag = 'input') {
+    const l = bookEl('label');
+    const input = bookEl(tag);
+    input.value = value || '';
+    input.oninput = () => { oninput(input.value); redraw(); };
+    l.append(bookEl('span', '', label), input);
+    return l;
+  }
+  function button(text, onclick, cls = '') {
+    const btn = bookEl('button', cls, text);
+    btn.type = 'button';
+    btn.onclick = onclick;
+    return btn;
+  }
+
+  function drawProps() {
+    const b = book(), props = $('#props');
+    if (sel === -1) {
+      const color = bookEl('input');
+      color.type = 'color';
+      color.value = b.color || '#2b3a42';
+      color.setAttribute('aria-label', 'Custom cover color');
+      color.oninput = () => { b.color = color.value; redraw(); };
+      const swatches = bookEl('div', 'swatches');
+      COLORS.forEach(c => {
+        const s = button('', () => { b.color = color.value = c; redraw(); });
+        s.style.background = c;
+        s.setAttribute('aria-label', 'Cover color ' + c);
+        swatches.append(s);
+      });
+      swatches.append(color);
+      const colorLabel = bookEl('div');
+      colorLabel.append(bookEl('span', '', 'Cover color'), swatches);
+      colorLabel.style.display = 'grid'; colorLabel.style.gap = '6px';
+      props.replaceChildren(
+        bookEl('h3', '', 'Cover'),
+        field('Title', b.title, v => b.title = v),
+        field('Subtitle', b.subtitle, v => b.subtitle = v),
+        colorLabel,
+        bookEl('p', 'meta', 'Click the photo area on the cover to choose a cover photo.'),
+        button('Delete this book', () => {
+          if (!confirm('Delete "' + (b.title || 'Untitled') + '"? It disappears from the site once you save.')) return;
+          books.splice(cur, 1);
+          changed(); drawShelf();
+        }, 'danger'),
+      );
+      return;
+    }
+
+    const p = b.pages[sel];
+    const layouts = bookEl('div', 'layouts');
+    Object.entries(BOOK_LAYOUTS).forEach(([key, info]) => {
+      const btn = button('', () => { p.layout = key; redraw(); drawProps(); });
+      btn.setAttribute('aria-pressed', (p.layout || 'single') === key);
+      btn.append(bookBox(renderBookPage({ layout: key, photos: [], text: key === 'text' ? 'Aa' : '' })), bookEl('span', '', info.label));
+      layouts.append(btn);
+    });
+    const layoutLabel = bookEl('div');
+    layoutLabel.style.display = 'grid'; layoutLabel.style.gap = '6px';
+    layoutLabel.append(bookEl('span', '', 'Layout'), layouts);
+
+    const moves = bookEl('div', 'toolbar');
+    const up = button('↑ Move up', () => movePage(sel, sel - 1));
+    const down = button('↓ Move down', () => movePage(sel, sel + 1));
+    up.disabled = sel === 0;
+    down.disabled = sel === b.pages.length - 1;
+    moves.append(up, down,
+      button('Duplicate', () => { b.pages.splice(sel + 1, 0, structuredClone(p)); sel++; changed(); drawEditor(); }));
+
+    props.replaceChildren(
+      bookEl('h3', '', 'Page ' + (sel + 1) + ' of ' + b.pages.length),
+      layoutLabel,
+      field(p.layout === 'text' ? 'Text' : 'Caption (optional)', p.text, v => p.text = v, 'textarea'),
+      bookEl('p', 'meta', 'Click a photo spot on the page to choose a photo. Drag pages in the strip to reorder them.'),
+      moves,
+      button('Delete page', () => {
+        if (b.pages.length === 1) return alert('A book needs at least one page.');
+        b.pages.splice(sel, 1);
+        sel = Math.min(sel, b.pages.length - 1);
+        changed(); drawEditor();
+      }, 'danger'),
+    );
+  }
+
+  // ---------- Save ----------
+  $('#save').onclick = async () => {
+    const btn = $('#save');
+    // Give each book a stable, unique id for its share link; drop photos hidden by a smaller layout.
+    const ids = new Set();
+    books.forEach(b => {
+      if (!b.id) {
+        let id = slug(b.title) || 'book', n = 1;
+        while (books.some(o => o !== b && o.id === id) || ids.has(id)) id = (slug(b.title) || 'book') + '-' + ++n;
+        b.id = id;
+      }
+      ids.add(b.id);
+      b.pages.forEach(p => { p.photos = (p.photos || []).slice(0, BOOK_LAYOUTS[p.layout]?.slots ?? 1); });
+    });
+    btn.disabled = true;
+    $('#save-status').textContent = 'Saving…';
+    try {
+      const res = await gh('_data/books.json', { method: 'PUT', body: {
+        message: 'Update photo books',
+        content: b64(new TextEncoder().encode(JSON.stringify(books, null, 2) + '\n')),
+        sha: booksSha || undefined,
+      } });
+      booksSha = res.content.sha;
+      savedJSON = JSON.stringify(books);
+      $('#savebar').hidden = true;
+      $('#lib-status').textContent = 'Photo books saved. The site updates in about a minute.';
+    } catch (err) {
+      $('#save-status').textContent = 'Save failed: ' + err.message +
+        (/does not match|sha/i.test(err.message) ? ' (books were changed elsewhere; reload the page)' : '');
+    }
+    btn.disabled = false;
+  };
+  $('#discard').onclick = () => {
+    if (!confirm('Discard all unsaved changes to your photo books?')) return;
+    books = JSON.parse(savedJSON);
+    changed(); drawShelf();
+  };
+
+  // ---------- Photo library ----------
+  async function loadLibrary() {
+    const files = (await gh('photos')) || [];
+    library = files.filter(f => /\.(jpe?g|png|webp|avif|gif)$/i.test(f.name))
+      .map(f => ({ path: '/' + f.path, name: f.name, sha: f.sha }))
+      .reverse();
+    drawLibrary();
+  }
+
+  function usedIn(path) {
+    return books.filter(b => b.cover === path || b.pages.some(p => (p.photos || []).includes(path))).map(b => b.title || 'Untitled');
+  }
+
+  function drawLibrary() {
+    $('#lib').replaceChildren(...library.map(f => {
+      const fig = bookEl('figure');
+      const img = bookEl('img');
+      img.src = src(f.path); img.alt = ''; img.loading = 'lazy';
+      fig.append(img, bookEl('span', '', f.name), button('Delete', async () => {
+        const used = usedIn(f.path);
+        const msg = used.length ? f.name + ' is used in: ' + used.join(', ') + '. Delete anyway? It will show as an empty spot.' : 'Delete ' + f.name + '?';
+        if (!confirm(msg)) return;
+        try {
+          await gh(f.path.slice(1), { method: 'DELETE', body: { message: 'Delete photo ' + f.name, sha: f.sha } });
+          library = library.filter(x => x !== f);
+          drawLibrary();
+        } catch (err) { alert('Delete failed: ' + err.message); }
+      }));
       return fig;
     }));
-    if (!files.length) $('#photos').textContent = 'No photos yet.';
+    if (!library.length) $('#lib').textContent = 'No photos yet.';
   }
 
   // Re-encoding through a canvas shrinks the file and drops EXIF metadata such as GPS location.
@@ -117,33 +492,233 @@ noindex: true
     const c = document.createElement('canvas');
     c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-    const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.88));
-    return new Uint8Array(await blob.arrayBuffer());
+    return new Promise(r => c.toBlob(r, 'image/jpeg', 0.88));
   }
 
-  $('#login form').onsubmit = e => { e.preventDefault(); token = e.target.token.value.trim(); start(); };
-  $('#logout').onclick = () => { try { localStorage.removeItem('gh-token'); } catch (e) {} location.reload(); };
-
-  $('#upload').onsubmit = async e => {
-    e.preventDefault();
-    const f = e.target, status = $('#upload-status');
-    const name = f.date.value + '-' + (slug(f.title.value) || 'photo') + '.jpg';
-    f.querySelector('button').disabled = true;
-    try {
-      status.textContent = 'Resizing…';
-      const bytes = await resize(f.file.files[0]);
-      status.textContent = 'Uploading…';
-      if (await gh('photos/' + name)) throw new Error(name + ' already exists, pick another title');
-      await gh('photos/' + name, { method: 'PUT', body: { message: 'Add photo ' + name, content: b64(bytes) } });
-      status.textContent = 'Uploaded ' + name + '. It will appear on the gallery in about a minute.';
-      f.file.value = ''; f.title.value = '';
-      loadPhotos();
-    } catch (err) {
-      status.textContent = 'Upload failed: ' + err.message;
+  // Uploads files one by one; returns the stored paths of the ones that succeeded.
+  async function upload(files, status) {
+    const done = [];
+    for (const [n, file] of [...files].entries()) {
+      status.textContent = 'Uploading ' + (n + 1) + ' of ' + files.length + '…';
+      try {
+        const name = (slug(file.name.replace(/\.[^.]+$/, '')) || 'photo') + '-' + Date.now().toString(36) + '.jpg';
+        const blob = await resize(file);
+        const res = await gh('photos/' + name, { method: 'PUT', body: { message: 'Add photo ' + name, content: b64(new Uint8Array(await blob.arrayBuffer())) } });
+        const path = '/photos/' + name;
+        localSrc[path] = URL.createObjectURL(blob);
+        library.unshift({ path, name, sha: res.content.sha });
+        done.push(path);
+      } catch (err) {
+        status.textContent = 'Upload of ' + file.name + ' failed: ' + err.message;
+        drawLibrary();
+        return done;
+      }
     }
-    f.querySelector('button').disabled = false;
+    status.textContent = done.length + ' photo' + (done.length === 1 ? '' : 's') + ' uploaded.';
+    drawLibrary();
+    return done;
+  }
+  $('#lib-upload').onchange = async e => { await upload(e.target.files, $('#lib-status')); e.target.value = ''; };
+
+  // ---------- Photo picker ----------
+  // Resolves to an array of chosen paths, or null if cancelled. Single mode returns on the first click.
+  function pick(multi) {
+    const dlg = $('#picker'), grid = $('#pick-grid'), chosen = [];
+    $('#picker h2').textContent = multi ? 'Choose photos (one page each)' : 'Choose a photo';
+    $('#pick-ok').hidden = !multi;
+    $('#pick-status').textContent = library.length ? '' : 'Your library is empty. Upload a photo to get started.';
+    return new Promise(resolve => {
+      const finish = v => { dlg.onclose = null; dlg.close(); resolve(v); };
+      const draw = () => grid.replaceChildren(...library.map(f => {
+        const btn = button('', () => {
+          if (!multi) return finish([f.path]);
+          const at = chosen.indexOf(f.path);
+          at < 0 ? chosen.push(f.path) : chosen.splice(at, 1);
+          btn.setAttribute('aria-pressed', at < 0);
+          $('#pick-ok').textContent = 'Add ' + chosen.length + ' page' + (chosen.length === 1 ? '' : 's');
+        });
+        btn.setAttribute('aria-pressed', chosen.includes(f.path));
+        btn.setAttribute('aria-label', f.name);
+        const img = bookEl('img');
+        img.src = src(f.path); img.alt = ''; img.loading = 'lazy';
+        btn.append(img);
+        return btn;
+      }));
+      draw();
+      $('#pick-ok').textContent = 'Add selected';
+      $('#pick-ok').onclick = () => finish(chosen);
+      $('#pick-cancel').onclick = () => finish(null);
+      dlg.onclose = () => resolve(null);
+      $('#pick-upload').onchange = async e => {
+        const paths = await upload(e.target.files, $('#pick-status'));
+        e.target.value = '';
+        if (!multi && paths.length) return finish([paths[0]]);
+        chosen.push(...paths);
+        draw();
+      };
+      dlg.showModal();
+    });
+  }
+
+  // ---------- Resume editor ----------
+  let cv = null, cvSaved = '', cvSha = '';
+  const cvDirty = () => cv !== null && JSON.stringify(cv) !== cvSaved;
+  const collapsed = new WeakSet(); // sections the user folded, kept across redraws
+  const SECTION_TYPES = { entries: 'Entries with bullet points', tags: 'Tag list', pairs: 'Two-column list' };
+
+  // Text edits only refresh the preview so the field keeps focus; structural edits rebuild the form.
+  function cvChanged() {
+    renderResume($('#cv-preview'), cv, { downloadButton: false });
+    $('#cv-savebar').hidden = !cvDirty();
+    $('#cv-status').textContent = 'You have unsaved changes to your resume.';
+  }
+  function cvStructure() { drawCv(); cvChanged(); }
+
+  function cvField(obj, key, label, { multiline = false, placeholder = '' } = {}) {
+    const l = bookEl('label');
+    const input = bookEl(multiline ? 'textarea' : 'input');
+    input.value = obj[key] || '';
+    input.placeholder = placeholder;
+    if (multiline) { input.rows = 2; input.style.minHeight = 'auto'; }
+    input.oninput = () => { obj[key] = input.value; cvChanged(); };
+    l.append(bookEl('span', '', label), input);
+    return l;
+  }
+
+  // ↑ ↓ × controls for item `i` of `arr`.
+  function cvControls(arr, i, what) {
+    const box = bookEl('span', 'toolbar cv-ctl');
+    const mk = (t, label, fn, cls) => { const b = button(t, fn, 'mini ' + (cls || '')); b.setAttribute('aria-label', label); return b; };
+    const up = mk('↑', 'Move ' + what + ' up', () => { arr.splice(i - 1, 0, arr.splice(i, 1)[0]); cvStructure(); });
+    const down = mk('↓', 'Move ' + what + ' down', () => { arr.splice(i + 1, 0, arr.splice(i, 1)[0]); cvStructure(); });
+    up.disabled = i === 0;
+    down.disabled = i === arr.length - 1;
+    box.append(up, down, mk('×', 'Remove ' + what, () => { arr.splice(i, 1); cvStructure(); }, 'danger'));
+    return box;
+  }
+
+  function cvLine(field, controls) {
+    const line = bookEl('div', 'cv-line');
+    line.append(field, controls);
+    return line;
+  }
+
+  function drawCv() {
+    const form = $('#cv-form');
+    const head = bookEl('div', 'cv-card');
+    head.append(bookEl('h3', '', 'Header'), cvField(cv, 'name', 'Name'), cvField(cv, 'role', 'Title'));
+    const contact = bookEl('div', 'cv-list');
+    contact.append(bookEl('span', 'meta', 'Contact & links (leave the link empty for plain text)'));
+    cv.contact.forEach((c, i) => {
+      const g = bookEl('div', 'cv-grid');
+      g.append(cvField(c, 'label', 'Text'), cvField(c, 'url', 'Link', { placeholder: 'https://… or mailto:…' }));
+      contact.append(cvLine(g, cvControls(cv.contact, i, 'link')));
+    });
+    contact.append(button('+ Add link', () => { cv.contact.push({ label: '', url: '' }); cvStructure(); }, 'mini'));
+    head.append(contact);
+
+    const sections = cv.sections.map((s, si) => {
+      const card = bookEl('details', 'cv-card');
+      card.open = !collapsed.has(s);
+      card.ontoggle = () => card.open ? collapsed.delete(s) : collapsed.add(s);
+      const sum = bookEl('summary', '', (s.title || 'Untitled section'));
+      sum.append(bookEl('span', 'meta', ' · ' + SECTION_TYPES[s.type || 'entries']));
+      card.append(sum, cvLine(cvField(s, 'title', 'Section title'), cvControls(cv.sections, si, 'section')));
+      s.items = s.items || [];
+
+      if (s.type === 'tags') {
+        const l = bookEl('label');
+        const ta = bookEl('textarea');
+        ta.rows = 2; ta.style.minHeight = 'auto';
+        ta.value = s.items.join(', ');
+        ta.oninput = () => { s.items = ta.value.split(',').map(t => t.trim()).filter(Boolean); cvChanged(); };
+        l.append(bookEl('span', '', 'Items, separated by commas'), ta);
+        card.append(l);
+      } else if (s.type === 'pairs') {
+        s.items.forEach((p, i) => {
+          const g = bookEl('div', 'cv-grid');
+          g.append(cvField(p, 'title', 'Name'), cvField(p, 'right', 'Detail'));
+          card.append(cvLine(g, cvControls(s.items, i, 'row')));
+        });
+        card.append(button('+ Add row', () => { s.items.push({ title: '', right: '' }); cvStructure(); }, 'mini'));
+      } else {
+        s.items.forEach((it, i) => {
+          const item = bookEl('div', 'cv-item');
+          const top = bookEl('div', 'cv-item-head');
+          top.append(bookEl('strong', '', it.title || 'New entry'), cvControls(s.items, i, 'entry'));
+          const g = bookEl('div', 'cv-grid');
+          g.append(
+            cvField(it, 'title', 'Title', { placeholder: 'Company, school…' }), cvField(it, 'right', 'Right side', { placeholder: 'Location, year…' }),
+            cvField(it, 'subtitle', 'Subtitle', { placeholder: 'Role, degree…' }), cvField(it, 'subright', 'Right side', { placeholder: 'Jan 2024 – Present' }),
+          );
+          item.append(top, g, cvField(it, 'text', 'Description (optional)', { multiline: true }));
+          it.bullets = it.bullets || [];
+          const bl = bookEl('div', 'cv-list');
+          bl.append(bookEl('span', 'meta', 'Bullet points'));
+          it.bullets.forEach((b, bi) => {
+            const l = bookEl('label');
+            const ta = bookEl('textarea');
+            ta.rows = 2; ta.style.minHeight = 'auto';
+            ta.value = b;
+            ta.setAttribute('aria-label', 'Bullet ' + (bi + 1));
+            ta.oninput = () => { it.bullets[bi] = ta.value; cvChanged(); };
+            l.append(ta);
+            bl.append(cvLine(l, cvControls(it.bullets, bi, 'bullet')));
+          });
+          bl.append(button('+ Add bullet', () => { it.bullets.push(''); cvStructure(); }, 'mini'));
+          item.append(bl);
+          card.append(item);
+        });
+        card.append(button('+ Add entry', () => {
+          s.items.push({ title: '', right: '', subtitle: '', subright: '', text: '', bullets: [] });
+          cvStructure();
+        }, 'mini'));
+      }
+      return card;
+    });
+
+    const add = bookEl('div', 'cv-card');
+    const type = bookEl('select');
+    type.setAttribute('aria-label', 'New section type');
+    Object.entries(SECTION_TYPES).forEach(([k, v]) => { const o = bookEl('option', '', v); o.value = k; type.append(o); });
+    const row = bookEl('div', 'toolbar');
+    row.append(type, button('+ Add section', () => {
+      cv.sections.push({ title: 'New section', type: type.value, items: [] });
+      cvStructure();
+    }));
+    add.append(row);
+
+    form.replaceChildren(head, ...sections, add);
+    renderResume($('#cv-preview'), cv, { downloadButton: false });
+  }
+
+  $('#cv-save').onclick = async () => {
+    const btn = $('#cv-save');
+    btn.disabled = true;
+    $('#cv-status').textContent = 'Saving…';
+    try {
+      const res = await gh('_data/resume.json', { method: 'PUT', body: {
+        message: 'Update resume',
+        content: b64(new TextEncoder().encode(JSON.stringify(cv, null, 2) + '\n')),
+        sha: cvSha || undefined,
+      } });
+      cvSha = res.content.sha;
+      cvSaved = JSON.stringify(cv);
+      $('#cv-status').textContent = 'Saved. Your resume updates in about a minute.';
+      setTimeout(() => { $('#cv-savebar').hidden = !cvDirty(); }, 2500);
+    } catch (err) {
+      $('#cv-status').textContent = 'Save failed: ' + err.message +
+        (/does not match|sha/i.test(err.message) ? ' (the resume was changed elsewhere; reload the page)' : '');
+    }
+    btn.disabled = false;
+  };
+  $('#cv-discard').onclick = () => {
+    if (!confirm('Discard all unsaved changes to your resume?')) return;
+    cv = JSON.parse(cvSaved);
+    cvStructure();
   };
 
+  // ---------- Projects ----------
   $('#projects').onsubmit = async e => {
     e.preventDefault();
     const f = e.target, status = $('#projects-status');
