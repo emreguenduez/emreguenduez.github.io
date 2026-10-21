@@ -24,4 +24,10 @@
 
 <script id="resume-data" type="application/json">{{ site.data.resume | jsonify | replace: "</", "<\/" }}</script>
 <script src="{{ '/resume.js' | relative_url }}"></script>
-<script>renderResume(document.getElementById('resume'), JSON.parse(document.getElementById('resume-data').textContent));</script>
+<script>
+  renderResume(document.getElementById('resume'), JSON.parse(document.getElementById('resume-data').textContent));
+  // Browsers name the saved PDF after the page title; keep it plain ASCII so upload portals don't mangle it.
+  const screenTitle = document.title;
+  addEventListener('beforeprint', () => { document.title = 'M-Emre-Guenduez-Resume'; });
+  addEventListener('afterprint', () => { document.title = screenTitle; });
+</script>

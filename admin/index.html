@@ -767,7 +767,14 @@ wide: true
     contact.append(bookEl('span', 'meta', 'Contact & links (leave the link empty for plain text)'));
     cv.contact.forEach((c, i) => {
       const g = bookEl('div', 'cv-grid');
-      g.append(cvField(c, 'label', 'Text'), cvField(c, 'url', 'Link', { placeholder: 'https://… or mailto:…' }));
+      g.append(cvField(c, 'label', 'Text'), cvField(c, 'url', 'Link', { placeholder: 'https://…, mailto:… or tel:…' }));
+      const only = bookEl('label', 'check');
+      const box = bookEl('input');
+      box.type = 'checkbox';
+      box.checked = !!c.printOnly;
+      box.onchange = () => { if (box.checked) c.printOnly = true; else delete c.printOnly; cvChanged(); };
+      only.append(box, bookEl('span', '', 'PDF only (hidden on the website, but still in its source code)'));
+      g.append(only);
       contact.append(cvLine(g, cvControls(cv.contact, i, 'link')));
     });
     contact.append(button('+ Add link', () => { cv.contact.push({ label: '', url: '' }); cvStructure(); }, 'mini'));

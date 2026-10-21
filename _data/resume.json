@@ -8,6 +8,11 @@
       "url": "mailto:emreguenduez@protonmail.com"
     },
     {
+      "label": "+49 1575 0495710",
+      "url": "tel:+4915750495710",
+      "printOnly": true
+    },
+    {
       "label": "GitHub",
       "url": "https://github.com/emreguenduez"
     },
@@ -30,50 +35,50 @@
           "right": "Aug 2026 – Present",
           "subtitle": "Founder & Sole Engineer",
           "subright": "",
-          "text": "SaaS + desktop software for vehicle damage appraisal offices · [eksperone.com](https://eksperone.com)",
+          "text": "SaaS and desktop software for vehicle damage appraisal offices · [eksperone.com](https://eksperone.com)",
           "bullets": [
-            "Shipped an **offline plate-recognition desktop app** (C#, YOLOv9 + OCR) that cut photo-sorting time from **40 min to 5 min**. Currently deployed at **2 offices**.",
+            "Shipped an offline plate-recognition desktop app (C#, YOLOv9 + OCR) that cut photo-sorting time from **40 min to 5 min**. Currently deployed at 2 offices.",
             "Built a **multi-tenant case-management platform** (.NET 10, PostgreSQL, React/TypeScript) with role-based access and audit logging.",
             "Added mobile photo capture and customer upload links, removing manual photo transfers.",
             "Owned **end-to-end delivery**: CI/CD, Docker, VPS deployment and Windows packaging.",
-            "Gathered requirements **directly from appraisal experts**."
+            "Gathered requirements directly from appraisal experts."
           ]
         },
         {
           "title": "TWINSOFT GmbH & Co. KG",
-          "right": "Ratingen, Germany",
+          "right": "Jan 2026 – Present",
           "subtitle": "Software Engineer Working Student",
-          "subright": "Jan 2026 – Present",
+          "subright": "Ratingen, Germany",
           "text": "",
           "bullets": [
-            "Developed new features for a **biometric authentication mobile application**, improving usability, reliability, and security across core user flows",
-            "Designed and implemented a **health-check and diagnostics feature** that accelerated troubleshooting and helped pinpoint failure points across services and application components"
+            "Developed new features for a **biometric authentication mobile application**, improving usability, reliability, and security across core user flows.",
+            "Designed and implemented a **health-check and diagnostics feature** that accelerated troubleshooting and helped pinpoint failure points across services and application components."
           ]
         },
         {
           "title": "Rheinmetall",
-          "right": "Neuss, Germany",
+          "right": "Aug 2024 – Dec 2025",
           "subtitle": "Software Engineer Working Student",
-          "subright": "Aug 2024 – Dec 2025",
+          "subright": "Neuss, Germany",
           "text": "",
           "bullets": [
-            "Contributed as a core team member to the development of an internal logistics part management system using **.NET Framework**",
-            "**Resolved 60% of previously known issues**, significantly improving system stability and functionality",
-            "**Boosted application performance by 20%** through strategic code restructuring and rigorous optimization of key system functionalities, leading to faster loading times and reduced memory usage",
-            "Refactored legacy components to improve maintainability, reduce technical debt, and support faster feature delivery"
+            "Contributed as a core team member to the development of an internal logistics part management system using .NET Framework.",
+            "Resolved **60% of previously known issues**, significantly improving system stability and functionality.",
+            "Boosted application performance by **20%** through strategic code restructuring and rigorous optimization of key system functionalities, leading to faster loading times and reduced memory usage.",
+            "Refactored legacy components to improve maintainability, reduce technical debt, and support faster feature delivery."
           ]
         },
         {
           "title": "ASELSAN",
-          "right": "Ankara, Türkiye",
+          "right": "Nov 2021 – Apr 2024",
           "subtitle": "Software Engineer",
-          "subright": "Nov 2021 – Apr 2024",
+          "subright": "Ankara, Türkiye",
           "text": "",
           "bullets": [
-            "Led development of a **Flutter-based smart city application** designed to serve approximately **2,000,000 users**",
-            "**Engineered back-end services capable of handling 1,000,000 data entries daily** for Türkiye’s nationwide highway toll collection and traffic monitoring systems, optimizing data flow and storage using **.NET Framework**",
-            "Designed and built 2 predictive models for climate and air quality forecasting using Python, time-series analysis, and machine learning techniques",
-            "Collaborated with municipal governments and cross-functional teams to support seamless integration of the smart city platform and advance city-wide digital transformation efforts"
+            "Led development of a Flutter-based smart city application designed to serve approximately **2,000,000 users**.",
+            "Engineered back-end services capable of handling **1,000,000 data entries daily** for Türkiye’s nationwide highway toll collection and traffic monitoring systems, optimizing data flow and storage using .NET Framework.",
+            "Designed and built 2 predictive models for climate and air quality forecasting using Python, time-series analysis, and machine learning techniques.",
+            "Collaborated with municipal governments and cross-functional teams to support seamless integration of the smart city platform and advance city-wide digital transformation efforts."
           ]
         }
       ]
@@ -84,27 +89,27 @@
       "items": [
         {
           "title": "Rheinische Friedrich-Wilhelms-Universität Bonn",
-          "right": "M.Sc.",
-          "subtitle": "Computer Science",
-          "subright": "Apr 2024 – Sep 2027",
+          "right": "Apr 2024 – Sep 2027",
+          "subtitle": "M.Sc. Computer Science",
+          "subright": "",
           "text": "",
           "bullets": []
         },
         {
           "title": "Kadir Has University",
-          "right": "B.Sc.",
-          "subtitle": "Computer Engineering",
-          "subright": "Sep 2018 – Jul 2022",
+          "right": "Sep 2018 – Jul 2022",
+          "subtitle": "B.Sc. Computer Engineering",
+          "subright": "",
           "text": "",
           "bullets": [
-            "**Graduated 3rd in the department** with a **3.73 GPA**, earning **high honors** for academic excellence. Completed a thesis project focused on **image recognition** techniques to detect **sea mucilage** (marine mucilage)"
+            "Graduated **3rd in the department** with a 3.73 GPA, earning high honors for academic excellence. Completed a thesis project focused on image recognition techniques to detect sea mucilage (marine mucilage)."
           ]
         },
         {
           "title": "Jacobs University",
-          "right": "Erasmus+",
-          "subtitle": "Computer Science",
-          "subright": "Jan 2021 – May 2021",
+          "right": "Jan 2021 – May 2021",
+          "subtitle": "Computer Science · Erasmus+ exchange",
+          "subright": "",
           "text": "",
           "bullets": []
         }
@@ -134,7 +139,7 @@
           "right": "2023",
           "subtitle": "IntelliSys",
           "subright": "",
-          "text": "Accepted for publication and presentation at IntelliSys 2023 in Amsterdam, Netherlands",
+          "text": "Accepted for publication and presentation at IntelliSys 2023 in Amsterdam, Netherlands.",
           "bullets": []
         }
       ]

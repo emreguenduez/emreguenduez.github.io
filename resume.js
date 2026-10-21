@@ -25,13 +25,29 @@ function resumeInline(text) {
   return frag;
 }
 
-function resumeRow(left, right, cls, tag) {
+// Company/title on the left, date or place on the right (always secondary metadata).
+function resumeRow(left, right, cls, tag, leftCls = '') {
   const row = resumeEl('div', cls);
-  const l = resumeEl(tag);
+  const l = resumeEl(tag, leftCls);
   l.append(resumeInline(left));
   row.append(l);
-  if (right) row.append(resumeEl('span', tag === 'h3' ? 'meta' : '', right));
+  if (right) row.append(resumeEl('span', 'meta', right));
   return row;
+}
+
+// On paper a link is only as good as the address you can read, so print shows "github.com/…" instead of "GitHub".
+function resumePrintAddress(url, label) {
+  if (/^(mailto|tel):/i.test(url)) return label;
+  return url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
+}
+
+function resumeLink(c) {
+  const a = resumeEl('a');
+  a.href = c.url;
+  const print = resumePrintAddress(c.url, c.label);
+  if (print === c.label) a.textContent = c.label;
+  else a.append(resumeEl('span', 'screen-only', c.label), resumeEl('span', 'print-only', print));
+  return a;
 }
 
 // Fills `root` with the resume. `downloadButton: false` hides the PDF button (used in the editor preview).
@@ -41,9 +57,15 @@ function renderResume(root, cv, { downloadButton = true } = {}) {
   if (cv.intro) { const intro = resumeEl('p', 'intro'); intro.append(resumeInline(cv.intro)); header.append(intro); }
   const links = resumeEl('div', 'links');
   (cv.contact || []).filter(c => c.label).forEach(c => {
-    if (c.url && SAFE_URL.test(c.url)) { const a = resumeEl('a', '', c.label); a.href = c.url; links.append(a); }
-    else links.append(resumeEl('span', '', c.label));
+    const el = c.url && SAFE_URL.test(c.url) ? resumeLink(c) : resumeEl('span', '', c.label);
+    if (c.printOnly) el.classList.add('print-only'); // e.g. a phone number for the PDF
+    links.append(el);
   });
+  // The printed copy points back to this site.
+  if (downloadButton && location.protocol.startsWith('http')) {
+    links.append(resumeLink({ url: location.origin, label: location.host }));
+    links.lastChild.classList.add('print-only');
+  }
   if (downloadButton) {
     const dl = resumeEl('button', 'dl', 'Download PDF');
     dl.type = 'button';
@@ -75,7 +97,7 @@ function renderResume(root, cv, { downloadButton = true } = {}) {
       items.forEach(it => {
         const item = resumeEl('div', 'item');
         item.append(resumeRow(it.title, it.right, 'row', 'h3'));
-        if (it.subtitle || it.subright) item.append(resumeRow(it.subtitle, it.subright, 'row meta', 'span'));
+        if (it.subtitle || it.subright) item.append(resumeRow(it.subtitle, it.subright, 'row sub', 'span', 'subtitle'));
         if (it.text) { const p = resumeEl('p'); p.append(resumeInline(it.text)); item.append(p); }
         const bullets = (it.bullets || []).filter(b => b.trim());
         if (bullets.length) {
