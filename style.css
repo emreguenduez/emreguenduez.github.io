@@ -231,7 +231,7 @@ main.wide { max-width: 1100px; }
 .strip .add { padding: 6px; font-size: 0.8rem; justify-self: stretch; }
 .canvas { max-width: min(520px, calc((100vh - 110px) * 0.75)); width: 100%; margin: 0 auto; box-shadow: 0 2px 4px rgb(0 0 0 / 0.12), 0 16px 40px -16px rgb(0 0 0 / 0.4); }
 .canvas .slot { cursor: pointer; }
-.canvas .slot:hover { outline: 3px solid var(--accent); outline-offset: -3px; }
+.canvas .slot:hover, .canvas .slot.dropping { outline: 3px solid var(--accent); outline-offset: -3px; }
 .canvas .slot-x {
   position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 999px; border: 0;
   background: rgb(0 0 0 / 0.6); color: #fff; font: 16px/1 system-ui; cursor: pointer; opacity: 0;
@@ -255,6 +255,8 @@ main.wide { max-width: 1100px; }
 
 /* Photo picker */
 .picker { width: min(900px, 94vw); max-height: 88vh; border: 0; border-radius: 12px; padding: 20px; background: var(--bg); color: var(--text); }
+[data-panel="library"].dropping, .picker.dropping { outline: 3px dashed var(--accent); outline-offset: 6px; border-radius: 8px; }
+.picker.dropping { outline-offset: -8px; }
 .picker::backdrop { background: rgb(0 0 0 / 0.6); }
 .picker .thumbs button { padding: 0; border: 3px solid transparent; border-radius: 8px; background: none; }
 .admin .picker .thumbs button:hover { background: none; border-color: var(--line); }

@@ -40,6 +40,7 @@ wide: true
       <button type="button" id="ed-back">← All books</button>
       <button type="button" id="ed-preview">Preview book</button>
     </div>
+    <p class="status" id="ed-status"></p>
     <div class="ed">
       <ol class="strip" id="strip" aria-label="Pages"></ol>
       <div class="canvas pagebox" id="canvas"></div>
@@ -124,23 +125,30 @@ wide: true
 <script src="{{ '/resume.js' | relative_url }}"></script>
 <script>
   const REPO = 'emreguenduez/emreguenduez.github.io';
-  const API = 'https://api.github.com/repos/' + REPO + '/contents/';
+  const REPO_API = 'https://api.github.com/repos/' + REPO;
+  const API = REPO_API + '/contents/';
   const RAW = 'https://raw.githubusercontent.com/' + REPO + '/main';
   const COLORS = ['#2b3a42', '#1f4e3d', '#7a2e2e', '#3b3355', '#8a6a3b', '#d8d2c4', '#111111'];
   const $ = s => document.querySelector(s);
   let token = '';
   try { token = localStorage.getItem('gh-token') || ''; } catch (e) {}
 
+  // A token without write access can still read this public repo, so GitHub only refuses on save.
+  const NO_WRITE = 'This token can read your site but not save to it. On GitHub, go to Settings → Developer settings → Fine-grained tokens, edit the token, set Repository access to only emreguenduez.github.io and Repository permissions → Contents to "Read and write", then sign in again.';
+
   // ---------- GitHub API ----------
   async function gh(path, opts = {}) {
-    const res = await fetch(API + path, {
+    const res = await fetch(path.startsWith('https:') ? path : API + path, {
       ...opts,
       cache: 'no-store',
       headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
       body: opts.body && JSON.stringify(opts.body),
     });
     if (res.status === 404 && !opts.method) return null;
-    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || res.statusText);
+    if (!res.ok) {
+      const msg = (await res.json().catch(() => ({}))).message || res.statusText;
+      throw new Error(/not accessible by (personal access|integration)/i.test(msg) ? NO_WRITE : msg);
+    }
     return res.json();
   }
   const b64 = bytes => { let s = ''; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s); };
@@ -175,7 +183,8 @@ wide: true
   // ---------- Sign in ----------
   async function start() {
     try {
-      const [proj, data, resume] = await Promise.all([gh('_data/projects.yml'), gh('_data/books.json'), gh('_data/resume.json')]);
+      const [repo, proj, data, resume] = await Promise.all([gh(REPO_API), gh('_data/projects.yml'), gh('_data/books.json'), gh('_data/resume.json')]);
+      if (repo && repo.permissions && !repo.permissions.push) throw new Error(NO_WRITE);
       cv = resume ? JSON.parse(toText(resume.content)) : { name: '', role: '', contact: [], sections: [] };
       cvSha = resume ? resume.sha : '';
       cvSaved = JSON.stringify(cv);
@@ -185,7 +194,7 @@ wide: true
       booksSha = data ? data.sha : '';
       savedJSON = JSON.stringify(books);
     } catch (e) {
-      $('#login .status').textContent = 'Sign-in failed: ' + e.message;
+      $('#login .status').textContent = e.message === NO_WRITE ? e.message : 'Sign-in failed: ' + e.message;
       return;
     }
     try { localStorage.setItem('gh-token', token); } catch (e) {}
@@ -269,6 +278,8 @@ wide: true
       li.ondragleave = () => li.classList.remove('drop-after', 'drop-before');
       li.ondrop = e => {
         e.preventDefault();
+        li.classList.remove('drop-after', 'drop-before');
+        if (isFileDrag(e)) return;
         const from = +e.dataTransfer.getData('text/plain');
         let to = i + (li.classList.contains('drop-after') ? 1 : 0);
         if (from < to) to--;
@@ -313,21 +324,37 @@ wide: true
   }
 
   // Clicking a photo slot on the big page opens the picker; × removes the photo.
+  function setSlot(i, path) {
+    const b = book();
+    if (i === 'cover') b.cover = path;
+    else { const p = b.pages[sel]; p.photos = p.photos || []; p.photos[+i] = path; }
+    redraw();
+  }
   $('#canvas').onclick = async e => {
     const slot = e.target.closest('.slot');
     if (!slot) return;
-    const b = book(), i = slot.dataset.slot;
-    const set = path => {
-      if (i === 'cover') b.cover = path;
-      else { const p = b.pages[sel]; p.photos = p.photos || []; p.photos[+i] = path; }
-    };
-    if (e.target.closest('.slot-x')) set('');
-    else {
-      const picked = await pick(false);
-      if (!picked) return;
-      set(picked[0]);
-    }
-    redraw();
+    const i = slot.dataset.slot;
+    if (e.target.closest('.slot-x')) return setSlot(i, '');
+    const picked = await pick(false);
+    if (picked) setSlot(i, picked[0]);
+  };
+  // Dropping an image file on a photo spot uploads it and puts it there.
+  $('#canvas').ondragover = e => {
+    const slot = e.target.closest('.slot');
+    $('#canvas').querySelectorAll('.dropping').forEach(s => s !== slot && s.classList.remove('dropping'));
+    if (!slot || !isFileDrag(e)) return;
+    e.preventDefault();
+    slot.classList.add('dropping');
+  };
+  $('#canvas').ondragleave = e => { if (!$('#canvas').contains(e.relatedTarget)) $('#canvas').querySelectorAll('.dropping').forEach(s => s.classList.remove('dropping')); };
+  $('#canvas').ondrop = async e => {
+    const slot = e.target.closest('.slot');
+    if (!slot || !isFileDrag(e)) return;
+    e.preventDefault();
+    slot.classList.remove('dropping');
+    const at = cur, page = sel, i = slot.dataset.slot;
+    const [path] = await upload([...e.dataTransfer.files].slice(0, 1), $('#ed-status'));
+    if (path && at === cur && page === sel) setSlot(i, path); // skip if the user moved to another page meanwhile
   };
 
   function field(label, value, oninput, tag = 'input') {
@@ -369,7 +396,7 @@ wide: true
         field('Title', b.title, v => b.title = v),
         field('Subtitle', b.subtitle, v => b.subtitle = v),
         colorLabel,
-        bookEl('p', 'meta', 'Click the photo area on the cover to choose a cover photo.'),
+        bookEl('p', 'meta', 'Click the photo area on the cover to choose a cover photo, or drop an image file on it.'),
         button('Delete this book', () => {
           if (!confirm('Delete "' + (b.title || 'Untitled') + '"? It disappears from the site once you save.')) return;
           books.splice(cur, 1);
@@ -403,7 +430,7 @@ wide: true
       bookEl('h3', '', 'Page ' + (sel + 1) + ' of ' + b.pages.length),
       layoutLabel,
       field(p.layout === 'text' ? 'Text' : 'Caption (optional)', p.text, v => p.text = v, 'textarea'),
-      bookEl('p', 'meta', 'Click a photo spot on the page to choose a photo. Drag pages in the strip to reorder them.'),
+      bookEl('p', 'meta', 'Click a photo spot on the page to choose a photo, or drop an image file on it. Drag pages in the strip to reorder them.'),
       moves,
       button('Delete page', () => {
         if (b.pages.length === 1) return alert('A book needs at least one page.');
@@ -497,7 +524,10 @@ wide: true
 
   // Uploads files one by one; returns the stored paths of the ones that succeeded.
   async function upload(files, status) {
-    const done = [];
+    const done = [], all = [...files];
+    files = all.filter(f => f.type.startsWith('image/'));
+    const skipped = all.length > files.length ? ' Skipped ' + all.filter(f => !files.includes(f)).map(f => f.name).join(', ') + ': only image files can be added.' : '';
+    if (!files.length) { status.textContent = skipped.trim(); return done; }
     for (const [n, file] of [...files].entries()) {
       status.textContent = 'Uploading ' + (n + 1) + ' of ' + files.length + '…';
       try {
@@ -514,11 +544,25 @@ wide: true
         return done;
       }
     }
-    status.textContent = done.length + ' photo' + (done.length === 1 ? '' : 's') + ' uploaded.';
+    status.textContent = done.length + ' photo' + (done.length === 1 ? '' : 's') + ' uploaded.' + skipped;
     drawLibrary();
     return done;
   }
   $('#lib-upload').onchange = async e => { await upload(e.target.files, $('#lib-status')); e.target.value = ''; };
+
+  // ---------- Drag and drop ----------
+  const isFileDrag = e => e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+  function dropZone(el, onFiles) {
+    el.addEventListener('dragover', e => { if (!isFileDrag(e)) return; e.preventDefault(); el.classList.add('dropping'); });
+    el.addEventListener('dragleave', e => { if (!el.contains(e.relatedTarget)) el.classList.remove('dropping'); });
+    el.addEventListener('drop', e => { if (!isFileDrag(e)) return; e.preventDefault(); el.classList.remove('dropping'); onFiles(e.dataTransfer.files); });
+  }
+  // A file dropped anywhere else would make the browser open it and leave the editor.
+  addEventListener('dragover', e => { if (isFileDrag(e)) e.preventDefault(); });
+  addEventListener('drop', e => { if (isFileDrag(e)) e.preventDefault(); });
+  dropZone($('[data-panel="library"]'), files => upload(files, $('#lib-status')));
+  let pickFiles = null; // set while the picker is open
+  dropZone($('#picker'), files => pickFiles && pickFiles(files));
 
   // ---------- Photo picker ----------
   // Resolves to an array of chosen paths, or null if cancelled. Single mode returns on the first click.
@@ -528,7 +572,7 @@ wide: true
     $('#pick-ok').hidden = !multi;
     $('#pick-status').textContent = library.length ? '' : 'Your library is empty. Upload a photo to get started.';
     return new Promise(resolve => {
-      const finish = v => { dlg.onclose = null; dlg.close(); resolve(v); };
+      const finish = v => { dlg.onclose = null; pickFiles = null; dlg.close(); resolve(v); };
       const draw = () => grid.replaceChildren(...library.map(f => {
         const btn = button('', () => {
           if (!multi) return finish([f.path]);
@@ -548,14 +592,14 @@ wide: true
       $('#pick-ok').textContent = 'Add selected';
       $('#pick-ok').onclick = () => finish(chosen);
       $('#pick-cancel').onclick = () => finish(null);
-      dlg.onclose = () => resolve(null);
-      $('#pick-upload').onchange = async e => {
-        const paths = await upload(e.target.files, $('#pick-status'));
-        e.target.value = '';
+      dlg.onclose = () => { pickFiles = null; resolve(null); };
+      pickFiles = async files => {
+        const paths = await upload(files, $('#pick-status'));
         if (!multi && paths.length) return finish([paths[0]]);
         chosen.push(...paths);
         draw();
       };
+      $('#pick-upload').onchange = async e => { await pickFiles(e.target.files); e.target.value = ''; };
       dlg.showModal();
     });
   }
