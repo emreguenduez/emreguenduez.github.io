@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "id": "eclipse",
+    "title": "Eclipse",
+    "subtitle": "2026",
+    "color": "#971200",
+    "cover": "/photos/img-5839-mvik9x5p.jpg",
+    "pages": [
+      {
+        "layout": "single",
+        "photos": [
+          "/photos/eclipse2026-8-mvik3yak.jpg"
+        ],
+        "text": ""
+      },
+      {
+        "layout": "two",
+        "photos": [
+          "/photos/eclipse2026-2-mvik3w4c.jpg",
+          "/photos/eclipse2026-29-mvik42z7.jpg"
+        ],
+        "text": ""
+      },
+      {
+        "layout": "two",
+        "photos": [
+          "/photos/eclipse2026-73-mvik8fcv.jpg",
+          "/photos/eclipse2026-65-mvik47fy.jpg"
+        ],
+        "text": ""
+      },
+      {
+        "layout": "two",
+        "photos": [
+          "/photos/eclipse2026-72-mvik4cry.jpg"
+        ],
+        "text": ""
+      },
+      {
+        "layout": "single",
+        "photos": [
+          "/photos/eclipse2026-63-mvik45ma.jpg"
+        ],
+        "text": ""
+      },
+      {
+        "layout": "single",
+        "photos": [
+          "/photos/eclipse2026-13-mvik40xk.jpg"
+        ],
+        "text": ""
+      },
+      {
+        "layout": "bleed",
+        "photos": [
+          "/photos/eclipse2026-67-mvik49nr.jpg"
+        ],
+        "text": ""
+      }
+    ]
+  }
+]
