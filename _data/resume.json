@@ -3,10 +3,22 @@
   "role": "Software Engineer",
   "intro": "I'm a software engineer in Bonn, studying for an M.Sc. in Computer Science at the University of Bonn. I build software end to end, from EksperOne, the appraisal software I founded, to the back-end behind Türkiye's highway toll collection at ASELSAN. Away from the keyboard I take photos, and the photo books on this site are where they end up.",
   "contact": [
-    { "label": "emreguenduez@protonmail.com", "url": "mailto:emreguenduez@protonmail.com" },
-    { "label": "Bonn, Germany", "url": "" },
-    { "label": "GitHub", "url": "https://github.com/emreguenduez" },
-    { "label": "LinkedIn", "url": "https://www.linkedin.com/in/emreguenduez" }
+    {
+      "label": "emreguenduez@protonmail.com",
+      "url": "mailto:emreguenduez@protonmail.com"
+    },
+    {
+      "label": "Bonn, Germany",
+      "url": ""
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/emreguenduez"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/emreguenduez"
+    }
   ],
   "sections": [
     {
@@ -14,8 +26,10 @@
       "type": "entries",
       "items": [
         {
-          "title": "EksperOne", "right": "Aug 2026 – Present",
-          "subtitle": "Founder & Sole Engineer", "subright": "",
+          "title": "EksperOne",
+          "right": "Aug 2026 – Present",
+          "subtitle": "Founder & Sole Engineer",
+          "subright": "",
           "text": "SaaS + desktop software for vehicle damage appraisal offices · [eksperone.com](https://eksperone.com)",
           "bullets": [
             "Shipped an **offline plate-recognition desktop app** (C#, YOLOv9 + OCR) that cut photo-sorting time from **40 min to 5 min**. Currently deployed at **2 offices**.",
@@ -26,8 +40,10 @@
           ]
         },
         {
-          "title": "TWINSOFT GmbH & Co. KG", "right": "Ratingen, Germany",
-          "subtitle": "Software Engineer Working Student", "subright": "Jan 2026 – Present",
+          "title": "TWINSOFT GmbH & Co. KG",
+          "right": "Ratingen, Germany",
+          "subtitle": "Software Engineer Working Student",
+          "subright": "Jan 2026 – Present",
           "text": "",
           "bullets": [
             "Developed new features for a **biometric authentication mobile application**, improving usability, reliability, and security across core user flows",
@@ -35,8 +51,10 @@
           ]
         },
         {
-          "title": "Rheinmetall", "right": "Neuss, Germany",
-          "subtitle": "Software Engineer Working Student", "subright": "Aug 2024 – Dec 2025",
+          "title": "Rheinmetall",
+          "right": "Neuss, Germany",
+          "subtitle": "Software Engineer Working Student",
+          "subright": "Aug 2024 – Dec 2025",
           "text": "",
           "bullets": [
             "Contributed as a core team member to the development of an internal logistics part management system using **.NET Framework**",
@@ -46,8 +64,10 @@
           ]
         },
         {
-          "title": "ASELSAN", "right": "Ankara, Türkiye",
-          "subtitle": "Software Engineer", "subright": "Nov 2021 – Apr 2024",
+          "title": "ASELSAN",
+          "right": "Ankara, Türkiye",
+          "subtitle": "Software Engineer",
+          "subright": "Nov 2021 – Apr 2024",
           "text": "",
           "bullets": [
             "Led development of a **Flutter-based smart city application** designed to serve approximately **2,000,000 users**",
@@ -63,37 +83,57 @@
       "type": "entries",
       "items": [
         {
-          "title": "Rheinische Friedrich-Wilhelms-Universität Bonn", "right": "M.Sc.",
-          "subtitle": "Computer Science", "subright": "Apr 2024 – Sep 2027",
-          "text": "", "bullets": []
+          "title": "Rheinische Friedrich-Wilhelms-Universität Bonn",
+          "right": "M.Sc.",
+          "subtitle": "Computer Science",
+          "subright": "Apr 2024 – Sep 2027",
+          "text": "",
+          "bullets": []
         },
         {
-          "title": "Kadir Has University", "right": "B.Sc.",
-          "subtitle": "Computer Engineering", "subright": "Sep 2018 – Jul 2022",
+          "title": "Kadir Has University",
+          "right": "B.Sc.",
+          "subtitle": "Computer Engineering",
+          "subright": "Sep 2018 – Jul 2022",
           "text": "",
           "bullets": [
             "**Graduated 3rd in the department** with a **3.73 GPA**, earning **high honors** for academic excellence. Completed a thesis project focused on **image recognition** techniques to detect **sea mucilage** (marine mucilage)"
           ]
         },
         {
-          "title": "Jacobs University", "right": "Erasmus+",
-          "subtitle": "Computer Science", "subright": "Jan 2021 – May 2021",
-          "text": "", "bullets": []
+          "title": "Jacobs University",
+          "right": "Erasmus+",
+          "subtitle": "Computer Science",
+          "subright": "Jan 2021 – May 2021",
+          "text": "",
+          "bullets": []
         }
       ]
     },
     {
       "title": "Skills",
       "type": "tags",
-      "items": ["Python", ".NET", "C#", "SQL", "Flutter", "Git", "TypeScript/JavaScript", "Go", "React"]
+      "items": [
+        "Python",
+        ".NET",
+        "C#",
+        "SQL",
+        "Flutter",
+        "Git",
+        "TypeScript/JavaScript",
+        "Go",
+        "React"
+      ]
     },
     {
       "title": "Publications",
       "type": "entries",
       "items": [
         {
-          "title": "Air Quality Forecasting Using Time Series Models: A Comparative Study", "right": "2023",
-          "subtitle": "IntelliSys", "subright": "",
+          "title": "Air Quality Forecasting Using Time Series Models: A Comparative Study",
+          "right": "2023",
+          "subtitle": "IntelliSys",
+          "subright": "",
           "text": "Accepted for publication and presentation at IntelliSys 2023 in Amsterdam, Netherlands",
           "bullets": []
         }
@@ -104,8 +144,10 @@
       "type": "entries",
       "items": [
         {
-          "title": "Schengen Visa Appointment Bot", "right": "2022",
-          "subtitle": "", "subright": "",
+          "title": "Schengen Visa Appointment Bot",
+          "right": "2022",
+          "subtitle": "",
+          "subright": "",
           "text": "[github.com/emreguenduez/idatarandevu](https://github.com/emreguenduez/idatarandevu)",
           "bullets": []
         }
@@ -115,16 +157,35 @@
       "title": "Languages",
       "type": "pairs",
       "items": [
-        { "title": "Turkish", "right": "Native" },
-        { "title": "English", "right": "C2" },
-        { "title": "Spanish", "right": "C1" },
-        { "title": "German", "right": "B1–B2" }
+        {
+          "title": "Turkish",
+          "right": "Native"
+        },
+        {
+          "title": "English",
+          "right": "C2"
+        },
+        {
+          "title": "Spanish",
+          "right": "C1"
+        },
+        {
+          "title": "German",
+          "right": "B1–B2"
+        }
       ]
     },
     {
       "title": "Interests",
       "type": "tags",
-      "items": ["Photography", "Body building", "Learning languages", "Seinfeld", "Calligraphy", "Bouldering", "Cooking"]
+      "items": [
+        "Photography",
+        "Body building",
+        "Learning languages",
+        "Calligraphy",
+        "Bouldering",
+        "Cooking"
+      ]
     }
   ]
 }
