@@ -8,8 +8,10 @@
 {%- if site.data.books.size > 0 %}
 <section class="shelf-peek" aria-labelledby="peek-title">
   <h2 id="peek-title">Photo books</h2>
-  <div class="books" id="peek"></div>
-  <p class="more meta"><a href="{{ '/photography/' | relative_url }}">All photo books</a></p>
+  <div class="sec-body">
+    <div class="books" id="peek"></div>
+    <p class="more meta"><a href="{{ '/photography/' | relative_url }}">All photo books</a></p>
+  </div>
 </section>
 <script id="books-data" type="application/json">{{ site.data.books | jsonify | replace: "</", "<\/" }}</script>
 <script src="{{ '/book.js' | relative_url }}"></script>

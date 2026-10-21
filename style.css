@@ -67,7 +67,7 @@ body {
 ::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
 input, textarea { caret-color: var(--accent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
-main { max-width: 640px; margin: 0 auto; padding: 40px max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left)); }
+main { max-width: 1100px; margin: 0 auto; padding: 40px max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left)); }
 a { color: inherit; text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:hover { color: var(--accent); text-decoration-color: var(--accent); }
 h1, h2, h3 { text-wrap: balance; }
@@ -146,13 +146,11 @@ nav a[aria-current] { color: var(--text); font-weight: 600; text-decoration: und
 .theme:hover { color: var(--text); }
 .theme svg { width: 18px; height: 18px; }
 footer {
-  max-width: 640px; margin: 88px auto 0; padding: 22px max(20px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); border-top: 1px solid var(--line);
+  width: min(1060px, 100% - 2 * max(20px, env(safe-area-inset-left), env(safe-area-inset-right))); margin: 88px auto 0; padding: 22px 0 max(40px, env(safe-area-inset-bottom)); border-top: 1px solid var(--line);
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; font-size: 0.875rem; color: var(--muted);
 }
 footer nav { margin: 0; gap: 4px 18px; font-size: inherit; }
 footer nav a { padding: 6px 0; }
-main.wide { max-width: 1100px; }
-main.wide + footer { max-width: 1100px; }
 .page-title { margin: 0; font-size: 2.75rem; font-weight: 500; line-height: 1.05; letter-spacing: -0.015em; }
 .lead { color: var(--muted); margin: 10px 0 40px; font-size: 1.2rem; font-style: italic; max-width: 34em; }
 .empty { color: var(--muted); font-style: italic; }
@@ -430,3 +428,18 @@ main.wide + footer { max-width: 1100px; }
 .admin .choice button { flex: 1; border: 0; border-radius: 6px; padding: 6px 4px; min-height: 36px; font-size: 0.8125rem; color: var(--muted); background: none; }
 .admin .choice button:hover:not(:disabled) { background: none; color: var(--text); }
 .admin .choice button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+
+/* Every page shares the photography width. To keep lines readable at that width,
+   section titles take a left column (like a printed CV) and the content runs beside them. */
+@media screen and (min-width: 900px) {
+  body { font-size: 1.125rem; }
+  header .intro { max-width: 40em; }
+  main > #resume > section, main > .shelf-peek { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: 56px; }
+  main > #resume > section > h2, main > .shelf-peek > h2 { margin: 0; padding-top: 1px; }
+  .shelf-peek .books { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .project { grid-template-columns: 220px minmax(0, 1fr); column-gap: 56px; }
+  .project:has(> img) { grid-template-columns: 220px minmax(0, 1fr) 200px; }
+  .project > .row { grid-column: 1; grid-row: 1 / span 4; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; }
+  .project > :not(.row):not(img) { grid-column: 2; }
+  .project img { grid-column: 3; width: 100%; }
+}

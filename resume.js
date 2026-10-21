@@ -57,11 +57,12 @@ function renderResume(root, cv, { downloadButton = true } = {}) {
     const items = s.items || [];
     if (!items.length) return;
     const sec = resumeEl('section');
-    sec.append(resumeEl('h2', '', s.title));
+    const body = resumeEl('div', 'sec-body'); // a column of its own beside the title on wide screens
+    sec.append(resumeEl('h2', '', s.title), body);
     if (s.type === 'tags') {
       const ul = resumeEl('ul', 'tags');
       items.filter(Boolean).forEach(t => ul.append(resumeEl('li', '', t)));
-      sec.append(ul);
+      body.append(ul);
     } else if (s.type === 'pairs') {
       const grid = resumeEl('div', 'langs');
       items.forEach(p => {
@@ -69,7 +70,7 @@ function renderResume(root, cv, { downloadButton = true } = {}) {
         d.append(resumeEl('strong', '', p.title), resumeEl('span', 'meta', p.right));
         grid.append(d);
       });
-      sec.append(grid);
+      body.append(grid);
     } else {
       items.forEach(it => {
         const item = resumeEl('div', 'item');
@@ -82,7 +83,7 @@ function renderResume(root, cv, { downloadButton = true } = {}) {
           bullets.forEach(b => { const li = resumeEl('li'); li.append(resumeInline(b)); ul.append(li); });
           item.append(ul);
         }
-        sec.append(item);
+        body.append(item);
       });
     }
     parts.push(sec);
