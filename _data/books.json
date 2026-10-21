@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "id": "new-photo-book",
+    "title": "New photo book",
+    "subtitle": "2026",
+    "color": "#2b3a42",
+    "cover": "/photos/botanicalgarden-1-mvieuacc.jpg",
+    "pages": [
+      {
+        "layout": "bleed",
+        "photos": [
+          "/photos/krorezbeachfuji-19-mvieuz9u.jpg"
+        ],
+        "text": ""
+      },
+      {
+        "layout": "single",
+        "photos": [],
+        "text": ""
+      },
+      {
+        "layout": "single",
+        "photos": [],
+        "text": ""
+      }
+    ]
+  }
+]
