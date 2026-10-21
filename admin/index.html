@@ -221,7 +221,7 @@ wide: true
     const items = books.map((b, i) => {
       const btn = bookEl('button', 'book');
       btn.type = 'button';
-      btn.append(bookBox(renderBookCover(b, src)), bookEl('h3', '', b.title || 'Untitled'), bookEl('span', 'meta', (b.pages || []).length + ' pages · Edit'));
+      btn.append(bookBox(renderBookCover(b, src)), bookEl('h3', '', b.title || 'Untitled'), bookEl('span', 'meta', bookPagesLabel((b.pages || []).length) + ' · Edit'));
       btn.onclick = () => edit(i);
       return btn;
     });
@@ -650,7 +650,8 @@ wide: true
   function drawCv() {
     const form = $('#cv-form');
     const head = bookEl('div', 'cv-card');
-    head.append(bookEl('h3', '', 'Header'), cvField(cv, 'name', 'Name'), cvField(cv, 'role', 'Title'));
+    head.append(bookEl('h3', '', 'Header'), cvField(cv, 'name', 'Name'), cvField(cv, 'role', 'Title'),
+      cvField(cv, 'intro', 'Short intro, a sentence or two in your own words (optional; left out of the PDF)', { multiline: true }));
     const contact = bookEl('div', 'cv-list');
     contact.append(bookEl('span', 'meta', 'Contact & links (leave the link empty for plain text)'));
     cv.contact.forEach((c, i) => {

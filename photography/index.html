@@ -3,7 +3,7 @@ title: Photography · M. Emre Gündüz
 wide: true
 ---
 <header>
-  <h1>Photography</h1>
+  <h1 class="page-title">Photography</h1>
   <p class="lead">Photo books of places I've been. Open one and flip through.</p>
 </header>
 
@@ -21,14 +21,7 @@ wide: true
   viewer.innerHTML = BOOK_VIEWER_HTML;
   const src = p => '{{ site.baseurl }}' + p;
 
-  document.getElementById('books').append(...books.map(b => {
-    const a = bookEl('a', 'book');
-    a.href = '#' + b.id;
-    a.append(bookBox(renderBookCover(b, src)));
-    a.append(bookEl('h3', '', b.title || 'Untitled'));
-    a.append(bookEl('span', 'meta', (b.pages || []).length + ' pages'));
-    return a;
-  }));
+  document.getElementById('books').append(...books.map(b => renderShelfItem(b, src, '#' + b.id)));
   document.getElementById('no-books').hidden = books.length > 0;
 
   // The hash (#book-id) opens a book, so links to a single book can be shared.

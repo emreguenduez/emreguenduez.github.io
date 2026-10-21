@@ -41,8 +41,8 @@ function renderBookCover(book, src = p => p, editable = false) {
   const inner = bookEl('div', 'bin');
   inner.style.background = book.color || '#2b3a42'; // on the inner box: PageFlip overwrites the page's own style
   inner.append(bookSlot(book.cover, src, editable, 'cover'));
-  inner.append(bookEl('h3', '', book.title || 'Untitled'));
-  if (book.subtitle) inner.append(bookEl('p', '', book.subtitle));
+  inner.append(bookEl('p', 'ctitle', book.title || 'Untitled'));
+  if (book.subtitle) inner.append(bookEl('p', 'csub', book.subtitle));
   page.append(inner);
   return page;
 }
@@ -101,12 +101,19 @@ function openBook(dialog, book, src = p => p) {
   flip.loadFromHTML(all);
 
   const count = dialog.querySelector('.count');
+  const stage = dialog.querySelector('.stage');
   const update = () => {
     const i = flip.getCurrentPageIndex();
     count.textContent = i === 0 ? 'Cover' : i >= all.length - 1 ? 'Back cover' : 'Page ' + Math.min(i, n) + ' of ' + n;
+    const spread = flip.getOrientation() === 'landscape';
+    stage.classList.toggle('on-front', spread && i === 0);
+    stage.classList.toggle('on-back', spread && i >= all.length - 1);
   };
   update();
   flip.on('flip', update);
+  flip.on('changeOrientation', update);
+  // as soon as a page starts turning, the book opens to a full spread, so recenter it
+  flip.on('changeState', e => { if (e.data !== 'read') stage.classList.remove('on-front', 'on-back'); else update(); });
   const prev = () => flip.flipPrev(), next = () => flip.flipNext();
   const key = e => { if (e.key === 'ArrowLeft') prev(); if (e.key === 'ArrowRight') next(); };
   dialog.querySelector('.prev').onclick = prev;
@@ -119,12 +126,24 @@ function openBook(dialog, book, src = p => p) {
   }, { once: true });
 }
 
+const bookPagesLabel = n => n + (n === 1 ? ' page' : ' pages');
+
+// A cover on the shelf, linking to `href`. The cover already shows the title, so it isn't repeated below.
+function renderShelfItem(book, src, href) {
+  const a = bookEl('a', 'book');
+  a.href = href;
+  const pages = bookPagesLabel((book.pages || []).length);
+  a.setAttribute('aria-label', (book.title || 'Untitled') + ', photo book, ' + pages);
+  a.append(bookBox(renderBookCover(book, src)), bookEl('span', 'meta', pages));
+  return a;
+}
+
 const BOOK_VIEWER_HTML = `
   <h2></h2>
-  <button class="close" type="button" aria-label="Close book">✕</button>
+  <button class="close" type="button" aria-label="Close book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   <div class="stage"></div>
   <div class="controls">
-    <button class="prev" type="button" aria-label="Previous page">‹</button>
+    <button class="prev" type="button" aria-label="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
     <span class="count" aria-live="polite"></span>
-    <button class="next" type="button" aria-label="Next page">›</button>
+    <button class="next" type="button" aria-label="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
   </div>`;

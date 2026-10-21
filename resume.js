@@ -38,6 +38,7 @@ function resumeRow(left, right, cls, tag) {
 function renderResume(root, cv, { downloadButton = true } = {}) {
   const header = resumeEl('header');
   header.append(resumeEl('h1', '', cv.name), resumeEl('p', 'role', cv.role));
+  if (cv.intro) { const intro = resumeEl('p', 'intro'); intro.append(resumeInline(cv.intro)); header.append(intro); }
   const links = resumeEl('div', 'links');
   (cv.contact || []).filter(c => c.label).forEach(c => {
     if (c.url && SAFE_URL.test(c.url)) { const a = resumeEl('a', '', c.label); a.href = c.url; links.append(a); }
