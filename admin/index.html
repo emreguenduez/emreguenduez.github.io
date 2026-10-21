@@ -512,9 +512,30 @@ wide: true
     }
     if (alts.length) alts.unshift(bookEl('p', 'meta', 'For people using screen readers. If left empty, the caption is used.'));
 
+    // Margins: medium is the layout's own spacing. Full-bleed pages have no margins to set.
+    const margins = bookEl('div');
+    margins.style.display = 'grid'; margins.style.gap = '6px';
+    if (p.layout !== 'bleed') {
+      const group = bookEl('div', 'choice');
+      group.setAttribute('role', 'group');
+      group.setAttribute('aria-label', 'Margins');
+      BOOK_MARGINS.forEach(m => {
+        const btn = button(m[0].toUpperCase() + m.slice(1), () => { p.margin = m; redraw(); drawProps(); });
+        btn.setAttribute('aria-pressed', (p.margin || 'medium') === m);
+        group.append(btn);
+      });
+      const all = button('Use on every page', () => {
+        b.pages.forEach(o => { o.margin = p.margin || 'medium'; });
+        redraw();
+        $('#ed-status').textContent = 'Every page now has ' + (p.margin || 'medium') + ' margins.';
+      }, 'mini quiet');
+      margins.append(bookEl('span', '', 'Margins'), group, all);
+    }
+
     props.replaceChildren(
       head,
       layoutLabel,
+      margins,
       field(p.layout === 'text' ? 'Text' : 'Caption (optional)', p.text, v => p.text = v, 'textarea'),
       ...alts,
       bookEl('p', 'meta', 'Click a photo spot on the page to choose a photo, or drop an image file on it. Drag pages in the strip, or select one and press Alt with an arrow key, to reorder.'),

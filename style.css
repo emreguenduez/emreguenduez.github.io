@@ -74,7 +74,7 @@ h1, h2, h3 { text-wrap: balance; }
 p, li { text-wrap: pretty; }
 
 /* Shared roles: sans is for metadata and controls only */
-.meta, nav, footer, .tags, .dl, .theme, .lead-meta { font-family: var(--sans); }
+.meta, nav, footer, .dl, .theme, .lead-meta { font-family: var(--sans); }
 .meta { color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
 
 header h1 { margin: 0; font-size: 2.75rem; font-weight: 500; line-height: 1.05; letter-spacing: -0.015em; }
@@ -94,7 +94,7 @@ li::marker { color: var(--accent); }
 li strong, p strong { font-weight: 600; }
 p { margin: 6px 0 0; }
 
-.tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: 0.875rem; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: 0.9375rem; }
 .tags li { margin: 0; padding: 3px 12px; border: 1px solid var(--line); border-radius: 999px; }
 .langs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
 .langs strong { display: block; font-weight: 600; }
@@ -164,10 +164,11 @@ main.wide + footer { max-width: 1100px; }
 }
 .bin { position: absolute; inset: 0; padding: 8cqw; display: flex; flex-direction: column; gap: 4cqw; }
 .slots { flex: 1; min-height: 0; display: grid; gap: 3cqw; }
-.slot { margin: 0; min-height: 0; position: relative; background: #ebe9e3; overflow: hidden; }
+/* an empty spot is just paper; only the editor shows a placeholder for it */
+.slot { margin: 0; min-height: 0; position: relative; overflow: hidden; }
+.slot:has(.slot-empty) { background: #ebe9e3; }
 .slot img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .btext { margin: 0; font-size: 4.2cqw; line-height: 1.45; text-align: center; font-style: italic; white-space: pre-line; }
-.bpage--single .slot { background: none; }
 .bpage--single .slot img { object-fit: contain; }
 .bpage--two .slots { grid-template-rows: 1fr 1fr; }
 .bpage--grid .slots { grid-template: 1fr 1fr / 1fr 1fr; }
@@ -177,10 +178,16 @@ main.wide + footer { max-width: 1100px; }
   color: #fff; background: linear-gradient(transparent, rgb(0 0 0 / 0.55));
 }
 .bpage--text .bin { justify-content: center; padding: 14cqw; }
+/* per-page margins; medium is each layout's own default, and full-bleed pages have none */
+.bpage--m-none:not(.bpage--bleed) .bin { padding: 0; }
+.bpage--m-small:not(.bpage--bleed) .bin { padding: 4cqw; }
+.bpage--m-large:not(.bpage--bleed) .bin { padding: 16cqw; }
 .bpage--text .btext { font-size: 6cqw; font-style: normal; }
 .bcover { background: #2b3a42; color: #fff; }
 .bcover .bin { padding: 10cqw; align-items: center; text-align: center; }
-.bcover .slot { flex: 1; width: 100%; background: rgb(255 255 255 / 0.12); box-shadow: 0 1cqw 4cqw rgb(0 0 0 / 0.35); }
+.bcover .slot { flex: 1; width: 100%; }
+.bcover .slot:has(img) { box-shadow: 0 1cqw 4cqw rgb(0 0 0 / 0.35); }
+.bcover .slot:has(.slot-empty) { background: rgb(255 255 255 / 0.12); }
 .bcover .ctitle { margin: 2cqw 0 0; font-size: 8cqw; font-weight: 450; letter-spacing: 0.01em; line-height: 1.15; text-wrap: balance; }
 .bcover .csub, .bback p { margin: 0; font-size: 4cqw; opacity: 0.85; letter-spacing: 0.12em; text-transform: uppercase; font-family: var(--sans); }
 .bback .bin { justify-content: flex-end; }
@@ -417,3 +424,9 @@ main.wide + footer { max-width: 1100px; }
 }
 /* iOS zooms into inputs smaller than 16px */
 @media (pointer: coarse) { .admin input, .admin textarea, .admin select, .admin #projects textarea { font-size: 16px; } }
+
+/* A row of mutually exclusive options, e.g. page margins */
+.choice { display: flex; border: 1px solid var(--line); border-radius: 8px; padding: 3px; gap: 2px; }
+.admin .choice button { flex: 1; border: 0; border-radius: 6px; padding: 6px 4px; min-height: 36px; font-size: 0.8125rem; color: var(--muted); background: none; }
+.admin .choice button:hover:not(:disabled) { background: none; color: var(--text); }
+.admin .choice button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }

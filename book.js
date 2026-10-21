@@ -9,6 +9,8 @@ const BOOK_LAYOUTS = {
   text: { label: 'Text', slots: 0 },
 };
 
+const BOOK_MARGINS = ['none', 'small', 'medium', 'large'];
+
 function bookEl(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -68,7 +70,7 @@ function renderBookBack(book) {
 
 function renderBookPage(page, src = p => p, editable = false) {
   const layout = BOOK_LAYOUTS[page.layout] ? page.layout : 'single';
-  const el = bookEl('div', 'bpage bpage--' + layout);
+  const el = bookEl('div', 'bpage bpage--' + layout + (BOOK_MARGINS.includes(page.margin) && page.margin !== 'medium' ? ' bpage--m-' + page.margin : ''));
   const inner = bookEl('div', 'bin');
   const n = BOOK_LAYOUTS[layout].slots;
   if (n) {

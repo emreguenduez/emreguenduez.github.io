@@ -1,6 +1,7 @@
 {
   "name": "M. Emre Gündüz",
   "role": "Software Engineer",
+  "intro": "I'm a software engineer in Bonn, studying for an M.Sc. in Computer Science at the University of Bonn. I build software end to end, from EksperOne, the appraisal software I founded, to the back-end behind Türkiye's highway toll collection at ASELSAN. Away from the keyboard I take photos, and the photo books on this site are where they end up.",
   "contact": [
     { "label": "emreguenduez@protonmail.com", "url": "mailto:emreguenduez@protonmail.com" },
     { "label": "Bonn, Germany", "url": "" },
