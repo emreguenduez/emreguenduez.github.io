@@ -41,13 +41,17 @@ function resumePrintAddress(url, label) {
   return url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
 }
 
-function resumeLink(c) {
+// Web links print as "GitHub github.com/…": the label says what it is, the address stays readable on paper.
+function resumeLink(c, printLabel = c.label) {
   const a = resumeEl('a');
   a.href = c.url;
   const print = resumePrintAddress(c.url, c.label);
-  if (print === c.label) a.textContent = c.label;
+  if (print === c.label && printLabel === c.label) { a.textContent = c.label; return a; } // email, phone
+  if (print === c.label) a.textContent = print;
   else a.append(resumeEl('span', 'screen-only', c.label), resumeEl('span', 'print-only', print));
-  return a;
+  const wrap = resumeEl('span', 'labeled');
+  wrap.append(resumeEl('span', 'print-only plabel', printLabel), a);
+  return wrap;
 }
 
 // Fills `root` with the resume. `downloadButton: false` hides the PDF button (used in the editor preview).
@@ -64,7 +68,7 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
   });
   // The printed copy points back to this site.
   if (downloadButton && /^https?:/.test(siteUrl)) {
-    links.append(resumeLink({ url: siteUrl, label: siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') }));
+    links.append(resumeLink({ url: siteUrl, label: siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') }, 'Personal Website'));
     links.lastChild.classList.add('print-only');
   }
   if (downloadButton) {

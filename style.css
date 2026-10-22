@@ -147,7 +147,11 @@ a.dl { display: inline-block; text-decoration: none; }
   a { text-decoration: underline; text-decoration-thickness: 0.5pt; text-underline-offset: 1.5pt; text-decoration-color: currentColor; }
   header h1 { font-size: 20pt; }
   header .role { margin: 0 0 2px; font-size: 10.5pt; }
-  header .links { gap: 2px 8px; margin-top: 3px; font-size: 7.5pt; color: var(--text); }
+  header .links { gap: 2px 12px; margin-top: 3px; font-size: 7.5pt; color: var(--text); }
+  /* contact details on the first line, labelled web links on the second */
+  header .links::before { content: ""; flex-basis: 100%; order: 1; }
+  header .links > .labeled { order: 2; }
+  .plabel { margin-right: 4px; font-family: var(--sans); font-size: 7pt; color: var(--muted); }
   section { margin-top: 5px; padding-top: 2px; border-top-width: 0.75pt; break-inside: avoid; }
   h2 { margin-bottom: 1px; font-size: 11pt; }
   .item + .item { margin-top: 5px; }
