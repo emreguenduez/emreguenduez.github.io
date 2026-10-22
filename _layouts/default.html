@@ -28,7 +28,7 @@
 <footer>
   <span>{{ site.data.resume.name }} · Bonn · {{ site.time | date: "%Y" }}</span>
   <nav aria-label="Contact">
-    {% for c in site.data.resume.contact %}{% if c.url and c.url != "" %}<a href="{{ c.url }}">{% if c.url contains "mailto:" %}Email{% else %}{{ c.label }}{% endif %}</a>{% endif %}{% endfor %}
+    {% for c in site.data.resume.contact %}{% if c.url and c.url != "" and c.printOnly != true %}<a href="{{ c.url }}">{% if c.url contains "mailto:" %}Email{% else %}{{ c.label }}{% endif %}</a>{% endif %}{% endfor %}
   </nav>
 </footer>
 <script>
