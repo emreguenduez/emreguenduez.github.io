@@ -51,7 +51,8 @@ function resumeLink(c) {
 }
 
 // Fills `root` with the resume. `downloadButton: false` hides the PDF button (used in the editor preview).
-function renderResume(root, cv, { downloadButton = true } = {}) {
+// `siteUrl` is the public address printed in the PDF; `pdfUrl` is the pre-built PDF the button downloads.
+function renderResume(root, cv, { downloadButton = true, siteUrl = location.origin, pdfUrl = '' } = {}) {
   const header = resumeEl('header');
   header.append(resumeEl('h1', '', cv.name), resumeEl('p', 'role', cv.role));
   if (cv.intro) { const intro = resumeEl('p', 'intro'); intro.append(resumeInline(cv.intro)); header.append(intro); }
@@ -62,14 +63,15 @@ function renderResume(root, cv, { downloadButton = true } = {}) {
     links.append(el);
   });
   // The printed copy points back to this site.
-  if (downloadButton && location.protocol.startsWith('http')) {
-    links.append(resumeLink({ url: location.origin, label: location.host }));
+  if (downloadButton && /^https?:/.test(siteUrl)) {
+    links.append(resumeLink({ url: siteUrl, label: siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') }));
     links.lastChild.classList.add('print-only');
   }
   if (downloadButton) {
-    const dl = resumeEl('button', 'dl', 'Download PDF');
-    dl.type = 'button';
-    dl.onclick = () => print();
+    // A real file works on every phone; print() does nothing in many mobile and in-app browsers.
+    const dl = resumeEl(pdfUrl ? 'a' : 'button', 'dl', 'Download PDF');
+    if (pdfUrl) { dl.href = pdfUrl; dl.download = 'M-Emre-Guenduez-Resume.pdf'; }
+    else { dl.type = 'button'; dl.onclick = () => print(); }
     links.append(dl);
   }
   header.append(links);

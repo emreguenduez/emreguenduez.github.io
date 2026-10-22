@@ -126,6 +126,7 @@ p { margin: 6px 0 0; }
   border: 1px solid currentColor; border-radius: 999px; padding: 4px 14px;
 }
 .dl:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+a.dl { display: inline-block; text-decoration: none; }
 
 /* Home: a peek at the photo books, after the resume */
 .shelf-peek .books { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 24px 20px; }
@@ -141,7 +142,7 @@ p { margin: 6px 0 0; }
   }
   body { font-size: 8.8pt; line-height: 1.27; }
   main { max-width: none; padding: 0; }
-  .dl, .intro, .screen-only { display: none; }
+  .dl, a.dl, .intro, .screen-only { display: none; }
   .print-only { display: inline; }
   a { text-decoration: underline; text-decoration-thickness: 0.5pt; text-underline-offset: 1.5pt; text-decoration-color: currentColor; }
   header h1 { font-size: 20pt; }
@@ -481,3 +482,4 @@ footer nav a { padding: 6px 0; }
 }
 .admin label.check { display: flex; align-items: center; gap: 8px; grid-column: 1 / -1; }
 .admin label.check input { width: 18px; height: 18px; }
+@media (pointer: coarse) { .dl { padding: 12px 18px; } }

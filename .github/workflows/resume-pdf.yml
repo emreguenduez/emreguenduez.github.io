@@ -1,0 +1,71 @@
+# Rebuilds resume.pdf whenever the resume or its styles change (including saves from /admin/),
+# so "Download PDF" serves a real file that works on phones, where window.print() often does nothing.
+name: Resume PDF
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - _data/resume.json
+      - resume.js
+      - style.css
+      - index.html
+      - _layouts/**
+      - fonts/**
+      - _config.yml
+      - .github/workflows/resume-pdf.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: resume-pdf
+  cancel-in-progress: true
+
+jobs:
+  pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Build the site
+        env:
+          JEKYLL_ENV: production
+        run: |
+          gem install jekyll --no-document
+          jekyll build -d _site
+
+      - name: Print the resume to PDF
+        run: |
+          # metric-compatible stand-ins for the Helvetica/Arial used for dates in print
+          sudo apt-get install -y -q fonts-liberation >/dev/null
+          python3 -m http.server 4000 -d _site >/dev/null 2>&1 &
+          sleep 2
+          google-chrome --headless=new --no-sandbox --disable-gpu --no-pdf-header-footer \
+            --virtual-time-budget=10000 --print-to-pdf=resume.pdf http://localhost:4000/
+          pages=$(grep -ac '/Type */Page[^s]' resume.pdf || true)
+          echo "Pages: $pages"
+          if [ "$pages" != "1" ]; then echo "::warning::The resume PDF has $pages pages; it should fit on one."; fi
+
+      - name: Commit the PDF
+        # this job only runs when the resume or its styles changed, so the PDF is always worth replacing
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add resume.pdf
+          if git diff --cached --quiet; then echo "No change."; exit 0; fi
+          git commit -m "Update resume PDF"
+          git pull --rebase --autostash origin main
+          git push
+
+      - name: Publish
+        # pushes made with the workflow token don't always start a Pages build on their own
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" >/dev/null || true

@@ -1,4 +1,5 @@
 title: M. Emre Gündüz
+url: https://emreguenduez.github.io
 defaults:
   - scope: { path: "" }
     values: { layout: default }
