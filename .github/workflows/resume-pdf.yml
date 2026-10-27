@@ -58,7 +58,7 @@ jobs:
             path="${pair%%:*}"; out="${pair##*:}"
             google-chrome --headless=new --no-sandbox --disable-gpu --no-pdf-header-footer \
               --virtual-time-budget=10000 --print-to-pdf="$out" "http://localhost:4000/$path"
-            pages=$(grep -ac '/Type */Page[^s]' "$out" || true)
+            pages=$(python3 -c "import re,sys; print(len(re.findall(rb'/Type\s*/Page[^s]', open(sys.argv[1],'rb').read())))" "$out")
             echo "$out: $pages page(s)"
             if [ "$pages" != "1" ]; then echo "::warning::$out has $pages pages; it should fit on one."; fi
           done
