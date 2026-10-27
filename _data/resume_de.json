@@ -37,10 +37,10 @@
           "subright": "",
           "text": "SaaS- und Desktop-Software für Kfz-Gutachterbüros · [eksperone.com](https://eksperone.com)",
           "bullets": [
-            "Offline-Desktop-App zur Kennzeichenerkennung (C#, YOLOv9 + OCR) ausgeliefert, die die Fotosortierung von **40 auf 5 Minuten** verkürzt. Im Einsatz in 2 Büros.",
+            "Offline-Desktop-App zur Kennzeichenerkennung (C#, YOLOv9 + OCR) deployed, die die Fotosortierung von **40 auf 5 Minuten** verkürzt. Im Einsatz in 2 Büros.",
             "Eine **mandantenfähige Fallverwaltungsplattform** (.NET 10, PostgreSQL, React/TypeScript) mit rollenbasierter Zugriffskontrolle und Audit-Logging entwickelt.",
-            "Mobile Fotoaufnahme und Upload-Links für Kunden eingeführt, wodurch manuelle Fotoübertragungen entfallen.",
-            "Verantwortung für die **gesamte Auslieferung**: CI/CD, Docker, VPS-Deployment und Windows-Paketierung.",
+            "Mobile Fotoaufnahmen und Upload-Links für Kunden eingeführt, wodurch manuelle Fotoübertragungen entfallen.",
+            "Verantwortung für die **gesamte deployment**: CI/CD, Docker, VPS-Deployment und Windows-Paketierung.",
             "Anforderungen direkt mit Kfz-Sachverständigen erhoben."
           ]
         },
