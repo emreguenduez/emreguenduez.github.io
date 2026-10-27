@@ -1,0 +1,30 @@
+{%- assign lang = page.lang | default: "en" -%}
+{%- assign t = site.data.i18n[lang] -%}
+{%- assign dkey = "description_" | append: lang -%}
+<header>
+  <h1 class="page-title">{{ t.projects_title }}</h1>
+  <p class="lead">{{ t.projects_lead }}</p>
+</header>
+
+{%- comment -%} Projects are listed in _data/projects.yml, in the order they appear there. description_de / description_tr translate a description. {%- endcomment -%}
+{%- if site.data.projects.size > 0 %}
+<ol class="plist">
+{%- for p in site.data.projects %}
+  {%- assign desc = p[dkey] | default: p.description %}
+  <li class="project">
+    <div class="row"><h2>{{ p.name }}</h2>{% if p.year %}<span class="meta">{{ p.year }}</span>{% endif %}</div>
+    {%- if desc %}<p>{{ desc }}</p>{% endif %}
+    {%- if p.tags %}<p class="meta tagline">{{ p.tags | join: " · " }}</p>{% endif %}
+    {%- if p.url or p.repo %}
+    <p class="plinks">
+      {%- if p.url %}<a href="{{ p.url }}">{{ t.website }}</a>{% endif %}
+      {%- if p.repo %}<a href="{{ p.repo }}">{{ t.source_code }}</a>{% endif %}
+    </p>
+    {%- endif %}
+    {%- if p.image %}<img src="{{ p.image | relative_url }}" alt="Screenshot: {{ p.name | escape }}" loading="lazy">{% endif %}
+  </li>
+{%- endfor %}
+</ol>
+{%- else %}
+<p class="empty">{{ t.no_projects }}</p>
+{%- endif %}

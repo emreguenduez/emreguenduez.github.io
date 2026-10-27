@@ -1,36 +1,5 @@
 ---
+lang: en
+ref: /
 ---
-{%- comment -%} Resume content lives in _data/resume.json (editable from /admin/). {%- endcomment -%}
-<div id="resume">
-  <noscript><h1>{{ site.data.resume.name }}</h1><p>{{ site.data.resume.role }}</p></noscript>
-</div>
-
-{%- if site.data.books.size > 0 %}
-<section class="shelf-peek" aria-labelledby="peek-title">
-  <h2 id="peek-title">Photo books</h2>
-  <div class="sec-body">
-    <div class="books" id="peek"></div>
-    <p class="more meta"><a href="{{ '/photography/' | relative_url }}">All photo books</a></p>
-  </div>
-</section>
-<script id="books-data" type="application/json">{{ site.data.books | jsonify | replace: "</", "<\/" }}</script>
-<script src="{{ '/book.js' | relative_url }}"></script>
-<script>
-  // The newest three books, each opening straight into the viewer on /photography/.
-  const peekBooks = (JSON.parse(document.getElementById('books-data').textContent) || []).slice(-3).reverse();
-  document.getElementById('peek').append(...peekBooks.map(b => renderShelfItem(b, p => '{{ site.baseurl }}' + p, '{{ "/photography/" | relative_url }}#' + b.id)));
-</script>
-{%- endif %}
-
-<script id="resume-data" type="application/json">{{ site.data.resume | jsonify | replace: "</", "<\/" }}</script>
-<script src="{{ '/resume.js' | relative_url }}"></script>
-<script>
-  renderResume(document.getElementById('resume'), JSON.parse(document.getElementById('resume-data').textContent), {
-    siteUrl: '{{ site.url }}' || location.origin,
-    pdfUrl: '{{ "/resume.pdf" | relative_url }}',
-  });
-  // Browsers name the saved PDF after the page title; keep it plain ASCII so upload portals don't mangle it.
-  const screenTitle = document.title;
-  addEventListener('beforeprint', () => { document.title = 'M-Emre-Guenduez-Resume'; });
-  addEventListener('afterprint', () => { document.title = screenTitle; });
-</script>
+{% include page-home.html %}

@@ -1,49 +1,68 @@
+{%- assign lang = page.lang | default: "en" -%}
+{%- assign t = site.data.i18n[lang] -%}
+{%- assign langs = "en,de,tr" | split: "," -%}
 <!doctype html>
-<html lang="en">
+<html lang="{{ lang }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>{{ page.title | default: "M. Emre Gündüz · Software Engineer" }}</title>
-<meta name="description" content="M. Emre Gündüz — Software Engineer based in Bonn, Germany.">
+<title>{{ page.title | default: t.title_home }}</title>
+<meta name="description" content="{{ t.description }}">
 {% if page.noindex %}<meta name="robots" content="noindex">{% endif %}
+{%- if page.ref %}
+{%- for l in langs %}
+<link rel="alternate" hreflang="{{ l }}" href="{{ site.url }}{{ site.data.i18n[l].prefix }}{{ page.ref }}">
+{%- endfor %}
+<link rel="alternate" hreflang="x-default" href="{{ site.url }}{{ page.ref }}">
+{%- endif %}
 <script>try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script>window.T = {{ t | jsonify }};</script>
 <link rel="preload" href="{{ '/fonts/newsreader-latin-400-normal.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 </head>
 <body>
 <main{% if page.wide %} class="wide"{% endif %}>
   <nav aria-label="Site">
-    {% assign links = "/|Resume,/projects/|Projects,/photography/|Photography" | split: "," %}
-    {% for l in links %}{% assign p = l | split: "|" %}
-    <a href="{{ p[0] | relative_url }}"{% if page.url == p[0] %} aria-current="page"{% endif %}>{{ p[1] }}</a>
-    {% endfor %}
-    <button class="theme" type="button">
-      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>
-      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
-      <span></span>
-    </button>
+    {%- assign items = "/|nav_resume,/projects/|nav_projects,/photography/|nav_photography" | split: "," %}
+    {%- for item in items %}{% assign p = item | split: "|" %}{% assign href = t.prefix | append: p[0] %}{% assign key = p[1] %}
+    <a href="{{ href | relative_url }}"{% if page.url == href %} aria-current="page"{% endif %}>{{ t[key] }}</a>
+    {%- endfor %}
+    <span class="navtools">
+      {%- if page.ref %}
+      <span class="langs-switch" role="group" aria-label="{{ t.language }}">
+        {%- for l in langs %}{% assign lt = site.data.i18n[l] %}
+        <a href="{{ lt.prefix | append: page.ref | relative_url }}" hreflang="{{ l }}" lang="{{ l }}" aria-label="{{ lt.name }}"{% if l == lang %} aria-current="true"{% endif %}>{{ l | upcase }}</a>
+        {%- endfor %}
+      </span>
+      {%- endif %}
+      <button class="theme" type="button">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        <span></span>
+      </button>
+    </span>
   </nav>
 {{ content }}
 </main>
 <footer>
   <span>{{ site.data.resume.name }} · Bonn · {{ site.time | date: "%Y" }}</span>
   <nav aria-label="Contact">
-    {% for c in site.data.resume.contact %}{% if c.url and c.url != "" and c.printOnly != true %}<a href="{{ c.url }}">{% if c.url contains "mailto:" %}Email{% else %}{{ c.label }}{% endif %}</a>{% endif %}{% endfor %}
+    {% for c in site.data.resume.contact %}{% if c.url and c.url != "" and c.printOnly != true %}<a href="{{ c.url }}">{% if c.url contains "mailto:" %}{{ t.email }}{% else %}{{ c.label }}{% endif %}</a>{% endif %}{% endfor %}
   </nav>
 </footer>
 <script>
   // The label names the current theme; dark follows the OS until the visitor picks one.
   const themeBtn = document.querySelector('.theme');
-  const current = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const currentTheme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   const paint = () => {
-    const t = current();
-    themeBtn.querySelector('span').textContent = t === 'dark' ? 'Dark' : 'Light';
-    themeBtn.querySelector('.sun').style.display = t === 'dark' ? 'none' : '';
-    themeBtn.querySelector('.moon').style.display = t === 'dark' ? '' : 'none';
-    themeBtn.setAttribute('aria-label', 'Theme: ' + t + '. Switch to ' + (t === 'dark' ? 'light' : 'dark'));
+    const dark = currentTheme() === 'dark';
+    themeBtn.querySelector('span').textContent = dark ? T.dark : T.light;
+    themeBtn.querySelector('.sun').style.display = dark ? 'none' : '';
+    themeBtn.querySelector('.moon').style.display = dark ? '' : 'none';
+    themeBtn.setAttribute('aria-label', T.theme + ': ' + (dark ? T.dark : T.light) + '. ' + (dark ? T.switch_to_light : T.switch_to_dark));
   };
   themeBtn.onclick = () => {
-    const next = current() === 'dark' ? 'light' : 'dark';
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
     try { localStorage.setItem('theme', next); } catch (e) {}
     paint();

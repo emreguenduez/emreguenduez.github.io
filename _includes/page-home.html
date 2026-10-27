@@ -1,0 +1,37 @@
+{%- assign lang = page.lang | default: "en" -%}
+{%- assign t = site.data.i18n[lang] -%}
+{%- if lang == "en" %}{% assign cv = site.data.resume %}{% else %}{% assign key = "resume_" | append: lang %}{% assign cv = site.data[key] | default: site.data.resume %}{% endif -%}
+{%- comment -%} Resume content lives in _data/resume.json, resume_de.json and resume_tr.json (editable from /admin/). {%- endcomment -%}
+<div id="resume">
+  <noscript><h1>{{ cv.name }}</h1><p>{{ cv.role }}</p></noscript>
+</div>
+
+{%- if site.data.books.size > 0 %}
+<section class="shelf-peek" aria-labelledby="peek-title">
+  <h2 id="peek-title">{{ t.photo_books }}</h2>
+  <div class="sec-body">
+    <div class="books" id="peek"></div>
+    <p class="more meta"><a href="{{ t.prefix | append: '/photography/' | relative_url }}">{{ t.all_photo_books }}</a></p>
+  </div>
+</section>
+<script id="books-data" type="application/json">{{ site.data.books | jsonify | replace: "</", "<\/" }}</script>
+<script src="{{ '/book.js' | relative_url }}"></script>
+<script>
+  // The newest three books, each opening straight into the viewer on the photography page.
+  const peekBooks = (JSON.parse(document.getElementById('books-data').textContent) || []).slice(-3).reverse();
+  document.getElementById('peek').append(...peekBooks.map(b => renderShelfItem(b, p => '{{ site.baseurl }}' + p, '{{ t.prefix | append: "/photography/" | relative_url }}#' + b.id)));
+</script>
+{%- endif %}
+
+<script id="resume-data" type="application/json">{{ cv | jsonify | replace: "</", "<\/" }}</script>
+<script src="{{ '/resume.js' | relative_url }}"></script>
+<script>
+  renderResume(document.getElementById('resume'), JSON.parse(document.getElementById('resume-data').textContent), {
+    siteUrl: '{{ site.url }}' || location.origin,
+    pdfUrl: '{{ t.pdf_url | relative_url }}',
+  });
+  // Browsers name the saved PDF after the page title; keep it plain ASCII so upload portals don't mangle it.
+  const screenTitle = document.title;
+  addEventListener('beforeprint', () => { document.title = T.print_title; });
+  addEventListener('afterprint', () => { document.title = screenTitle; });
+</script>

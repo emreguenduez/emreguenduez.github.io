@@ -11,6 +11,9 @@ const BOOK_LAYOUTS = {
 
 const BOOK_MARGINS = ['none', 'small', 'medium', 'large'];
 
+// Interface words come from the page's language (window.T, set by the layout); English otherwise.
+const bookT = (key, fallback) => (window.T && window.T[key]) || fallback;
+
 function bookEl(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -116,7 +119,7 @@ function openBook(dialog, book, src = p => p) {
   const stage = dialog.querySelector('.stage');
   const update = () => {
     const i = flip.getCurrentPageIndex();
-    count.textContent = i === 0 ? 'Cover' : i >= all.length - 1 ? 'Back cover' : 'Page ' + Math.min(i, n) + ' of ' + n;
+    count.textContent = i === 0 ? bookT('cover', 'Cover') : i >= all.length - 1 ? bookT('back_cover', 'Back cover') : bookT('page_of', 'Page {i} of {n}').replace('{i}', Math.min(i, n)).replace('{n}', n);
     const spread = flip.getOrientation() === 'landscape';
     stage.classList.toggle('on-front', spread && i === 0);
     stage.classList.toggle('on-back', spread && i >= all.length - 1);
@@ -138,24 +141,24 @@ function openBook(dialog, book, src = p => p) {
   }, { once: true });
 }
 
-const bookPagesLabel = n => n + (n === 1 ? ' page' : ' pages');
+const bookPagesLabel = n => n + ' ' + (n === 1 ? bookT('page_one', 'page') : bookT('page_many', 'pages'));
 
 // A cover on the shelf, linking to `href`. The cover already shows the title, so it isn't repeated below.
 function renderShelfItem(book, src, href) {
   const a = bookEl('a', 'book');
   a.href = href;
   const pages = bookPagesLabel((book.pages || []).length);
-  a.setAttribute('aria-label', (book.title || 'Untitled') + ', photo book, ' + pages);
+  a.setAttribute('aria-label', (book.title || 'Untitled') + ', ' + bookT('photo_book', 'photo book') + ', ' + pages);
   a.append(bookBox(renderBookCover(book, src)), bookEl('span', 'meta', pages));
   return a;
 }
 
 const BOOK_VIEWER_HTML = `
   <h2></h2>
-  <button class="close" type="button" aria-label="Close book"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <button class="close" type="button" aria-label="${bookT('close_book', 'Close book')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   <div class="stage"></div>
   <div class="controls">
-    <button class="prev" type="button" aria-label="Previous page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="prev" type="button" aria-label="${bookT('prev_page', 'Previous page')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
     <span class="count" aria-live="polite"></span>
-    <button class="next" type="button" aria-label="Next page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    <button class="next" type="button" aria-label="${bookT('next_page', 'Next page')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
   </div>`;

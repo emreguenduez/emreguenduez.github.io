@@ -1,35 +1,7 @@
 ---
+lang: en
+ref: /photography/
 title: Photography · M. Emre Gündüz
 wide: true
 ---
-<header>
-  <h1 class="page-title">Photography</h1>
-  <p class="lead">Photo books of places I've been. Open one and flip through.</p>
-</header>
-
-<div class="books" id="books"></div>
-<p class="empty" id="no-books" hidden>No photo books yet.</p>
-
-<dialog class="viewer" aria-label="Photo book"></dialog>
-
-<script id="books-data" type="application/json">{{ site.data.books | jsonify | replace: "</", "<\/" }}</script>
-<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-<script src="{{ '/book.js' | relative_url }}"></script>
-<script>
-  const books = JSON.parse(document.getElementById('books-data').textContent || '[]') || [];
-  const viewer = document.querySelector('.viewer');
-  viewer.innerHTML = BOOK_VIEWER_HTML;
-  const src = p => '{{ site.baseurl }}' + p;
-
-  document.getElementById('books').append(...books.map(b => renderShelfItem(b, src, '#' + b.id)));
-  document.getElementById('no-books').hidden = books.length > 0;
-
-  // The hash (#book-id) opens a book, so links to a single book can be shared.
-  const route = () => {
-    const b = books.find(b => '#' + b.id === location.hash);
-    if (b && !viewer.open) openBook(viewer, b, src);
-  };
-  viewer.addEventListener('close', () => history.replaceState(null, '', location.pathname));
-  addEventListener('hashchange', route);
-  route();
-</script>
+{% include page-photography.html %}

@@ -68,7 +68,12 @@ wide: true
   <div data-panel="resume" role="tabpanel" id="panel-resume" aria-labelledby="tab-resume">
   <section>
     <h2>Resume</h2>
-    <p class="meta">Write <code>**bold**</code> for emphasis and <code>[text](https://link)</code> for links. The preview updates as you type; empty sections are hidden.</p>
+    <div class="choice cv-langs" role="group" aria-label="Resume language">
+      <button type="button" data-cv-lang="en" aria-pressed="true">English</button>
+      <button type="button" data-cv-lang="de" aria-pressed="false">Deutsch</button>
+      <button type="button" data-cv-lang="tr" aria-pressed="false">Türkçe</button>
+    </div>
+    <p class="meta">Each language has its own resume and its own PDF, shown on the /, /de/ and /tr/ pages. Write <code>**bold**</code> for emphasis and <code>[text](https://link)</code> for links. The preview updates as you type; empty sections are hidden.</p>
     <div class="segmented" role="group" aria-label="Show">
       <button type="button" data-cv-view="form" aria-pressed="true">Edit</button>
       <button type="button" data-cv-view="preview" aria-pressed="false">Preview</button>
@@ -237,7 +242,7 @@ wide: true
       const [repo, proj, data, resume] = await Promise.all([gh(REPO_API), gh('_data/projects.yml'), gh('_data/books.json'), gh('_data/resume.json')]);
       if (repo && repo.permissions && !repo.permissions.push) throw new Error(NO_WRITE);
       cv = resume ? JSON.parse(toText(resume.content)) : { name: '', role: '', contact: [], sections: [] };
-      cvSha = resume ? resume.sha : '';
+      cvSha = resume ? resume.sha : ''; cvLang = 'en';
       cvSaved = JSON.stringify(cv);
       pjSaved = $('#projects').yaml.value = proj ? toText(proj.content) : '';
       pjSha = proj ? proj.sha : '';
@@ -717,6 +722,25 @@ wide: true
 
   // ---------- Resume editor ----------
   let cv = null, cvSaved = '', cvSha = '';
+  const CV_FILES = { en: '_data/resume.json', de: '_data/resume_de.json', tr: '_data/resume_tr.json' };
+  const CV_NAMES = { en: 'English', de: 'German', tr: 'Turkish' };
+  let cvLang = 'en';
+
+  // Loads another language's resume into the editor. A missing file starts as a copy of the one on screen.
+  async function switchCvLang(lang) {
+    if (lang === cvLang) return;
+    if (cvDirty() && !confirm('Discard your unsaved changes to the ' + CV_NAMES[cvLang] + ' resume?')) return;
+    let file;
+    try { file = await gh(CV_FILES[lang]); } catch (err) { $('#cv-status').textContent = 'Couldn\'t load it. ' + err.message; $('#cv-savebar').hidden = false; return; }
+    cvLang = lang;
+    cv = file ? JSON.parse(toText(file.content)) : structuredClone(cv);
+    cvSha = file ? file.sha : '';
+    cvSaved = file ? JSON.stringify(cv) : '';
+    document.querySelectorAll('[data-cv-lang]').forEach(b => b.setAttribute('aria-pressed', b.dataset.cvLang === lang));
+    const saveBtn = $('#cv-save'); delete saveBtn.dataset.force; saveBtn.textContent = 'Save & publish';
+    cvStructure();
+  }
+  document.querySelectorAll('[data-cv-lang]').forEach(b => b.onclick = () => switchCvLang(b.dataset.cvLang));
   const cvDirty = () => cv !== null && JSON.stringify(cv) !== cvSaved;
   const collapsed = new WeakSet(); // sections the user folded, kept across redraws
   const SECTION_TYPES = { entries: 'Entries with bullet points', tags: 'Tag list', pairs: 'Two-column list' };
@@ -725,7 +749,7 @@ wide: true
   function cvChanged() {
     renderResume($('#cv-preview'), cv, { downloadButton: false });
     $('#cv-savebar').hidden = !cvDirty();
-    $('#cv-status').textContent = 'You have unsaved changes to your resume.';
+    $('#cv-status').textContent = 'You have unsaved changes to the ' + CV_NAMES[cvLang] + ' resume.';
   }
   function cvStructure() { drawCv(); cvChanged(); }
 
@@ -860,11 +884,11 @@ wide: true
     btn.disabled = true;
     $('#cv-status').textContent = 'Saving…';
     try {
-      cvSha = await saveFile('_data/resume.json', JSON.stringify(cv, null, 2) + '\n', cvSha, 'Update resume', btn.dataset.force);
+      cvSha = await saveFile(CV_FILES[cvLang], JSON.stringify(cv, null, 2) + '\n', cvSha, 'Update ' + CV_NAMES[cvLang] + ' resume', btn.dataset.force);
       cvSaved = JSON.stringify(cv);
       delete btn.dataset.force;
       btn.textContent = 'Save & publish';
-      $('#cv-status').textContent = 'Saved. Your resume updates in about a minute.';
+      $('#cv-status').textContent = 'Saved. The ' + CV_NAMES[cvLang] + ' resume and its PDF update in a few minutes.';
       setTimeout(() => { $('#cv-savebar').hidden = !cvDirty(); }, 3000);
     } catch (err) {
       $('#cv-status').textContent = failText(err);
@@ -877,7 +901,8 @@ wide: true
     document.querySelectorAll('[data-cv-view]').forEach(o => o.setAttribute('aria-pressed', o === b));
   });
   $('#cv-discard').onclick = () => {
-    if (!confirm('Discard all unsaved changes to your resume?')) return;
+    if (!confirm('Discard all unsaved changes to the ' + CV_NAMES[cvLang] + ' resume?')) return;
+    if (!cvSaved) return; // a new language with nothing saved yet
     cv = JSON.parse(cvSaved);
     cvStructure();
   };

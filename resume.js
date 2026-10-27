@@ -68,13 +68,13 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
   });
   // The printed copy points back to this site.
   if (downloadButton && /^https?:/.test(siteUrl)) {
-    links.append(resumeLink({ url: siteUrl, label: siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') }, 'Personal Website'));
+    links.append(resumeLink({ url: siteUrl, label: siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') }, (window.T && T.website_label) || 'Personal Website'));
     links.lastChild.classList.add('print-only');
   }
   if (downloadButton) {
     // A real file works on every phone; print() does nothing in many mobile and in-app browsers.
-    const dl = resumeEl(pdfUrl ? 'a' : 'button', 'dl', 'Download PDF');
-    if (pdfUrl) { dl.href = pdfUrl; dl.download = 'M-Emre-Guenduez-Resume.pdf'; }
+    const dl = resumeEl(pdfUrl ? 'a' : 'button', 'dl', (window.T && T.download_pdf) || 'Download PDF');
+    if (pdfUrl) { dl.href = pdfUrl; dl.download = (window.T && T.pdf_file) || 'M-Emre-Guenduez-Resume.pdf'; }
     else { dl.type = 'button'; dl.onclick = () => print(); }
     links.append(dl);
   }

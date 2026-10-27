@@ -1,0 +1,196 @@
+{
+  "name": "M. Emre Gündüz",
+  "role": "Softwareentwickler",
+  "intro": "Ich bin Softwareentwickler in Bonn und studiere Informatik (M.Sc.) an der Universität Bonn. Ich entwickle Software von Anfang bis Ende: von EksperOne, der Software für Kfz-Gutachterbüros, die ich gegründet habe, bis zum Backend der türkischen Autobahnmaut bei ASELSAN. Abseits der Tastatur fotografiere ich, und die Fotobücher auf dieser Seite sind das Ergebnis.",
+  "contact": [
+    {
+      "label": "emreguenduez@protonmail.com",
+      "url": "mailto:emreguenduez@protonmail.com"
+    },
+    {
+      "label": "+49 1575 0495710",
+      "url": "tel:+4915750495710",
+      "printOnly": true
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/emreguenduez"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/emreguenduez"
+    },
+    {
+      "label": "Bonn, Deutschland",
+      "url": ""
+    }
+  ],
+  "sections": [
+    {
+      "title": "Berufserfahrung",
+      "type": "entries",
+      "items": [
+        {
+          "title": "EksperOne",
+          "right": "Aug. 2026 – heute",
+          "subtitle": "Gründer & alleiniger Entwickler",
+          "subright": "",
+          "text": "SaaS- und Desktop-Software für Kfz-Gutachterbüros · [eksperone.com](https://eksperone.com)",
+          "bullets": [
+            "Offline-Desktop-App zur Kennzeichenerkennung (C#, YOLOv9 + OCR) ausgeliefert, die die Fotosortierung von **40 auf 5 Minuten** verkürzt. Im Einsatz in 2 Büros.",
+            "Eine **mandantenfähige Fallverwaltungsplattform** (.NET 10, PostgreSQL, React/TypeScript) mit rollenbasierter Zugriffskontrolle und Audit-Logging entwickelt.",
+            "Mobile Fotoaufnahme und Upload-Links für Kunden eingeführt, wodurch manuelle Fotoübertragungen entfallen.",
+            "Verantwortung für die **gesamte Auslieferung**: CI/CD, Docker, VPS-Deployment und Windows-Paketierung.",
+            "Anforderungen direkt mit Kfz-Sachverständigen erhoben."
+          ]
+        },
+        {
+          "title": "TWINSOFT GmbH & Co. KG",
+          "right": "Jan. 2026 – heute",
+          "subtitle": "Werkstudent Softwareentwicklung",
+          "subright": "Ratingen, Deutschland",
+          "text": "",
+          "bullets": [
+            "Neue Funktionen für eine **mobile App zur biometrischen Authentifizierung** entwickelt und dabei Benutzerfreundlichkeit, Zuverlässigkeit und Sicherheit der zentralen Abläufe verbessert.",
+            "Eine **Health-Check- und Diagnosefunktion** entworfen und umgesetzt, die die Fehlersuche beschleunigt und Fehlerquellen über Dienste und Anwendungskomponenten hinweg eingrenzt."
+          ]
+        },
+        {
+          "title": "Rheinmetall",
+          "right": "Aug. 2024 – Dez. 2025",
+          "subtitle": "Werkstudent Softwareentwicklung",
+          "subright": "Neuss, Deutschland",
+          "text": "",
+          "bullets": [
+            "Als Kernmitglied des Teams an einem internen Logistik-System zur Teileverwaltung mit .NET Framework mitgearbeitet.",
+            "**60 % der bekannten Fehler** behoben und damit Stabilität und Funktionsumfang des Systems deutlich verbessert.",
+            "Die Anwendungsleistung durch gezielte Umstrukturierung und Optimierung zentraler Funktionen um **20 %** gesteigert, mit kürzeren Ladezeiten und geringerem Speicherverbrauch.",
+            "Altkomponenten überarbeitet, um Wartbarkeit zu verbessern, technische Schulden abzubauen und neue Funktionen schneller auszuliefern."
+          ]
+        },
+        {
+          "title": "ASELSAN",
+          "right": "Nov. 2021 – Apr. 2024",
+          "subtitle": "Softwareentwickler",
+          "subright": "Ankara, Türkei",
+          "text": "",
+          "bullets": [
+            "Entwicklung einer Flutter-basierten Smart-City-App für rund **2.000.000 Nutzer** geleitet.",
+            "Backend-Dienste für das landesweite türkische Autobahnmaut- und Verkehrsüberwachungssystem entwickelt, die **1.000.000 Datensätze täglich** verarbeiten; Datenfluss und Speicherung mit .NET Framework optimiert.",
+            "2 Vorhersagemodelle für Klima- und Luftqualitätsprognosen mit Python, Zeitreihenanalyse und Machine Learning entworfen und umgesetzt.",
+            "Mit Stadtverwaltungen und interdisziplinären Teams an der Integration der Smart-City-Plattform und der digitalen Transformation der Städte gearbeitet."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Ausbildung",
+      "type": "entries",
+      "items": [
+        {
+          "title": "Rheinische Friedrich-Wilhelms-Universität Bonn",
+          "right": "Apr. 2024 – Sep. 2027",
+          "subtitle": "M.Sc. Informatik",
+          "subright": "",
+          "text": "",
+          "bullets": []
+        },
+        {
+          "title": "Kadir Has University",
+          "right": "Sep. 2018 – Juli 2022",
+          "subtitle": "B.Sc. Computer Engineering",
+          "subright": "",
+          "text": "",
+          "bullets": [
+            "Abschluss als **Drittbester des Jahrgangs** mit einem GPA von 3,73 und Auszeichnung (High Honors). Abschlussarbeit über Bilderkennungsverfahren zur Erkennung von Meeresschleim (Müsilaj)."
+          ]
+        },
+        {
+          "title": "Jacobs University",
+          "right": "Jan. 2021 – Mai 2021",
+          "subtitle": "Informatik · Erasmus+-Austausch",
+          "subright": "",
+          "text": "",
+          "bullets": []
+        }
+      ]
+    },
+    {
+      "title": "Kenntnisse",
+      "type": "tags",
+      "items": [
+        "Python",
+        ".NET",
+        "C#",
+        "SQL",
+        "Flutter",
+        "Git",
+        "TypeScript/JavaScript",
+        "Go",
+        "React"
+      ]
+    },
+    {
+      "title": "Publikationen",
+      "type": "entries",
+      "items": [
+        {
+          "title": "Air Quality Forecasting Using Time Series Models: A Comparative Study",
+          "right": "2023",
+          "subtitle": "IntelliSys",
+          "subright": "",
+          "text": "Zur Veröffentlichung und Präsentation auf der IntelliSys 2023 in Amsterdam angenommen.",
+          "bullets": []
+        }
+      ]
+    },
+    {
+      "title": "Projekte",
+      "type": "entries",
+      "items": [
+        {
+          "title": "Schengen Visa Appointment Bot",
+          "right": "2022",
+          "subtitle": "",
+          "subright": "",
+          "text": "[github.com/emreguenduez/idatarandevu](https://github.com/emreguenduez/idatarandevu)",
+          "bullets": []
+        }
+      ]
+    },
+    {
+      "title": "Sprachen",
+      "type": "pairs",
+      "items": [
+        {
+          "title": "Türkisch",
+          "right": "Muttersprache"
+        },
+        {
+          "title": "Englisch",
+          "right": "C2"
+        },
+        {
+          "title": "Spanisch",
+          "right": "C1"
+        },
+        {
+          "title": "Deutsch",
+          "right": "B1–B2"
+        }
+      ]
+    },
+    {
+      "title": "Interessen",
+      "type": "tags",
+      "items": [
+        "Fotografie",
+        "Bodybuilding",
+        "Sprachen lernen",
+        "Kalligrafie",
+        "Bouldern",
+        "Kochen"
+      ]
+    }
+  ]
+}

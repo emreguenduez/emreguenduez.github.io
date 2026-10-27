@@ -1,0 +1,120 @@
+# Interface text per language. Resume content lives in resume.json (en), resume_de.json and resume_tr.json.
+en:
+  name: English
+  prefix: ""
+  title_home: M. Emre Gündüz · Software Engineer
+  description: M. Emre Gündüz — Software Engineer based in Bonn, Germany.
+  nav_resume: Resume
+  nav_projects: Projects
+  nav_photography: Photography
+  language: Language
+  theme: Theme
+  light: Light
+  dark: Dark
+  switch_to_light: Switch to light
+  switch_to_dark: Switch to dark
+  email: Email
+  download_pdf: Download PDF
+  pdf_url: /resume.pdf
+  pdf_file: M-Emre-Guenduez-Resume.pdf
+  print_title: M-Emre-Guenduez-Resume
+  website_label: Personal Website
+  photo_books: Photo books
+  all_photo_books: All photo books
+  projects_title: Projects
+  projects_lead: Things I've built.
+  website: Website
+  source_code: Source code
+  no_projects: No projects yet.
+  photography_title: Photography
+  photography_lead: Photo books of places I've been. Open one and flip through.
+  no_books: No photo books yet.
+  photo_book: photo book
+  page_one: page
+  page_many: pages
+  cover: Cover
+  back_cover: Back cover
+  page_of: Page {i} of {n}
+  close_book: Close book
+  prev_page: Previous page
+  next_page: Next page
+
+de:
+  name: Deutsch
+  prefix: /de
+  title_home: M. Emre Gündüz · Softwareentwickler
+  description: M. Emre Gündüz — Softwareentwickler in Bonn.
+  nav_resume: Lebenslauf
+  nav_projects: Projekte
+  nav_photography: Fotografie
+  language: Sprache
+  theme: Farbschema
+  light: Hell
+  dark: Dunkel
+  switch_to_light: Zu hell wechseln
+  switch_to_dark: Zu dunkel wechseln
+  email: E-Mail
+  download_pdf: PDF herunterladen
+  pdf_url: /resume-de.pdf
+  pdf_file: M-Emre-Guenduez-Lebenslauf.pdf
+  print_title: M-Emre-Guenduez-Lebenslauf
+  website_label: Website
+  photo_books: Fotobücher
+  all_photo_books: Alle Fotobücher
+  projects_title: Projekte
+  projects_lead: Was ich gebaut habe.
+  website: Website
+  source_code: Quellcode
+  no_projects: Noch keine Projekte.
+  photography_title: Fotografie
+  photography_lead: Fotobücher von Orten, an denen ich war. Einfach eins öffnen und durchblättern.
+  no_books: Noch keine Fotobücher.
+  photo_book: Fotobuch
+  page_one: Seite
+  page_many: Seiten
+  cover: Titelseite
+  back_cover: Rückseite
+  page_of: Seite {i} von {n}
+  close_book: Buch schließen
+  prev_page: Vorherige Seite
+  next_page: Nächste Seite
+
+tr:
+  name: Türkçe
+  prefix: /tr
+  title_home: M. Emre Gündüz · Yazılım Mühendisi
+  description: M. Emre Gündüz — Bonn'da yaşayan yazılım mühendisi.
+  nav_resume: Özgeçmiş
+  nav_projects: Projeler
+  nav_photography: Fotoğraf
+  language: Dil
+  theme: Tema
+  light: Açık
+  dark: Koyu
+  switch_to_light: Açık temaya geç
+  switch_to_dark: Koyu temaya geç
+  email: E-posta
+  download_pdf: PDF indir
+  pdf_url: /resume-tr.pdf
+  pdf_file: M-Emre-Gunduz-Ozgecmis.pdf
+  print_title: M-Emre-Gunduz-Ozgecmis
+  website_label: Kişisel Web Sitesi
+  photo_books: Fotoğraf kitapları
+  all_photo_books: Tüm fotoğraf kitapları
+  projects_title: Projeler
+  projects_lead: Geliştirdiğim işler.
+  website: Web sitesi
+  source_code: Kaynak kodu
+  no_projects: Henüz proje yok.
+  photography_title: Fotoğraf
+  photography_lead: Gittiğim yerlerden fotoğraf kitapları. Birini aç ve sayfalarını çevir.
+  no_books: Henüz fotoğraf kitabı yok.
+  photo_book: fotoğraf kitabı
+  page_one: sayfa
+  page_many: sayfa
+  cover: Kapak
+  back_cover: Arka kapak
+  page_of: Sayfa {i} / {n}
+  close_book: Kitabı kapat
+  prev_page: Önceki sayfa
+  next_page: Sonraki sayfa
