@@ -71,9 +71,8 @@ wide: true
     <div class="choice cv-langs" role="group" aria-label="Resume language">
       <button type="button" data-cv-lang="en" aria-pressed="true">English</button>
       <button type="button" data-cv-lang="de" aria-pressed="false">Deutsch</button>
-      <button type="button" data-cv-lang="tr" aria-pressed="false">Türkçe</button>
     </div>
-    <p class="meta">Each language has its own resume and its own PDF, shown on the /, /de/ and /tr/ pages. Write <code>**bold**</code> for emphasis and <code>[text](https://link)</code> for links. The preview updates as you type; empty sections are hidden.</p>
+    <p class="meta">Each language has its own resume and its own PDF, shown on the / and /de/ pages. Write <code>**bold**</code> for emphasis and <code>[text](https://link)</code> for links. The preview updates as you type; empty sections are hidden.</p>
     <div class="segmented" role="group" aria-label="Show">
       <button type="button" data-cv-view="form" aria-pressed="true">Edit</button>
       <button type="button" data-cv-view="preview" aria-pressed="false">Preview</button>
@@ -722,8 +721,8 @@ wide: true
 
   // ---------- Resume editor ----------
   let cv = null, cvSaved = '', cvSha = '';
-  const CV_FILES = { en: '_data/resume.json', de: '_data/resume_de.json', tr: '_data/resume_tr.json' };
-  const CV_NAMES = { en: 'English', de: 'German', tr: 'Turkish' };
+  const CV_FILES = { en: '_data/resume.json', de: '_data/resume_de.json' };
+  const CV_NAMES = { en: 'English', de: 'German' };
   let cvLang = 'en';
 
   // Loads another language's resume into the editor. A missing file starts as a copy of the one on screen.

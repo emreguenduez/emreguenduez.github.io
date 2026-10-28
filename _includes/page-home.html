@@ -1,7 +1,7 @@
 {%- assign lang = page.lang | default: "en" -%}
 {%- assign t = site.data.i18n[lang] -%}
 {%- if lang == "en" %}{% assign cv = site.data.resume %}{% else %}{% assign key = "resume_" | append: lang %}{% assign cv = site.data[key] | default: site.data.resume %}{% endif -%}
-{%- comment -%} Resume content lives in _data/resume.json, resume_de.json and resume_tr.json (editable from /admin/). {%- endcomment -%}
+{%- comment -%} Resume content lives in _data/resume.json and resume_de.json (editable from /admin/). {%- endcomment -%}
 <div id="resume">
   <noscript><h1>{{ cv.name }}</h1><p>{{ cv.role }}</p></noscript>
 </div>

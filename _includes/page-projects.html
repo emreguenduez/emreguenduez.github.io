@@ -6,7 +6,7 @@
   <p class="lead">{{ t.projects_lead }}</p>
 </header>
 
-{%- comment -%} Projects are listed in _data/projects.yml, in the order they appear there. description_de / description_tr translate a description. {%- endcomment -%}
+{%- comment -%} Projects are listed in _data/projects.yml, in the order they appear there. description_de translates a description. {%- endcomment -%}
 {%- if site.data.projects.size > 0 %}
 <ol class="plist">
 {%- for p in site.data.projects %}

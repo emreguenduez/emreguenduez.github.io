@@ -1,4 +1,4 @@
-# Interface text per language. Resume content lives in resume.json (en), resume_de.json and resume_tr.json.
+# Interface text per language. Resume content lives in resume.json (en) and resume_de.json.
 en:
   name: English
   prefix: ""
@@ -78,43 +78,3 @@ de:
   close_book: Buch schließen
   prev_page: Vorherige Seite
   next_page: Nächste Seite
-
-tr:
-  name: Türkçe
-  prefix: /tr
-  title_home: M. Emre Gündüz · Yazılım Mühendisi
-  description: M. Emre Gündüz — Bonn'da yaşayan yazılım mühendisi.
-  nav_resume: Özgeçmiş
-  nav_projects: Projeler
-  nav_photography: Fotoğraf
-  language: Dil
-  theme: Tema
-  light: Açık
-  dark: Koyu
-  switch_to_light: Açık temaya geç
-  switch_to_dark: Koyu temaya geç
-  email: E-posta
-  download_pdf: PDF indir
-  pdf_url: /resume-tr.pdf
-  pdf_file: M-Emre-Gunduz-Ozgecmis.pdf
-  print_title: M-Emre-Gunduz-Ozgecmis
-  website_label: Kişisel Web Sitesi
-  photo_books: Fotoğraf kitapları
-  all_photo_books: Tüm fotoğraf kitapları
-  projects_title: Projeler
-  projects_lead: Geliştirdiğim işler.
-  website: Web sitesi
-  source_code: Kaynak kodu
-  no_projects: Henüz proje yok.
-  photography_title: Fotoğraf
-  photography_lead: Gittiğim yerlerden fotoğraf kitapları. Birini aç ve sayfalarını çevir.
-  no_books: Henüz fotoğraf kitabı yok.
-  photo_book: fotoğraf kitabı
-  page_one: sayfa
-  page_many: sayfa
-  cover: Kapak
-  back_cover: Arka kapak
-  page_of: Sayfa {i} / {n}
-  close_book: Kitabı kapat
-  prev_page: Önceki sayfa
-  next_page: Sonraki sayfa
