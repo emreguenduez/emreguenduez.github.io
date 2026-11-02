@@ -33,15 +33,15 @@
         {
           "title": "EksperOne",
           "right": "Aug. 2026 – heute",
-          "subtitle": "Gründer & alleiniger Entwickler",
+          "subtitle": "Gründer & alleiniger Softwareentwickler",
           "subright": "",
           "text": "SaaS- und Desktop-Software für Kfz-Gutachterbüros · [eksperone.com](https://eksperone.com)",
           "bullets": [
-            "Offline-Desktop-App zur Kennzeichenerkennung (C#, YOLOv9 + OCR) deployed, die die Fotosortierung von **40 auf 5 Minuten** verkürzt. Im Einsatz in 2 Büros.",
+            "Offline-Desktop-App zur Kennzeichenerkennung (C#, YOLOv9 + OCR) entwickelt und eingeführt, **die den Zeitaufwand für die Fotosortierung von 40 auf 5 Minuten reduziert.** Bereits **in zwei Büros im Einsatz.**",
             "Eine **mandantenfähige Fallverwaltungsplattform** (.NET 10, PostgreSQL, React/TypeScript) mit rollenbasierter Zugriffskontrolle und Audit-Logging entwickelt.",
-            "Mobile Fotoaufnahmen und Upload-Links für Kunden eingeführt, wodurch manuelle Fotoübertragungen entfallen.",
-            "Verantwortung für die **gesamte deployment**: CI/CD, Docker, VPS-Deployment und Windows-Paketierung.",
-            "Anforderungen direkt mit Kfz-Sachverständigen erhoben."
+            "Mobile Fotoerfassung und Upload-Links für Kunden eingeführt, wodurch manuelle Fotoübertragungen entfallen.",
+            "Verantwortung für den gesamten Deployment-Prozess: **CI/CD, Docker, VPS-Deployment und Windows-Paketierung.**",
+            "Anforderungen gemeinsam mit Kfz-Sachverständigen erhoben und abgestimmt."
           ]
         },
         {
@@ -62,10 +62,10 @@
           "subright": "Neuss, Deutschland",
           "text": "",
           "bullets": [
-            "Als Kernmitglied des Teams an einem internen Logistik-System zur Teileverwaltung mit .NET Framework mitgearbeitet.",
+            "Im Kernteam an einem internen Logistiksystem zur Teileverwaltung auf Basis des .**NET Frameworks** mitgearbeitet.",
             "**60 % der bekannten Fehler** behoben und damit Stabilität und Funktionsumfang des Systems deutlich verbessert.",
-            "Die Anwendungsleistung durch gezielte Umstrukturierung und Optimierung zentraler Funktionen um **20 %** gesteigert, mit kürzeren Ladezeiten und geringerem Speicherverbrauch.",
-            "Altkomponenten überarbeitet, um Wartbarkeit zu verbessern, technische Schulden abzubauen und neue Funktionen schneller auszuliefern."
+            "Die Anwendungsleistung durch gezielte Umstrukturierung und Optimierung zentraler Funktionen um **20 %** gesteigert, und dadurch Ladezeiten verkürzt sowie den Speicherverbrauch reduziert.",
+            "Legacy-Komponenten modernisiert, um Wartbarkeit zu verbessern, technische Schulden abzubauen und neue Funktionen schneller auszuliefern."
           ]
         },
         {
@@ -75,10 +75,10 @@
           "subright": "Ankara, Türkei",
           "text": "",
           "bullets": [
-            "Entwicklung einer Flutter-basierten Smart-City-App für rund **2.000.000 Nutzer** geleitet.",
-            "Backend-Dienste für das landesweite türkische Autobahnmaut- und Verkehrsüberwachungssystem entwickelt, die **1.000.000 Datensätze täglich** verarbeiten; Datenfluss und Speicherung mit .NET Framework optimiert.",
-            "2 Vorhersagemodelle für Klima- und Luftqualitätsprognosen mit Python, Zeitreihenanalyse und Machine Learning entworfen und umgesetzt.",
-            "Mit Stadtverwaltungen und interdisziplinären Teams an der Integration der Smart-City-Plattform und der digitalen Transformation der Städte gearbeitet."
+            "Entwicklung einer Flutter-basierten Smart-City-App für rund **2 Mio. Nutzer** geleitet.",
+            "Backend-Dienste für das landesweite türkische Autobahnmaut- und Verkehrsüberwachungssystem entwickelt, die **täglich rund 1 Mio. Datensätze** verarbeiten; Datenfluss und Speicherung mit .NET Framework optimiert.",
+            "Zwei Forecastingmodelle für Klima- und Luftqualitätsprognosen mit Python, Zeitreihenanalyse und Machine Learning entworfen und umgesetzt.",
+            "Gemeinsam mit Stadtverwaltungen und interdisziplinären Teams an der Integration der Smart-City-Plattform sowie an der digitalen Transformation kommunaler Prozesse mitgewirkt."
           ]
         }
       ]
@@ -102,7 +102,7 @@
           "subright": "",
           "text": "",
           "bullets": [
-            "Abschluss als **Drittbester des Jahrgangs** mit einem GPA von 3,73 und Auszeichnung (High Honors). Abschlussarbeit über Bilderkennungsverfahren zur Erkennung von Meeresschleim (Müsilaj)."
+            "Studium als **Drittbester des Jahrgangs** mit einem **GPA von 3,73** und der Auszeichnung ‚High Honors‘ abgeschlossen. Abschlussarbeit über Bilderkennungsverfahren zur Erkennung von Meeresschleim."
           ]
         },
         {
