@@ -85,6 +85,7 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
     const items = s.items || [];
     if (!items.length) return;
     const sec = resumeEl('section');
+    sec.dataset.type = s.type || 'entries';
     const body = resumeEl('div', 'sec-body'); // a column of its own beside the title on wide screens
     sec.append(resumeEl('h2', '', s.title), body);
     if (s.type === 'tags') {

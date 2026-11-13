@@ -9,6 +9,13 @@
   tags: [C#, YOLOv9, .NET 10, PostgreSQL, React, TypeScript, Docker]
   url: https://eksperone.com
 
+- name: SAM2 COCO Labeler
+  year: 2026
+  description: A desktop app for labeling RoboCup images. SAM2 turns a few point and box prompts into object masks, keypoints are placed by hand, and everything exports as COCO. Runs on Apple Silicon GPUs and autosaves while you work.
+  description_de: Eine Desktop-App zum Annotieren von RoboCup-Bildern. SAM2 erzeugt aus wenigen Punkt- und Box-Prompts Objektmasken, Keypoints werden von Hand gesetzt, und alles wird als COCO exportiert. Läuft auf Apple-Silicon-GPUs und speichert automatisch.
+  tags: [Python, PyQt6, PyTorch, SAM2, COCO]
+  repo: https://github.com/emreguenduez/sam2-coco-labeler
+
 - name: Schengen Visa Appointment Bot
   year: 2022
   description: A Puppeteer bot that checks iData's appointment endpoint for the nearest free Schengen visa slot, instead of refreshing the site by hand.

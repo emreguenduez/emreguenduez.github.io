@@ -149,6 +149,14 @@
       "type": "entries",
       "items": [
         {
+          "title": "SAM2 COCO Labeler",
+          "right": "2026",
+          "subtitle": "",
+          "subright": "",
+          "text": "SAM2-assisted labeling of RoboCup images, exported as COCO · [github.com/emreguenduez/sam2-coco-labeler](https://github.com/emreguenduez/sam2-coco-labeler)",
+          "bullets": []
+        },
+        {
           "title": "Schengen Visa Appointment Bot",
           "right": "2022",
           "subtitle": "",

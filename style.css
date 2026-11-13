@@ -140,7 +140,7 @@ a.dl { display: inline-block; text-decoration: none; }
     --bg: #fff; --text: #1f1c18; --muted: #5a5348; --accent: #1d5a43; --line: #b9b2a5;
     --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
-  body { font-size: 8.8pt; line-height: 1.24; }
+  body { font-size: 8.8pt; line-height: 1.22; }
   main { max-width: none; padding: 0; }
   .dl, a.dl, .intro, .screen-only { display: none; }
   .print-only { display: inline; }
@@ -170,8 +170,14 @@ a.dl { display: inline-block; text-decoration: none; }
   /* tags print as a plain list; thin pill outlines break up on laser printers */
   .tags { display: block; font-size: 8.8pt; }
   .tags li { display: inline; padding: 0; border: 0; }
-  .tags li + li::before { content: " · "; color: var(--muted); }
+  .tags li + li::before { content: "\00a0· "; color: var(--muted); } /* the dot stays with the word before it */
   .langs { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  /* Languages and the short list after it share one row, which keeps longer translations on one page */
+  #resume { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+  #resume > * { grid-column: 1 / -1; }
+  #resume > section[data-type="pairs"]:nth-last-child(2),
+  #resume > section[data-type="pairs"]:nth-last-child(2) + section:last-child { grid-column: auto; }
+  #resume > section[data-type="pairs"]:nth-last-child(2) .langs { grid-template-columns: repeat(2, 1fr); gap: 0 8px; }
   .langs strong { display: inline; margin-right: 6px; }
 }
 
