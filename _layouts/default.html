@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
 </head>
 <body>
+<a class="skip" href="#content">{{ t.skip }}</a>
 <main{% if page.wide %} class="wide"{% endif %}>
   <nav aria-label="Site">
     {%- assign items = "/|nav_resume,/projects/|nav_projects,/photography/|nav_photography" | split: "," %}
@@ -42,7 +43,9 @@
       </button>
     </span>
   </nav>
+<div id="content" tabindex="-1">
 {{ content }}
+</div>
 </main>
 <footer>
   <span>{{ site.data.resume.name }} · Bonn · {{ site.time | date: "%Y" }}</span>
@@ -51,14 +54,15 @@
   </nav>
 </footer>
 <script>
-  // The label names the current theme; dark follows the OS until the visitor picks one.
+  // Dark follows the OS until the visitor picks one.
   const themeBtn = document.querySelector('.theme');
   const currentTheme = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   const paint = () => {
+    // The button names what it does: on a light page it offers dark mode, with a moon.
     const dark = currentTheme() === 'dark';
-    themeBtn.querySelector('span').textContent = dark ? T.dark : T.light;
-    themeBtn.querySelector('.sun').style.display = dark ? 'none' : '';
-    themeBtn.querySelector('.moon').style.display = dark ? '' : 'none';
+    themeBtn.querySelector('span').textContent = dark ? T.to_light : T.to_dark;
+    themeBtn.querySelector('.sun').style.display = dark ? '' : 'none';
+    themeBtn.querySelector('.moon').style.display = dark ? 'none' : '';
     themeBtn.setAttribute('aria-label', T.theme + ': ' + (dark ? T.dark : T.light) + '. ' + (dark ? T.switch_to_light : T.switch_to_dark));
   };
   themeBtn.onclick = () => {

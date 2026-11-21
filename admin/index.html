@@ -44,9 +44,13 @@ wide: true
       <button type="button" id="ed-preview">Preview book</button>
     </div>
     <p class="status" id="ed-status" role="status"></p>
+    <p class="meta needs" id="ed-desc"></p>
     <div class="ed">
       <ol class="strip" id="strip" aria-label="Pages"></ol>
-      <div class="canvas pagebox" id="canvas"></div>
+      <div class="ed-center">
+        <div class="spread" id="spread" role="group" aria-label="Spread preview"></div>
+        <div class="canvas pagebox" id="canvas"></div>
+      </div>
       <div class="props" id="props"></div>
     </div>
   </section>
@@ -272,6 +276,24 @@ wide: true
   };
 
   // ---------- Bookshelf ----------
+  // Photo spots left empty on a page; they print as blank paper.
+  const emptySpots = p => {
+    const n = (BOOK_LAYOUTS[p.layout || 'single'] || BOOK_LAYOUTS.single).slots;
+    let k = 0;
+    for (let i = 0; i < n; i++) if (!(p.photos || [])[i]) k++;
+    return k;
+  };
+  // Photos that screen readers can't describe: no description of their own and no caption to fall back on.
+  function undescribed(b) {
+    let k = b.cover && !b.coverAlt ? 1 : 0;
+    (b.pages || []).forEach(p => {
+      const n = (BOOK_LAYOUTS[p.layout || 'single'] || BOOK_LAYOUTS.single).slots;
+      for (let i = 0; i < n; i++) if ((p.photos || [])[i] && !(p.alts || [])[i] && !p.text) k++;
+    });
+    return k;
+  }
+  const undescribedText = k => k === 1 ? '1 photo has no description' : k + ' photos have no description';
+
   function drawShelf() {
     $('#shelf').hidden = false;
     $('#editor').hidden = true;
@@ -279,6 +301,8 @@ wide: true
       const btn = bookEl('button', 'book');
       btn.type = 'button';
       btn.append(bookBox(renderBookCover(b, src)), bookEl('h3', '', b.title || 'Untitled'), bookEl('span', 'meta', bookPagesLabel((b.pages || []).length) + ' · Edit'));
+      const k = undescribed(b);
+      if (k) btn.append(bookEl('span', 'meta needs', undescribedText(k)));
       btn.onclick = () => edit(i);
       return btn;
     });
@@ -306,8 +330,12 @@ wide: true
   $('#ed-preview').onclick = () => openBook($('.viewer'), book(), src);
   $('.viewer').innerHTML = BOOK_VIEWER_HTML;
 
-  function drawEditor() { drawStrip(); drawCanvas(); drawProps(); }
-  function redraw() { changed(); drawStrip(); drawCanvas(); } // after content edits; leaves form fields alone
+  function drawEditor() { drawStrip(); drawCanvas(); drawProps(); drawNotes(); }
+  function redraw() { changed(); drawStrip(); drawCanvas(); drawNotes(); } // after content edits; leaves form fields alone
+  function drawNotes() {
+    const k = undescribed(book());
+    $('#ed-desc').textContent = k ? undescribedText(k) + '. Screen readers read the description aloud; add one in each photo\'s settings.' : '';
+  }
 
   function drawStrip() {
     const b = book();
@@ -336,7 +364,9 @@ wide: true
     lis.push(entry(-1, bookBox(renderBookCover(b, src)), 'Cover'));
 
     b.pages.forEach((p, i) => {
-      const li = entry(i, bookBox(renderBookPage(p, src)), 'Page ' + (i + 1));
+      const gaps = emptySpots(p);
+      const li = entry(i, bookBox(renderBookPage(p, src)), 'Page ' + (i + 1) + (gaps ? ' · ' + gaps + ' empty' : ''));
+      if (gaps) li.querySelector('.strip-btn > span').classList.add('needs');
       li.draggable = true;
       li.ondragstart = e => { e.dataTransfer.setData('text/plain', i); e.dataTransfer.effectAllowed = 'move'; };
       li.ondragover = e => {
@@ -395,6 +425,25 @@ wide: true
     const b = book();
     const pageEl = sel === -1 ? renderBookCover(b, src, true) : renderBookPage(b.pages[sel], src, true);
     $('#canvas').replaceChildren(pageEl);
+    // The spread shows the facing page, so half-empty spreads are visible while editing.
+    const left = sel === -1 ? null : sel - (sel % 2), right = sel === -1 ? -1 : left + 1;
+    const side = i => {
+      const btn = bookEl('button', 'spread-page');
+      btn.type = 'button';
+      if (i === null || i >= b.pages.length) {
+        btn.disabled = true;
+        btn.setAttribute('aria-label', i === null ? 'Inside of the cover' : 'Blank page at the end of the book');
+        btn.append(bookBox(bookEl('div', 'bpage')));
+        return btn;
+      }
+      const isCover = i === -1;
+      btn.append(bookBox(isCover ? renderBookCover(b, src) : renderBookPage(b.pages[i], src)));
+      btn.setAttribute('aria-label', isCover ? 'Cover' : 'Page ' + (i + 1));
+      if (i === sel) btn.setAttribute('aria-current', 'true');
+      btn.onclick = () => select(i);
+      return btn;
+    };
+    $('#spread').replaceChildren(bookEl('span', 'meta', 'Spread'), side(left), side(right));
   }
 
   // Clicking a photo slot on the big page opens the picker; × removes the photo.
@@ -479,7 +528,7 @@ wide: true
           if (!confirm('Delete "' + (b.title || 'Untitled') + '"? It disappears from the site once you save.')) return;
           books.splice(cur, 1);
           changed(); drawShelf();
-        }, 'danger'),
+        }, 'danger spaced'),
       );
       return;
     }
@@ -532,7 +581,7 @@ wide: true
         b.pages.forEach(o => { o.margin = p.margin || 'medium'; });
         redraw();
         $('#ed-status').textContent = 'Every page now has ' + (p.margin || 'medium') + ' margins.';
-      }, 'mini quiet');
+      }, 'mini');
       margins.append(bookEl('span', '', 'Margins'), group, all);
     }
 

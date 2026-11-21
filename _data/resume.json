@@ -164,7 +164,11 @@
           "text": "[github.com/emreguenduez/idatarandevu](https://github.com/emreguenduez/idatarandevu)",
           "bullets": []
         }
-      ]
+      ],
+      "more": {
+        "label": "All projects",
+        "url": "/projects/"
+      }
     },
     {
       "title": "Languages",
@@ -193,7 +197,7 @@
       "type": "tags",
       "items": [
         "Photography",
-        "Body building",
+        "Bodybuilding",
         "Learning languages",
         "Calligraphy",
         "Bouldering",

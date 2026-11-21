@@ -25,7 +25,10 @@
   // The hash (#book-id) opens a book, so links to a single book can be shared.
   const route = () => {
     const b = books.find(b => '#' + b.id === location.hash);
-    if (b && !viewer.open) openBook(viewer, b, src);
+    if (!b || viewer.open) return;
+    // After the back cover, offer the next book on the shelf (wrapping round), if there is one.
+    const nb = books.length > 1 ? books[(books.indexOf(b) + 1) % books.length] : null;
+    openBook(viewer, b, src, { next: nb && { title: nb.title || 'Untitled', open: () => { location.hash = '#' + nb.id; } } });
   };
   viewer.addEventListener('close', () => history.replaceState(null, '', location.pathname));
   addEventListener('hashchange', route);

@@ -1,7 +1,7 @@
 {
   "name": "M. Emre Gündüz",
   "role": "Softwareentwickler",
-  "intro": "Ich bin Softwareentwickler in Bonn und studiere Informatik (M.Sc.) an der Universität Bonn. Ich entwickle Softwares von Anfang bis Ende: von EksperOne, der von mir gegründeten Software für Kfz-Gutachterbüros, bis zum Backend der türkischen Autobahnmaut bei ASELSAN. Abseits der Tastatur fotografiere ich gerne und die Fotobücher auf dieser Seite sollen dies widerspiegeln.",
+  "intro": "Ich bin Softwareentwickler in Bonn und studiere Informatik (M.Sc.) an der Universität Bonn. Ich entwickle Software von Anfang bis Ende: von EksperOne, der von mir gegründeten Software für Kfz-Gutachterbüros, bis zum Backend der türkischen Autobahnmaut bei ASELSAN. Abseits der Tastatur fotografiere ich gern – die Fotobücher auf dieser Seite sind das Ergebnis.",
   "contact": [
     {
       "label": "emreguenduez@protonmail.com",
@@ -164,7 +164,11 @@
           "text": "[github.com/emreguenduez/idatarandevu](https://github.com/emreguenduez/idatarandevu)",
           "bullets": []
         }
-      ]
+      ],
+      "more": {
+        "label": "Alle Projekte",
+        "url": "/de/projects/"
+      }
     },
     {
       "title": "Sprachen",

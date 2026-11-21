@@ -50,6 +50,8 @@
   --accent: #1d5a43;
   --line: #e0d9cb;
   --danger: #a63a26;
+  --field: #8f877a;   /* input borders, 3:1 on paper */
+  --needs: #9a4a1e;   /* things still to do in the editor */
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
@@ -63,6 +65,8 @@
     --accent: #8bcaab;
     --line: #2e2b26;
     --danger: #ee8c77;
+    --field: #6e675c;
+    --needs: #e0a070;
     color-scheme: dark;
   }
 }
@@ -73,6 +77,8 @@
   --accent: #8bcaab;
   --line: #2e2b26;
   --danger: #ee8c77;
+  --field: #6e675c;
+  --needs: #e0a070;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -188,7 +194,7 @@ nav a:hover { color: var(--text); }
 nav a[aria-current] { color: var(--text); font-weight: 600; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 8px; }
 .navtools { margin-left: auto; display: flex; align-items: center; gap: 4px 18px; }
 .langs-switch { display: flex; gap: 12px; font-size: 0.8125rem; letter-spacing: 0.04em; }
-.langs-switch a { padding: 12px 2px; }
+.langs-switch a { padding: 12px 2px; min-width: 24px; text-align: center; }
 nav .langs-switch a[aria-current] { text-underline-offset: 6px; }
 .theme {
   display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 2px;
@@ -201,7 +207,7 @@ footer {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; font-size: 0.875rem; color: var(--muted);
 }
 footer nav { margin: 0; gap: 4px 18px; font-size: inherit; }
-footer nav a { padding: 6px 0; }
+footer nav a { padding: 12px 0; }
 .page-title { margin: 0; font-size: 2.75rem; font-weight: 500; line-height: 1.05; letter-spacing: -0.015em; }
 .lead { color: var(--muted); margin: 10px 0 40px; font-size: 1.2rem; font-style: italic; max-width: 34em; }
 .empty { color: var(--muted); font-style: italic; }
@@ -284,11 +290,14 @@ footer nav a { padding: 6px 0; }
   display: inline-grid; place-items: center; color: #fff; background: rgb(255 255 255 / 0.1); border: 0; border-radius: 999px;
   width: 48px; height: 48px; padding: 0; cursor: pointer;
 }
-.viewer button:hover { background: rgb(255 255 255 / 0.2); }
+.viewer button:hover:not(:disabled) { background: rgb(255 255 255 / 0.2); }
+.viewer button:disabled { opacity: 0.3; cursor: default; }
 .viewer button svg { width: 22px; height: 22px; }
 .viewer .close { position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); }
-@media (max-width: 600px) { .viewer .close { top: auto; bottom: max(16px, env(safe-area-inset-bottom)); } .viewer[open] { padding-bottom: 64px; } }
-.viewer h2 { position: fixed; top: 22px; left: 22px; right: 80px; margin: 0; font-size: 1.35rem; color: #ece6db; }
+/* on phones the close button joins the controls, within thumb reach */
+.viewer .close-inline { display: none; }
+@media (max-width: 600px) { .viewer .close { display: none; } .viewer .close-inline { display: inline-grid; } .viewer h2 { font-size: 1.4rem; } }
+.viewer h2 { position: fixed; top: 18px; left: 22px; right: 80px; margin: 0; font-size: 1.75rem; font-weight: 500; line-height: 1.2; color: #ece6db; }
 
 /* Projects: an index, not a grid of equal cards */
 .plist { list-style: none; margin: 0; padding: 0; }
@@ -296,7 +305,7 @@ footer nav a { padding: 6px 0; }
 .project:last-child { border-bottom: 1px solid var(--line); }
 .project > * { grid-column: 1; }
 .project:has(> img) { grid-template-columns: minmax(0, 1fr) auto; }
-.project .row h2 { margin: 0; font-size: 1.5rem; font-style: normal; font-weight: 500; }
+.project .row h2 { margin: 0; font-size: 1.3rem; font-style: normal; font-weight: 500; line-height: 1.25; }
 .project p { margin: 0; }
 .project .tagline { font-size: 0.8125rem; }
 .project .plinks { display: flex; gap: 18px; margin-top: 6px; font-family: var(--sans); font-size: 0.9375rem; }
@@ -317,7 +326,7 @@ footer nav a { padding: 6px 0; }
 .admin label { display: grid; gap: 4px; font-size: 0.95rem; }
 .admin input, .admin textarea, .admin select, .admin button {
   font: inherit; color: var(--text); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px;
+  border: 1px solid var(--field); border-radius: 6px; padding: 8px 10px;
 }
 .admin input:not([type="color"]):not([type="file"]), .admin textarea { min-width: 0; width: 100%; }
 .admin input[type="color"] { padding: 2px; width: 44px; height: 38px; }
@@ -484,12 +493,14 @@ footer nav a { padding: 6px 0; }
    section titles take a left column (like a printed CV) and the content runs beside them. */
 @media screen and (min-width: 900px) {
   body { font-size: 1.125rem; }
-  header .intro { max-width: 40em; }
-  main > #resume > section, main > .shelf-peek { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: 56px; }
-  main > #resume > section > h2, main > .shelf-peek > h2 { margin: 0; padding-top: 1px; }
+  header .intro { max-width: 36em; }
+  /* long lines get hard to follow; keep resume text near 75 characters while dates stay right-aligned */
+  #resume .item > p, #resume .item > ul { max-width: 75ch; }
+  #resume > section, .shelf-peek { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: 56px; }
+  #resume > section > h2, .shelf-peek > h2 { margin: 0; padding-top: 1px; }
   .shelf-peek .books { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-  .project { grid-template-columns: 220px minmax(0, 1fr); column-gap: 56px; }
-  .project:has(> img) { grid-template-columns: 220px minmax(0, 1fr) 200px; }
+  .project { grid-template-columns: 260px minmax(0, 1fr); column-gap: 56px; }
+  .project:has(> img) { grid-template-columns: 260px minmax(0, 1fr) 200px; }
   .project > .row { grid-column: 1; grid-row: 1 / span 4; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; }
   .project > :not(.row):not(img) { grid-column: 2; }
   .project img { grid-column: 3; width: 100%; }
@@ -498,3 +509,55 @@ footer nav a { padding: 6px 0; }
 .admin label.check input { width: 18px; height: 18px; }
 @media (pointer: coarse) { .dl { padding: 12px 18px; } }
 .cv-langs { max-width: 360px; margin: 4px 0 10px; }
+
+/* Skip link: hidden until keyboard focus reaches it */
+.skip { position: absolute; left: 12px; top: -100px; z-index: 50; padding: 10px 16px; border-radius: 6px; background: var(--text); color: var(--bg); font: 0.9375rem var(--sans); text-decoration: none; }
+.skip:focus { top: 12px; }
+.skip:hover { color: var(--bg); }
+
+/* Editor: things still to do, the spread preview, distance before destructive actions */
+.needs { color: var(--needs); }
+.admin .strip-btn > span.needs { color: var(--needs); }
+.ed-center { display: grid; gap: 12px; justify-items: center; min-width: 0; }
+.spread { display: flex; align-items: center; gap: 0; }
+.spread > .meta { margin-right: 10px; }
+.admin .spread-page { width: 56px; padding: 0; border: 0; border-radius: 0; background: none; }
+.admin .spread-page:hover:not(:disabled) { background: none; }
+.spread-page .pagebox { outline: 1px solid var(--line); pointer-events: none; }
+.spread-page[aria-current="true"] .pagebox { outline: 2px solid var(--accent); position: relative; z-index: 1; }
+.admin .spread-page:disabled { opacity: 0.55; }
+.props .spaced { margin-top: 20px; }
+#content:focus { outline: none; }
+
+/* Viewer: photos enlarge on tap; the end of a book leads somewhere */
+.viewer .zoom { display: block; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 0; background: none; cursor: zoom-in; }
+.viewer .zoom:hover { background: none; }
+.viewer .zoom img { width: 100%; height: 100%; display: block; }
+.bpage--single .zoom img { object-fit: contain; }
+.slot .zoom img { object-fit: cover; }
+.bpage--single .slot .zoom img { object-fit: contain; }
+.viewer .lightbox { border: 0; padding: 0; margin: auto; max-width: none; max-height: none; width: 100vw; height: 100vh; background: transparent; color: #ece6db; cursor: zoom-out; }
+.viewer .lightbox::backdrop { background: rgb(10 9 8 / 0.94); }
+.viewer .lightbox[open] { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; }
+.viewer .lightbox img { max-width: 100%; max-height: calc(100vh - 96px); object-fit: contain; }
+.viewer .lightbox p { margin: 0; max-width: 40em; text-align: center; font-style: italic; color: #c9c2b6; }
+.viewer .endnav { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.viewer .endnav[hidden] { display: none; }
+.viewer .endnav button { width: auto; height: auto; min-height: 44px; padding: 10px 18px; font: 0.9375rem var(--sans); }
+
+/* Contact links in the resume header get a comfortable tap height on screen (print keeps its compact line) */
+@media screen { header .links a:not(.print-only):not(.dl) { display: inline-block; padding: 8px 0; } } /* PDF-only links (the phone) must stay hidden */
+/* Admin tabs: two rows on narrow phones instead of a row that hides "Projects" */
+@media (max-width: 420px) {
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; mask-image: none; }
+  .admin .tabs button { padding: 10px 6px; }
+}
+
+/* Home: a single photo book sits beside its title instead of alone in a grid */
+.more { margin-top: 14px; }
+.shelf-peek.single .books { grid-template-columns: 140px minmax(0, 1fr); align-items: end; gap: 0 28px; }
+.shelf-peek.single .book .meta { display: none; }
+.peek-about h3 { margin: 0; font-size: 1.3rem; font-weight: 500; }
+.peek-about .meta { margin: 4px 0 12px; }
+.peek-about a { font-family: var(--sans); font-size: 0.9375rem; }
+@media print { .more, .peek-about { display: none; } }

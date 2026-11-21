@@ -115,6 +115,14 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
         body.append(item);
       });
     }
+    // Optional link from a section to a fuller page, e.g. Projects to /projects/ (not printed).
+    if (s.more && s.more.url) {
+      const more = resumeEl('p', 'more meta');
+      const link = resumeEl('a', '', s.more.label || s.more.url);
+      link.href = s.more.url;
+      more.append(link);
+      body.append(more);
+    }
     parts.push(sec);
   });
   root.replaceChildren(...parts);

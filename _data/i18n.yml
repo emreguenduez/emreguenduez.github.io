@@ -8,11 +8,14 @@ en:
   nav_projects: Projects
   nav_photography: Photography
   language: Language
+  skip: Skip to content
   theme: Theme
   light: Light
   dark: Dark
   switch_to_light: Switch to light
   switch_to_dark: Switch to dark
+  to_dark: Dark mode
+  to_light: Light mode
   email: Email
   download_pdf: Download PDF
   pdf_url: /resume.pdf
@@ -21,6 +24,7 @@ en:
   website_label: Personal Website
   photo_books: Photo books
   all_photo_books: All photo books
+  open_book: Open the book
   projects_title: Projects
   projects_lead: Things I've built.
   website: Website
@@ -35,6 +39,10 @@ en:
   cover: Cover
   back_cover: Back cover
   page_of: Page {i} of {n}
+  pages_of: Pages {a}–{b} of {n}
+  back_to_books: Back to photo books
+  next_book: "Next book: {t}"
+  enlarge: Enlarge photo
   close_book: Close book
   prev_page: Previous page
   next_page: Next page
@@ -48,11 +56,14 @@ de:
   nav_projects: Projekte
   nav_photography: Fotografie
   language: Sprache
+  skip: Zum Inhalt springen
   theme: Farbschema
   light: Hell
   dark: Dunkel
   switch_to_light: Zu hell wechseln
   switch_to_dark: Zu dunkel wechseln
+  to_dark: Dunkelmodus
+  to_light: Hellmodus
   email: E-Mail
   download_pdf: PDF herunterladen
   pdf_url: /resume-de.pdf
@@ -61,6 +72,7 @@ de:
   website_label: Website
   photo_books: Fotobücher
   all_photo_books: Alle Fotobücher
+  open_book: Buch öffnen
   projects_title: Projekte
   projects_lead: Was ich gebaut habe.
   website: Website
@@ -75,6 +87,10 @@ de:
   cover: Titelseite
   back_cover: Rückseite
   page_of: Seite {i} von {n}
+  pages_of: Seiten {a}–{b} von {n}
+  back_to_books: Zurück zu den Fotobüchern
+  next_book: "Nächstes Buch: {t}"
+  enlarge: Foto vergrößern
   close_book: Buch schließen
   prev_page: Vorherige Seite
   next_page: Nächste Seite

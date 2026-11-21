@@ -19,7 +19,19 @@
 <script>
   // The newest three books, each opening straight into the viewer on the photography page.
   const peekBooks = (JSON.parse(document.getElementById('books-data').textContent) || []).slice(-3).reverse();
-  document.getElementById('peek').append(...peekBooks.map(b => renderShelfItem(b, p => '{{ site.baseurl }}' + p, '{{ t.prefix | append: "/photography/" | relative_url }}#' + b.id)));
+  const bookHref = b => '{{ t.prefix | append: "/photography/" | relative_url }}#' + b.id;
+  document.getElementById('peek').append(...peekBooks.map(b => renderShelfItem(b, p => '{{ site.baseurl }}' + p, bookHref(b))));
+  // A single book gets its title and a way in beside the cover, so the shelf doesn't look half-empty.
+  if (peekBooks.length === 1) {
+    const b = peekBooks[0], peek = document.querySelector('.shelf-peek');
+    peek.classList.add('single');
+    const about = bookEl('div', 'peek-about');
+    const open = bookEl('a', '', '{{ t.open_book }}');
+    open.href = bookHref(b);
+    about.append(bookEl('h3', '', b.title || 'Untitled'), bookEl('p', 'meta', [b.subtitle, bookPagesLabel((b.pages || []).length)].filter(Boolean).join(' · ')), open);
+    document.getElementById('peek').append(about);
+    peek.querySelector('.more').hidden = true;
+  }
 </script>
 {%- endif %}
 
@@ -30,6 +42,9 @@
     siteUrl: '{{ site.url }}' || location.origin,
     pdfUrl: '{{ t.pdf_url | relative_url }}',
   });
+  // The photo books sit right under the intro, where a first-time visitor sees them (the PDF leaves them out).
+  const peekSection = document.querySelector('.shelf-peek');
+  if (peekSection) document.querySelector('#resume > header')?.after(peekSection);
   // Browsers name the saved PDF after the page title; keep it plain ASCII so upload portals don't mangle it.
   const screenTitle = document.title;
   addEventListener('beforeprint', () => { document.title = T.print_title; });

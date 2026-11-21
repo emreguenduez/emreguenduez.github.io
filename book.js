@@ -24,7 +24,7 @@ function bookEl(tag, cls, text) {
 const BOOK_X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>';
 
 // One photo spot. `alt` describes the photo; '' marks it decorative. In the editor the whole spot is a button.
-function bookSlot(path, src, editable, i, alt = '') {
+function bookSlot(path, src, editable, i, alt = '', zoom = false) {
   const f = bookEl('figure', 'slot');
   f.dataset.slot = i;
   const name = i === 'cover' ? 'cover photo' : 'photo ' + (i + 1);
@@ -32,7 +32,14 @@ function bookSlot(path, src, editable, i, alt = '') {
     const img = bookEl('img');
     img.src = src(path);
     img.alt = alt;
-    f.append(img);
+    if (zoom) {
+      // In the viewer each photo is a button that opens it full-size.
+      const z = bookEl('button', 'zoom');
+      z.type = 'button';
+      z.setAttribute('aria-label', bookT('enlarge', 'Enlarge photo') + (alt ? ': ' + alt : ''));
+      z.append(img);
+      f.append(z);
+    } else f.append(img);
   }
   if (editable) {
     const pickBtn = bookEl('button', 'slot-pick');
@@ -71,14 +78,14 @@ function renderBookBack(book) {
   return page;
 }
 
-function renderBookPage(page, src = p => p, editable = false) {
+function renderBookPage(page, src = p => p, editable = false, zoom = false) {
   const layout = BOOK_LAYOUTS[page.layout] ? page.layout : 'single';
   const el = bookEl('div', 'bpage bpage--' + layout + (BOOK_MARGINS.includes(page.margin) && page.margin !== 'medium' ? ' bpage--m-' + page.margin : ''));
   const inner = bookEl('div', 'bin');
   const n = BOOK_LAYOUTS[layout].slots;
   if (n) {
     const slots = bookEl('div', 'slots');
-    for (let i = 0; i < n; i++) slots.append(bookSlot((page.photos || [])[i], src, editable, i, (page.alts || [])[i] || page.text || ''));
+    for (let i = 0; i < n; i++) slots.append(bookSlot((page.photos || [])[i], src, editable, i, (page.alts || [])[i] || page.text || '', zoom));
     inner.append(slots);
   }
   if (page.text) inner.append(bookEl('p', 'btext', page.text));
@@ -95,8 +102,9 @@ function bookBox(pageEl) {
 }
 
 // Opens `book` in the full-screen flip viewer inside `dialog` (markup: h2, .stage, .prev, .next, .count, .close).
-function openBook(dialog, book, src = p => p) {
-  const pages = (book.pages || []).map(p => renderBookPage(p, src));
+// `next` (optional): { title, open } for the book that follows, offered after the back cover.
+function openBook(dialog, book, src = p => p, { next } = {}) {
+  const pages = (book.pages || []).map(p => renderBookPage(p, src, false, true));
   const n = pages.length;
   if (pages.length % 2) pages.push(bookEl('div', 'bpage')); // keeps the back cover on its own side
   const all = [renderBookCover(book, src), ...pages, renderBookBack(book)];
@@ -112,31 +120,61 @@ function openBook(dialog, book, src = p => p) {
     width: 450, height: 600, size: 'stretch',
     minWidth: 250, maxWidth: 900, minHeight: 333, maxHeight: 1200, // under 2×minWidth it shows one page at a time
     showCover: true, maxShadowOpacity: 0.5, mobileScrollSupport: false,
+    disableFlipByClick: true, // a tap on a photo enlarges it; pages turn from the corners, by swiping, or with the buttons
   });
   flip.loadFromHTML(all);
 
   const count = dialog.querySelector('.count');
   const stage = dialog.querySelector('.stage');
+  const prevBtn = dialog.querySelector('.prev'), nextBtn = dialog.querySelector('.next');
+  const endnav = dialog.querySelector('.endnav');
+  const nextLink = endnav.querySelector('.next-book');
+  nextLink.hidden = !next;
+  if (next) nextLink.textContent = bookT('next_book', 'Next book: {t}').replace('{t}', next.title);
   const update = () => {
     const i = flip.getCurrentPageIndex();
-    count.textContent = i === 0 ? bookT('cover', 'Cover') : i >= all.length - 1 ? bookT('back_cover', 'Back cover') : bookT('page_of', 'Page {i} of {n}').replace('{i}', Math.min(i, n)).replace('{n}', n);
     const spread = flip.getOrientation() === 'landscape';
+    const atEnd = i >= all.length - 1;
+    // Two pages are open at once on wide screens, so say which two.
+    const a = Math.min(i, n), b = spread ? Math.min(i + 1, n) : a;
+    count.textContent = i === 0 ? bookT('cover', 'Cover') : atEnd ? bookT('back_cover', 'Back cover')
+      : b > a ? bookT('pages_of', 'Pages {a}–{b} of {n}').replace('{a}', a).replace('{b}', b).replace('{n}', n)
+      : bookT('page_of', 'Page {i} of {n}').replace('{i}', a).replace('{n}', n);
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = atEnd;
+    endnav.hidden = !atEnd;
     stage.classList.toggle('on-front', spread && i === 0);
-    stage.classList.toggle('on-back', spread && i >= all.length - 1);
+    stage.classList.toggle('on-back', spread && atEnd);
   };
   update();
   flip.on('flip', update);
   flip.on('changeOrientation', update);
   // as soon as a page starts turning, the book opens to a full spread, so recenter it
   flip.on('changeState', e => { if (e.data !== 'read') stage.classList.remove('on-front', 'on-back'); else update(); });
-  const prev = () => flip.flipPrev(), next = () => flip.flipNext();
-  const key = e => { if (e.key === 'ArrowLeft') prev(); if (e.key === 'ArrowRight') next(); };
-  dialog.querySelector('.prev').onclick = prev;
-  dialog.querySelector('.next').onclick = next;
-  dialog.querySelector('.close').onclick = () => dialog.close();
+  const goPrev = () => flip.flipPrev(), goNext = () => flip.flipNext();
+  const key = e => { if (lightbox.open) return; if (e.key === 'ArrowLeft') goPrev(); if (e.key === 'ArrowRight') goNext(); };
+  prevBtn.onclick = goPrev;
+  nextBtn.onclick = goNext;
+  dialog.querySelectorAll('.close, .close-inline, .back-to-books').forEach(b => b.onclick = () => dialog.close());
+  nextLink.onclick = () => { dialog.close(); next.open(); };
+
+  // Full-size photo, with its description underneath.
+  const lightbox = dialog.querySelector('.lightbox');
+  const onZoom = e => {
+    const z = e.target.closest('.zoom');
+    if (!z) return;
+    const img = z.querySelector('img');
+    lightbox.querySelector('img').src = img.src;
+    lightbox.querySelector('img').alt = img.alt;
+    lightbox.querySelector('p').textContent = img.alt;
+    lightbox.showModal();
+  };
+  lightbox.onclick = () => lightbox.close();
+  stage.addEventListener('click', onZoom);
   dialog.addEventListener('keydown', key);
   dialog.addEventListener('close', () => {
     dialog.removeEventListener('keydown', key);
+    stage.removeEventListener('click', onZoom);
     flip.destroy();
   }, { once: true });
 }
@@ -155,10 +193,16 @@ function renderShelfItem(book, src, href) {
 
 const BOOK_VIEWER_HTML = `
   <h2></h2>
+  <dialog class="lightbox" aria-label="${bookT('enlarge', 'Enlarge photo')}"><img alt=""><p></p></dialog>
   <button class="close" type="button" aria-label="${bookT('close_book', 'Close book')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   <div class="stage"></div>
   <div class="controls">
     <button class="prev" type="button" aria-label="${bookT('prev_page', 'Previous page')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
     <span class="count" aria-live="polite"></span>
     <button class="next" type="button" aria-label="${bookT('next_page', 'Next page')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
-  </div>`;
+    <button class="close-inline" type="button" aria-label="${bookT('close_book', 'Close book')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <nav class="endnav" hidden>
+    <button class="back-to-books" type="button">${bookT('back_to_books', 'Back to photo books')}</button>
+    <button class="next-book" type="button"></button>
+  </nav>`;
