@@ -1,7 +1,25 @@
 {
   "name": "M. Emre Gündüz",
   "role": "Softwareentwickler",
-  "intro": "Ich bin Softwareentwickler in Bonn und studiere Informatik (M.Sc.) an der Universität Bonn. Ich entwickle Software von Anfang bis Ende: von EksperOne, der von mir gegründeten Software für Kfz-Gutachterbüros, bis zum Backend der türkischen Autobahnmaut bei ASELSAN. Abseits der Tastatur fotografiere ich gern – die Fotobücher auf dieser Seite sind das Ergebnis.",
+  "intro": "Ich bin Softwareentwickler in Bonn und studiere Informatik (M.Sc.) an der Universität Bonn. Ich entwickle Software von Anfang bis Ende: von EksperOne, der von mir gegründeten Software für Kfz-Gutachterbüros, bis zum Backend der türkischen Autobahnmaut bei ASELSAN. Abseits der Tastatur fotografiere ich gern – die Kontaktabzüge auf dieser Seite sind das Ergebnis.",
+  "now": [
+    {
+      "k": "baue",
+      "v": "EksperOne"
+    },
+    {
+      "k": "arbeite",
+      "v": "TWINSOFT · Ratingen"
+    },
+    {
+      "k": "studiere",
+      "v": "M.Sc. Informatik · Uni Bonn"
+    },
+    {
+      "k": "entwickle",
+      "v": "Filme, unten"
+    }
+  ],
   "contact": [
     {
       "label": "emreguenduez@protonmail.com",
@@ -81,7 +99,8 @@
             "Gemeinsam mit Stadtverwaltungen und interdisziplinären Teams an der Integration der Smart-City-Plattform sowie an der digitalen Transformation kommunaler Prozesse mitgewirkt."
           ]
         }
-      ]
+      ],
+      "cmd": "git log --graph"
     },
     {
       "title": "Ausbildung",
@@ -128,7 +147,8 @@
         "TypeScript/JavaScript",
         "Go",
         "React"
-      ]
+      ],
+      "cmd": "cat stack.txt"
     },
     {
       "title": "Publikationen",
@@ -168,7 +188,8 @@
       "more": {
         "label": "Alle Projekte",
         "url": "/de/projects/"
-      }
+      },
+      "cmd": "ls ~/src"
     },
     {
       "title": "Sprachen",

@@ -1,7 +1,25 @@
 {
   "name": "M. Emre Gündüz",
   "role": "Software Engineer",
-  "intro": "I'm a software engineer in Bonn, studying for an M.Sc. in Computer Science at the University of Bonn. I build software end to end, from EksperOne, the appraisal software I founded, to the back-end behind Türkiye's highway toll collection at ASELSAN. Away from the keyboard I take photos, and the photo books on this site are where they end up.",
+  "intro": "I'm a software engineer in Bonn, studying for an M.Sc. in Computer Science at the University of Bonn. I build software end to end, from EksperOne, the appraisal software I founded, to the back-end behind Türkiye's highway toll collection at ASELSAN. Away from the keyboard I take photos, and the contact sheets on this site are where they end up.",
+  "now": [
+    {
+      "k": "building",
+      "v": "EksperOne"
+    },
+    {
+      "k": "working",
+      "v": "TWINSOFT · Ratingen"
+    },
+    {
+      "k": "studying",
+      "v": "M.Sc. CS · Uni Bonn"
+    },
+    {
+      "k": "developing",
+      "v": "film, below"
+    }
+  ],
   "contact": [
     {
       "label": "emreguenduez@protonmail.com",
@@ -81,7 +99,8 @@
             "Collaborated with municipal governments and cross-functional teams to support seamless integration of the smart city platform and advance city-wide digital transformation efforts."
           ]
         }
-      ]
+      ],
+      "cmd": "git log --graph"
     },
     {
       "title": "Education",
@@ -128,7 +147,8 @@
         "TypeScript/JavaScript",
         "Go",
         "React"
-      ]
+      ],
+      "cmd": "cat stack.txt"
     },
     {
       "title": "Publications",
@@ -168,7 +188,8 @@
       "more": {
         "label": "All projects",
         "url": "/projects/"
-      }
+      },
+      "cmd": "ls ~/src"
     },
     {
       "title": "Languages",

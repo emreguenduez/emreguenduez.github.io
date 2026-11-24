@@ -4,9 +4,9 @@ en:
   prefix: ""
   title_home: M. Emre Gündüz · Software Engineer
   description: M. Emre Gündüz — Software Engineer based in Bonn, Germany.
-  nav_resume: Resume
-  nav_projects: Projects
-  nav_photography: Photography
+  nav_resume: resume
+  nav_projects: projects
+  nav_photography: photography
   language: Language
   skip: Skip to content
   theme: Theme
@@ -14,16 +14,24 @@ en:
   dark: Dark
   switch_to_light: Switch to light
   switch_to_dark: Switch to dark
-  to_dark: Dark mode
-  to_light: Light mode
+  to_dark: darkroom
+  to_light: daylight
+  built_with: built with jekyll
+  safelight: safelight on
+  frames: frames
+  roll: roll
+  close: Close
+  prev_frame: previous
+  next_frame: next
+  open_named: "open {title}"
   email: Email
   download_pdf: Download PDF
   pdf_url: /resume.pdf
   pdf_file: M-Emre-Guenduez-Resume.pdf
   print_title: M-Emre-Guenduez-Resume
   website_label: Personal Website
-  photo_books: Photo books
-  all_photo_books: All photo books
+  photo_books: Contact sheets
+  all_photo_books: All rolls
   open_book: Open the book
   projects_title: Projects
   projects_lead: Things I've built.
@@ -31,8 +39,8 @@ en:
   source_code: Source code
   no_projects: No projects yet.
   photography_title: Photography
-  photography_lead: Photo books of places I've been. Open one and flip through.
-  no_books: No photo books yet.
+  photography_lead: Rolls from places I've been, printed as negatives. Hover over a frame or tap it to develop it, then open it to see it large.
+  no_books: No rolls yet.
   photo_book: photo book
   page_one: page
   page_many: pages
@@ -52,9 +60,9 @@ de:
   prefix: /de
   title_home: M. Emre Gündüz · Softwareentwickler
   description: M. Emre Gündüz — Softwareentwickler in Bonn.
-  nav_resume: Lebenslauf
-  nav_projects: Projekte
-  nav_photography: Fotografie
+  nav_resume: lebenslauf
+  nav_projects: projekte
+  nav_photography: fotografie
   language: Sprache
   skip: Zum Inhalt springen
   theme: Farbschema
@@ -62,16 +70,24 @@ de:
   dark: Dunkel
   switch_to_light: Zu hell wechseln
   switch_to_dark: Zu dunkel wechseln
-  to_dark: Dunkelmodus
-  to_light: Hellmodus
+  to_dark: dunkelkammer
+  to_light: tageslicht
+  built_with: gebaut mit jekyll
+  safelight: rotlicht an
+  frames: bilder
+  roll: rolle
+  close: Schließen
+  prev_frame: zurück
+  next_frame: weiter
+  open_named: "{title} öffnen"
   email: E-Mail
   download_pdf: PDF herunterladen
   pdf_url: /resume-de.pdf
   pdf_file: M-Emre-Guenduez-Lebenslauf.pdf
   print_title: M-Emre-Guenduez-Lebenslauf
   website_label: Website
-  photo_books: Fotobücher
-  all_photo_books: Alle Fotobücher
+  photo_books: Kontaktabzüge
+  all_photo_books: Alle Filmrollen
   open_book: Buch öffnen
   projects_title: Projekte
   projects_lead: Was ich gebaut habe.
@@ -79,8 +95,8 @@ de:
   source_code: Quellcode
   no_projects: Noch keine Projekte.
   photography_title: Fotografie
-  photography_lead: Fotobücher von Orten, an denen ich war. Einfach eins öffnen und durchblättern.
-  no_books: Noch keine Fotobücher.
+  photography_lead: Filmrollen von Orten, an denen ich war, als Negative. Mit der Maus über ein Bild fahren oder es antippen, um es zu entwickeln, dann öffnen, um es groß zu sehen.
+  no_books: Noch keine Filmrollen.
   photo_book: Fotobuch
   page_one: Seite
   page_many: Seiten

@@ -5,32 +5,63 @@
   <p class="lead">{{ t.photography_lead }}</p>
 </header>
 
-<div class="books" id="books"></div>
-<p class="empty" id="no-books" hidden>{{ t.no_books }}</p>
+<div id="rolls"></div>
+<p class="empty" id="no-rolls" hidden>{{ t.no_books }}</p>
 
-<dialog class="viewer" aria-label="{{ t.photo_book }}"></dialog>
+<dialog class="lightbox" aria-label="{{ t.enlarge }}">
+  <figure><img alt=""><figcaption><span class="count meta"></span> <span class="alt"></span></figcaption></figure>
+  <div class="lb-controls">
+    <button class="prev" type="button">← {{ t.prev_frame }}</button>
+    <button class="close" type="button" autofocus>{{ t.close }}</button>
+    <button class="next" type="button">{{ t.next_frame }} →</button>
+  </div>
+</dialog>
 
-<script id="books-data" type="application/json">{{ site.data.books | jsonify | replace: "</", "<\/" }}</script>
-<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-<script src="{{ '/book.js' | relative_url }}"></script>
+<script id="rolls-data" type="application/json">{{ site.data.rolls | jsonify | replace: "</", "<\/" }}</script>
+<script src="{{ '/rolls.js' | relative_url }}"></script>
 <script>
-  const books = JSON.parse(document.getElementById('books-data').textContent || '[]') || [];
-  const viewer = document.querySelector('.viewer');
-  viewer.innerHTML = BOOK_VIEWER_HTML;
+  // Newest roll first; each is a contact sheet of six-frame strips, with an anchor (#id) to link to it.
+  const rolls = (JSON.parse(document.getElementById('rolls-data').textContent || '[]') || []).slice().reverse();
   const src = p => '{{ site.baseurl }}' + p;
+  const root = document.getElementById('rolls');
+  const lb = document.querySelector('.lightbox'), lbImg = lb.querySelector('img');
+  let shown = null, at = 0;
 
-  document.getElementById('books').append(...books.map(b => renderShelfItem(b, src, '#' + b.id)));
-  document.getElementById('no-books').hidden = books.length > 0;
-
-  // The hash (#book-id) opens a book, so links to a single book can be shared.
-  const route = () => {
-    const b = books.find(b => '#' + b.id === location.hash);
-    if (!b || viewer.open) return;
-    // After the back cover, offer the next book on the shelf (wrapping round), if there is one.
-    const nb = books.length > 1 ? books[(books.indexOf(b) + 1) % books.length] : null;
-    openBook(viewer, b, src, { next: nb && { title: nb.title || 'Untitled', open: () => { location.hash = '#' + nb.id; } } });
+  const show = i => {
+    at = (i + shown.length) % shown.length;
+    lbImg.src = shown[at].src; lbImg.alt = shown[at].alt;
+    lb.querySelector('.count').textContent = String(at + 1).padStart(2, '0') + ' / ' + String(shown.length).padStart(2, '0');
+    lb.querySelector('.alt').textContent = shown[at].alt;
   };
-  viewer.addEventListener('close', () => history.replaceState(null, '', location.pathname));
-  addEventListener('hashchange', route);
-  route();
+
+  rolls.forEach((r, ri) => {
+    const frames = (r.frames || []).map(f => ({ ...f, src: src(f.src) }));
+    if (!frames.length) return;
+    const sec = rollEl('section', 'roll');
+    sec.id = r.id;
+    const head = rollEl('div', 'roll-head');
+    head.append(rollEl('h2', '', r.title || 'Untitled'),
+      rollEl('span', 'meta', ['{{ t.roll }} ' + String(rolls.length - ri).padStart(2, '0'), r.subtitle, frames.length + ' {{ t.frames }}'].filter(Boolean).join(' · ')));
+    sec.append(head);
+    for (let i = 0; i < frames.length; i += 6) {
+      sec.append(rollStrip(frames.slice(i, i + 6), i, (f, n) => {
+        const b = rollEl('button');
+        b.type = 'button';
+        b.onclick = () => { shown = frames; show(n); lb.showModal(); };
+        return b;
+      }));
+    }
+    root.append(sec);
+  });
+  document.getElementById('no-rolls').hidden = root.children.length > 0;
+  rollDevelopOnTap(root);
+
+  lb.querySelector('.prev').onclick = () => show(at - 1);
+  lb.querySelector('.next').onclick = () => show(at + 1);
+  lb.querySelector('.close').onclick = () => lb.close();
+  lb.addEventListener('click', e => { if (e.target === lb || e.target.closest('figure')) lb.close(); });
+  lb.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') show(at - 1);
+    if (e.key === 'ArrowRight') show(at + 1);
+  });
 </script>

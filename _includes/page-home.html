@@ -6,32 +6,41 @@
   <noscript><h1>{{ cv.name }}</h1><p>{{ cv.role }}</p></noscript>
 </div>
 
-{%- if site.data.books.size > 0 %}
-<section class="shelf-peek" aria-labelledby="peek-title">
-  <h2 id="peek-title">{{ t.photo_books }}</h2>
-  <div class="sec-body">
-    <div class="books" id="peek"></div>
-    <p class="more meta"><a href="{{ t.prefix | append: '/photography/' | relative_url }}">{{ t.all_photo_books }}</a></p>
+{%- if site.data.rolls.size > 0 %}
+<section class="darkroom-band" aria-labelledby="peek-title">
+  <div class="inner">
+    <div class="band-head">
+      <h2 id="peek-title">{{ t.photo_books }}<span class="cmd">ls ~/darkroom</span></h2>
+      <span class="safelight">{{ t.safelight }}</span>
+    </div>
+    <div class="band-body" id="peek"></div>
   </div>
 </section>
-<script id="books-data" type="application/json">{{ site.data.books | jsonify | replace: "</", "<\/" }}</script>
-<script src="{{ '/book.js' | relative_url }}"></script>
+<script id="rolls-data" type="application/json">{{ site.data.rolls | jsonify | replace: "</", "<\/" }}</script>
+<script src="{{ '/rolls.js' | relative_url }}"></script>
 <script>
-  // The newest three books, each opening straight into the viewer on the photography page.
-  const peekBooks = (JSON.parse(document.getElementById('books-data').textContent) || []).slice(-3).reverse();
-  const bookHref = b => '{{ t.prefix | append: "/photography/" | relative_url }}#' + b.id;
-  document.getElementById('peek').append(...peekBooks.map(b => renderShelfItem(b, p => '{{ site.baseurl }}' + p, bookHref(b))));
-  // A single book gets its title and a way in beside the cover, so the shelf doesn't look half-empty.
-  if (peekBooks.length === 1) {
-    const b = peekBooks[0], peek = document.querySelector('.shelf-peek');
-    peek.classList.add('single');
-    const about = bookEl('div', 'peek-about');
-    const open = bookEl('a', '', '{{ t.open_book }}');
-    open.href = bookHref(b);
-    about.append(bookEl('h3', '', b.title || 'Untitled'), bookEl('p', 'meta', [b.subtitle, bookPagesLabel((b.pages || []).length)].filter(Boolean).join(' · ')), open);
-    document.getElementById('peek').append(about);
-    peek.querySelector('.more').hidden = true;
-  }
+  // The newest roll as one strip of negatives; each frame opens its contact sheet on the photography page.
+  (() => {
+    const rolls = (JSON.parse(document.getElementById('rolls-data').textContent) || []).slice().reverse();
+    const r = rolls[0], src = p => '{{ site.baseurl }}' + p;
+    const href = r => '{{ t.prefix | append: "/photography/" | relative_url }}#' + r.id;
+    const frames = (r.frames || []).map(f => ({ ...f, src: src(f.src) }));
+    const head = rollEl('div', 'strip-head'), open = rollEl('a', '', T.open_named.replace('{title}', (r.title || 'Untitled').toLowerCase()) + ' →');
+    open.href = href(r);
+    head.append(rollEl('span', '', [(r.id || 'roll') + '/', frames.length + ' {{ t.frames }}', r.subtitle].filter(Boolean).join(' · ')), open);
+    const strip = rollStrip(frames.slice(0, 6), 0, () => { const a = rollEl('a'); a.href = href(r); return a; });
+    const parts = [head, strip];
+    if (rolls.length > 1) {
+      const also = rollEl('p', 'also', '');
+      rolls.slice(1, 4).forEach((o, i) => { const a = rollEl('a', '', (o.id || 'roll') + '/'); a.href = href(o); also.append(i ? ' · ' : '', a); });
+      const all = rollEl('a', '', '{{ t.all_photo_books }}'); all.href = '{{ t.prefix | append: "/photography/" | relative_url }}';
+      also.append(' · ', all);
+      parts.push(also);
+    }
+    const peek = document.getElementById('peek');
+    peek.append(...parts);
+    rollDevelopOnTap(peek);
+  })();
 </script>
 {%- endif %}
 
@@ -42,9 +51,9 @@
     siteUrl: '{{ site.url }}' || location.origin,
     pdfUrl: '{{ t.pdf_url | relative_url }}',
   });
-  // The photo books sit right under the intro, where a first-time visitor sees them (the PDF leaves them out).
-  const peekSection = document.querySelector('.shelf-peek');
-  if (peekSection) document.querySelector('#resume > header')?.after(peekSection);
+  // The darkroom band follows Experience, early enough to be seen (the PDF leaves it out).
+  const band = document.querySelector('.darkroom-band');
+  if (band) (document.querySelector('#resume > section') || document.querySelector('#resume > header'))?.after(band);
   // Browsers name the saved PDF after the page title; keep it plain ASCII so upload portals don't mangle it.
   const screenTitle = document.title;
   addEventListener('beforeprint', () => { document.title = T.print_title; });

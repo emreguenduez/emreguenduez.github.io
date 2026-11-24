@@ -58,7 +58,11 @@ function resumeLink(c, printLabel = c.label) {
 // `siteUrl` is the public address printed in the PDF; `pdfUrl` is the pre-built PDF the button downloads.
 function renderResume(root, cv, { downloadButton = true, siteUrl = location.origin, pdfUrl = '' } = {}) {
   const header = resumeEl('header');
-  header.append(resumeEl('h1', '', cv.name), resumeEl('p', 'role', cv.role));
+  // The surname is set apart on screen; the text stays one plain name for the PDF.
+  const h1 = resumeEl('h1'), cut = (cv.name || '').lastIndexOf(' ');
+  if (cut > 0) h1.append(cv.name.slice(0, cut + 1), resumeEl('span', 'surname', cv.name.slice(cut + 1)));
+  else h1.textContent = cv.name || '';
+  header.append(h1, resumeEl('p', 'role', cv.role));
   if (cv.intro) { const intro = resumeEl('p', 'intro'); intro.append(resumeInline(cv.intro)); header.append(intro); }
   const links = resumeEl('div', 'links');
   (cv.contact || []).filter(c => c.label).forEach(c => {
@@ -79,6 +83,14 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
     links.append(dl);
   }
   header.append(links);
+  // now.txt: what's current, as a terminal would print it (screen only)
+  const now = (cv.now || []).filter(n => n.k && n.v);
+  if (now.length) {
+    const box = resumeEl('div', 'now screen-only'), dl = resumeEl('dl');
+    now.forEach(n => { const dd = resumeEl('dd'); dd.append(resumeInline(n.v)); dl.append(resumeEl('dt', '', n.k), dd); });
+    box.append(resumeEl('div', 'now-cmd', '~ $ cat now.txt'), dl);
+    header.append(box);
+  }
   const parts = [header];
 
   (cv.sections || []).forEach(s => {
@@ -87,7 +99,9 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
     const sec = resumeEl('section');
     sec.dataset.type = s.type || 'entries';
     const body = resumeEl('div', 'sec-body'); // a column of its own beside the title on wide screens
-    sec.append(resumeEl('h2', '', s.title), body);
+    const h2 = resumeEl('h2', '', s.title);
+    if (s.cmd) { h2.append(resumeEl('span', 'cmd', s.cmd)); if (/--graph/.test(s.cmd)) sec.dataset.graph = ''; }
+    sec.append(h2, body);
     if (s.type === 'tags') {
       const ul = resumeEl('ul', 'tags');
       items.filter(Boolean).forEach(t => ul.append(resumeEl('li', '', t)));

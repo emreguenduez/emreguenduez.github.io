@@ -24,7 +24,7 @@ wide: true
 <div id="panel" hidden>
   <div class="tabbar">
     <div class="tabs" role="tablist" aria-label="Admin sections">
-      <button type="button" role="tab" id="tab-books" aria-controls="panel-books" data-tab="books">Photo books</button>
+      <button type="button" role="tab" id="tab-rolls" aria-controls="panel-rolls" data-tab="rolls">Rolls</button>
       <button type="button" role="tab" id="tab-library" aria-controls="panel-library" data-tab="library">Photo library</button>
       <button type="button" role="tab" id="tab-resume" aria-controls="panel-resume" data-tab="resume">Resume</button>
       <button type="button" role="tab" id="tab-projects" aria-controls="panel-projects" data-tab="projects">Projects</button>
@@ -32,26 +32,25 @@ wide: true
     <button type="button" class="quiet" id="logout">Sign out</button>
   </div>
 
-  <div data-panel="books" role="tabpanel" id="panel-books" aria-labelledby="tab-books">
+  <div data-panel="rolls" role="tabpanel" id="panel-rolls" aria-labelledby="tab-rolls">
   <section id="shelf">
-    <h2>Photo books</h2>
-    <div class="books" id="book-list"></div>
+    <h2>Rolls</h2>
+    <p class="meta">Each roll is a contact sheet on the photography page. The newest one also runs across the home page.</p>
+    <div class="roll-list" id="roll-list"></div>
   </section>
 
   <section id="editor" hidden>
     <div class="toolbar">
-      <button type="button" id="ed-back">← All books</button>
-      <button type="button" id="ed-preview">Preview book</button>
+      <button type="button" id="ed-back">← All rolls</button>
     </div>
-    <p class="status" id="ed-status" role="status"></p>
+    <div class="ed-fields" id="ed-fields"></div>
+    <p class="meta">Drag a frame by its photo to move it, or use the arrows. Drop image files on the frames to upload them as new frames.</p>
     <p class="meta needs" id="ed-desc"></p>
-    <div class="ed">
-      <ol class="strip" id="strip" aria-label="Pages"></ol>
-      <div class="ed-center">
-        <div class="spread" id="spread" role="group" aria-label="Spread preview"></div>
-        <div class="canvas pagebox" id="canvas"></div>
-      </div>
-      <div class="props" id="props"></div>
+    <p class="status" id="ed-status" role="status"></p>
+    <ol class="ed-frames" id="frames" aria-label="Frames"></ol>
+    <div class="toolbar ed-actions">
+      <button type="button" id="ed-add">+ Add frames</button>
+      <button type="button" class="danger" id="ed-delete">Delete this roll</button>
     </div>
   </section>
   </div>
@@ -114,7 +113,7 @@ wide: true
   </div>
 
   <div class="savebar" id="savebar" hidden>
-    <span id="save-status" role="status">You have unsaved changes to your photo books.</span>
+    <span id="save-status" role="status">You have unsaved changes to your rolls.</span>
     <span class="toolbar">
       <button type="button" id="discard">Discard</button>
       <button type="button" class="primary" id="save">Save &amp; publish</button>
@@ -136,18 +135,15 @@ wide: true
 </dialog>
 
 </div>
-<dialog class="viewer" aria-label="Book preview"></dialog>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-<script src="{{ '/book.js' | relative_url }}"></script>
+<script src="{{ '/rolls.js' | relative_url }}"></script>
 <script src="{{ '/resume.js' | relative_url }}"></script>
 <script>
   const REPO = 'emreguenduez/emreguenduez.github.io';
   const REPO_API = 'https://api.github.com/repos/' + REPO;
   const API = REPO_API + '/contents/';
   const RAW = 'https://raw.githubusercontent.com/' + REPO + '/main';
-  const COLORS = ['#2b3a42', '#1f4e3d', '#7a2e2e', '#3b3355', '#8a6a3b', '#d8d2c4', '#111111'];
   const $ = s => document.querySelector(s);
   let token = '';
   try { token = localStorage.getItem('gh-token') || ''; } catch (e) {}
@@ -206,15 +202,14 @@ wide: true
   const src = p => localSrc[p] || RAW + p;
 
   // ---------- State ----------
-  let books = [], savedJSON = '[]', booksSha = '';
+  let rolls = [], savedJSON = '[]', rollsSha = '';
   let library = []; // [{ path: '/photos/x.jpg', name, sha }]
-  let cur = -1;     // index of the book being edited
-  let sel = -1;     // selected page index, -1 = cover
-  const book = () => books[cur];
-  const dirty = () => JSON.stringify(books) !== savedJSON;
+  let cur = -1;     // index of the roll being edited
+  const roll = () => rolls[cur];
+  const dirty = () => JSON.stringify(rolls) !== savedJSON;
   function changed() {
     $('#savebar').hidden = !dirty();
-    $('#save-status').textContent = 'You have unsaved changes to your photo books.';
+    $('#save-status').textContent = 'You have unsaved changes to your rolls.';
   }
   const anyDirty = () => dirty() || cvDirty() || pjDirty();
   addEventListener('beforeunload', e => { if (anyDirty()) e.preventDefault(); });
@@ -222,7 +217,7 @@ wide: true
   // ---------- Tabs ----------
   const tabs = [...document.querySelectorAll('[data-tab]')];
   function showTab(name) {
-    if (!tabs.some(t => t.dataset.tab === name)) name = 'books';
+    if (!tabs.some(t => t.dataset.tab === name)) name = 'rolls';
     document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== name);
     tabs.forEach(t => { const on = t.dataset.tab === name; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; });
     try { sessionStorage.setItem('admin-tab', name); } catch (e) {}
@@ -242,16 +237,16 @@ wide: true
   // ---------- Sign in ----------
   async function start() {
     try {
-      const [repo, proj, data, resume] = await Promise.all([gh(REPO_API), gh('_data/projects.yml'), gh('_data/books.json'), gh('_data/resume.json')]);
+      const [repo, proj, data, resume] = await Promise.all([gh(REPO_API), gh('_data/projects.yml'), gh('_data/rolls.json'), gh('_data/resume.json')]);
       if (repo && repo.permissions && !repo.permissions.push) throw new Error(NO_WRITE);
       cv = resume ? JSON.parse(toText(resume.content)) : { name: '', role: '', contact: [], sections: [] };
       cvSha = resume ? resume.sha : ''; cvLang = 'en';
       cvSaved = JSON.stringify(cv);
       pjSaved = $('#projects').yaml.value = proj ? toText(proj.content) : '';
       pjSha = proj ? proj.sha : '';
-      books = data ? JSON.parse(toText(data.content) || '[]') : [];
-      booksSha = data ? data.sha : '';
-      savedJSON = JSON.stringify(books);
+      rolls = data ? JSON.parse(toText(data.content) || '[]') : [];
+      rollsSha = data ? data.sha : '';
+      savedJSON = JSON.stringify(rolls);
     } catch (e) {
       $('#login .status').textContent = e.message === NO_WRITE ? e.message : 'Couldn\'t sign in. ' + e.message;
       $('#login .status').classList.add('error');
@@ -262,372 +257,171 @@ wide: true
     $('#panel').hidden = false;
     drawShelf();
     drawCv();
-    showTab(sessionStorage.getItem('admin-tab') || 'books');
+    showTab(sessionStorage.getItem('admin-tab') || 'rolls');
     loadLibrary();
   }
   $('#login form').onsubmit = e => { e.preventDefault(); token = e.target.token.value.trim(); start(); };
   $('#logout').onclick = () => {
     if (anyDirty() && !confirm('Discard unsaved changes and sign out?')) return;
-    savedJSON = JSON.stringify(books);
+    savedJSON = JSON.stringify(rolls);
     cvSaved = JSON.stringify(cv);
     pjSaved = $('#projects').yaml.value;
     try { localStorage.removeItem('gh-token'); } catch (e) {}
     location.reload();
   };
 
-  // ---------- Bookshelf ----------
-  // Photo spots left empty on a page; they print as blank paper.
-  const emptySpots = p => {
-    const n = (BOOK_LAYOUTS[p.layout || 'single'] || BOOK_LAYOUTS.single).slots;
-    let k = 0;
-    for (let i = 0; i < n; i++) if (!(p.photos || [])[i]) k++;
-    return k;
-  };
-  // Photos that screen readers can't describe: no description of their own and no caption to fall back on.
-  function undescribed(b) {
-    let k = b.cover && !b.coverAlt ? 1 : 0;
-    (b.pages || []).forEach(p => {
-      const n = (BOOK_LAYOUTS[p.layout || 'single'] || BOOK_LAYOUTS.single).slots;
-      for (let i = 0; i < n; i++) if ((p.photos || [])[i] && !(p.alts || [])[i] && !p.text) k++;
-    });
-    return k;
-  }
-  const undescribedText = k => k === 1 ? '1 photo has no description' : k + ' photos have no description';
-
-  function drawShelf() {
-    $('#shelf').hidden = false;
-    $('#editor').hidden = true;
-    const items = books.map((b, i) => {
-      const btn = bookEl('button', 'book');
-      btn.type = 'button';
-      btn.append(bookBox(renderBookCover(b, src)), bookEl('h3', '', b.title || 'Untitled'), bookEl('span', 'meta', bookPagesLabel((b.pages || []).length) + ' · Edit'));
-      const k = undescribed(b);
-      if (k) btn.append(bookEl('span', 'meta needs', undescribedText(k)));
-      btn.onclick = () => edit(i);
-      return btn;
-    });
-    const add = bookEl('button', 'book new-book');
-    add.type = 'button';
-    const box = bookEl('div', 'pagebox', '+');
-    add.append(box, bookEl('h3', '', 'New photo book'));
-    add.onclick = () => {
-      books.push({ id: '', title: 'New photo book', subtitle: String(new Date().getFullYear()), color: COLORS[books.length % COLORS.length], cover: '', pages: [{ layout: 'single', photos: [], text: '' }] });
-      changed();
-      edit(books.length - 1);
-    };
-    $('#book-list').replaceChildren(...items, add);
-  }
-
-  // ---------- Editor ----------
-  function edit(i) {
-    cur = i; sel = -1;
-    $('#shelf').hidden = true;
-    $('#editor').hidden = false;
-    drawEditor();
-    $('#editor').scrollIntoView({ block: 'start' });
-  }
-  $('#ed-back').onclick = drawShelf;
-  $('#ed-preview').onclick = () => openBook($('.viewer'), book(), src);
-  $('.viewer').innerHTML = BOOK_VIEWER_HTML;
-
-  function drawEditor() { drawStrip(); drawCanvas(); drawProps(); drawNotes(); }
-  function redraw() { changed(); drawStrip(); drawCanvas(); drawNotes(); } // after content edits; leaves form fields alone
-  function drawNotes() {
-    const k = undescribed(book());
-    $('#ed-desc').textContent = k ? undescribedText(k) + '. Screen readers read the description aloud; add one in each photo\'s settings.' : '';
-  }
-
-  function drawStrip() {
-    const b = book();
-    const strip = $('#strip');
-    const lis = [];
-    // Each entry is a button: Enter selects it, Alt+arrow keys move the page.
-    const entry = (i, pageBox, label) => {
-      const li = bookEl('li');
-      const btn = bookEl('button', 'strip-btn');
-      btn.type = 'button';
-      btn.dataset.page = i;
-      if (sel === i) btn.setAttribute('aria-current', 'true');
-      btn.setAttribute('aria-label', label + (i >= 0 ? '. Alt plus arrow keys to move' : ''));
-      btn.append(pageBox, bookEl('span', '', label));
-      btn.onclick = () => select(i);
-      if (i >= 0) btn.onkeydown = e => {
-        if (!e.altKey) return;
-        const step = { ArrowUp: -1, ArrowLeft: -1, ArrowDown: 1, ArrowRight: 1 }[e.key];
-        if (!step) return;
-        e.preventDefault();
-        movePage(i, i + step);
-      };
-      li.append(btn);
-      return li;
-    };
-    lis.push(entry(-1, bookBox(renderBookCover(b, src)), 'Cover'));
-
-    b.pages.forEach((p, i) => {
-      const gaps = emptySpots(p);
-      const li = entry(i, bookBox(renderBookPage(p, src)), 'Page ' + (i + 1) + (gaps ? ' · ' + gaps + ' empty' : ''));
-      if (gaps) li.querySelector('.strip-btn > span').classList.add('needs');
-      li.draggable = true;
-      li.ondragstart = e => { e.dataTransfer.setData('text/plain', i); e.dataTransfer.effectAllowed = 'move'; };
-      li.ondragover = e => {
-        e.preventDefault();
-        const after = e.offsetY > li.offsetHeight / 2;
-        li.classList.toggle('drop-after', after);
-        li.classList.toggle('drop-before', !after);
-      };
-      li.ondragleave = () => li.classList.remove('drop-after', 'drop-before');
-      li.ondrop = e => {
-        e.preventDefault();
-        const after = li.classList.contains('drop-after');
-        li.classList.remove('drop-after', 'drop-before');
-        if (isFileDrag(e)) return;
-        const from = +e.dataTransfer.getData('text/plain');
-        let to = i + (after ? 1 : 0);
-        if (from < to) to--;
-        movePage(from, to);
-      };
-      lis.push(li);
-    });
-
-    const addPage = bookEl('button', 'add', '+ Page');
-    addPage.type = 'button';
-    addPage.onclick = () => { b.pages.splice(sel + 1, 0, { layout: 'single', photos: [], text: '' }); sel++; changed(); drawEditor(); };
-    const addMany = bookEl('button', 'add', '+ Pages from photos');
-    addMany.type = 'button';
-    addMany.onclick = async () => {
-      const picked = await pick(true);
-      if (!picked || !picked.length) return;
-      b.pages.splice(sel + 1, 0, ...picked.map(path => ({ layout: 'single', photos: [path], text: '' })));
-      sel += picked.length;
-      changed(); drawEditor();
-    };
-    const tools = bookEl('li');
-    tools.style.cursor = 'default';
-    tools.append(addPage, addMany);
-    const hadFocus = strip.contains(document.activeElement);
-    strip.replaceChildren(...lis, tools);
-    const current = strip.querySelector('[aria-current="true"]');
-    current?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    if (hadFocus) current?.focus(); // keep the keyboard on the page that just moved
-  }
-
-  function select(i) { sel = i; drawEditor(); }
-
-  function movePage(from, to) {
-    const pages = book().pages;
-    if (to < 0 || to >= pages.length || from === to) return;
-    pages.splice(to, 0, pages.splice(from, 1)[0]);
-    sel = to;
-    changed(); drawEditor();
-  }
-
-  function drawCanvas() {
-    const b = book();
-    const pageEl = sel === -1 ? renderBookCover(b, src, true) : renderBookPage(b.pages[sel], src, true);
-    $('#canvas').replaceChildren(pageEl);
-    // The spread shows the facing page, so half-empty spreads are visible while editing.
-    const left = sel === -1 ? null : sel - (sel % 2), right = sel === -1 ? -1 : left + 1;
-    const side = i => {
-      const btn = bookEl('button', 'spread-page');
-      btn.type = 'button';
-      if (i === null || i >= b.pages.length) {
-        btn.disabled = true;
-        btn.setAttribute('aria-label', i === null ? 'Inside of the cover' : 'Blank page at the end of the book');
-        btn.append(bookBox(bookEl('div', 'bpage')));
-        return btn;
-      }
-      const isCover = i === -1;
-      btn.append(bookBox(isCover ? renderBookCover(b, src) : renderBookPage(b.pages[i], src)));
-      btn.setAttribute('aria-label', isCover ? 'Cover' : 'Page ' + (i + 1));
-      if (i === sel) btn.setAttribute('aria-current', 'true');
-      btn.onclick = () => select(i);
-      return btn;
-    };
-    $('#spread').replaceChildren(bookEl('span', 'meta', 'Spread'), side(left), side(right));
-  }
-
-  // Clicking a photo slot on the big page opens the picker; × removes the photo.
-  function setSlot(i, path) {
-    const b = book();
-    if (i === 'cover') b.cover = path;
-    else { const p = b.pages[sel]; p.photos = p.photos || []; p.photos[+i] = path; }
-    redraw();
-  }
-  $('#canvas').onclick = async e => {
-    const slot = e.target.closest('.slot');
-    if (!slot) return;
-    const i = slot.dataset.slot;
-    if (e.target.closest('.slot-x')) return setSlot(i, '');
-    const b = book();
-    const current = i === 'cover' ? b.cover : (b.pages[sel].photos || [])[+i];
-    const picked = await pick(false, current);
-    if (picked) setSlot(i, picked[0]);
-    $('#canvas').querySelector('[data-slot="' + i + '"] .slot-pick')?.focus();
-  };
-  // Dropping an image file on a photo spot uploads it and puts it there.
-  $('#canvas').ondragover = e => {
-    const slot = e.target.closest('.slot');
-    $('#canvas').querySelectorAll('.dropping').forEach(s => s !== slot && s.classList.remove('dropping'));
-    if (!slot || !isFileDrag(e)) return;
-    e.preventDefault();
-    slot.classList.add('dropping');
-  };
-  $('#canvas').ondragleave = e => { if (!$('#canvas').contains(e.relatedTarget)) $('#canvas').querySelectorAll('.dropping').forEach(s => s.classList.remove('dropping')); };
-  $('#canvas').ondrop = async e => {
-    const slot = e.target.closest('.slot');
-    if (!slot || !isFileDrag(e)) return;
-    e.preventDefault();
-    slot.classList.remove('dropping');
-    const at = cur, page = sel, i = slot.dataset.slot;
-    const [path] = await upload([...e.dataTransfer.files].slice(0, 1), $('#ed-status'));
-    if (path && at === cur && page === sel) setSlot(i, path); // skip if the user moved to another page meanwhile
-  };
-
-  function field(label, value, oninput, tag = 'input') {
-    const l = bookEl('label');
-    const input = bookEl(tag);
-    input.value = value || '';
-    input.oninput = () => { oninput(input.value); redraw(); };
-    l.append(bookEl('span', '', label), input);
-    return l;
-  }
+  // ---------- Rolls ----------
+  const undescribed = r => r.frames.filter(f => f.src && !f.alt).length;
+  const undescribedText = k => k === 1 ? '1 frame has no description' : k + ' frames have no description';
+  const framesLabel = n => n + (n === 1 ? ' frame' : ' frames');
   function button(text, onclick, cls = '') {
-    const btn = bookEl('button', cls, text);
+    const btn = rollEl('button', cls, text);
     btn.type = 'button';
     btn.onclick = onclick;
     return btn;
   }
 
-  function drawProps() {
-    const b = book(), props = $('#props');
-    if (sel === -1) {
-      const color = bookEl('input');
-      color.type = 'color';
-      color.value = b.color || '#2b3a42';
-      color.setAttribute('aria-label', 'Custom cover color');
-      color.oninput = () => { b.color = color.value; redraw(); };
-      const swatches = bookEl('div', 'swatches');
-      COLORS.forEach(c => {
-        const s = button('', () => { b.color = color.value = c; redraw(); });
-        s.style.background = c;
-        s.setAttribute('aria-label', 'Cover color ' + c);
-        swatches.append(s);
-      });
-      swatches.append(color);
-      const colorLabel = bookEl('div');
-      colorLabel.append(bookEl('span', '', 'Cover color'), swatches);
-      colorLabel.style.display = 'grid'; colorLabel.style.gap = '6px';
-      props.replaceChildren(
-        bookEl('h3', '', 'Cover'),
-        field('Title', b.title, v => b.title = v),
-        field('Subtitle', b.subtitle, v => b.subtitle = v),
-        colorLabel,
-        bookEl('p', 'meta', 'Click the photo area on the cover to choose a cover photo, or drop an image file on it.'),
-        ...(b.cover ? [field('Describe the cover photo (for screen readers)', b.coverAlt, v => b.coverAlt = v)] : []),
-        button('Delete this book', () => {
-          if (!confirm('Delete "' + (b.title || 'Untitled') + '"? It disappears from the site once you save.')) return;
-          books.splice(cur, 1);
-          changed(); drawShelf();
-        }, 'danger spaced'),
-      );
-      return;
-    }
-
-    const p = b.pages[sel];
-    const layouts = bookEl('div', 'layouts');
-    Object.entries(BOOK_LAYOUTS).forEach(([key, info]) => {
-      const btn = button('', () => { p.layout = key; redraw(); drawProps(); });
-      btn.setAttribute('aria-pressed', (p.layout || 'single') === key);
-      btn.append(bookBox(renderBookPage({ layout: key, photos: [], text: key === 'text' ? 'Aa' : '' })), bookEl('span', '', info.label));
-      layouts.append(btn);
+  function drawShelf() {
+    $('#shelf').hidden = false;
+    $('#editor').hidden = true;
+    const items = rolls.map((r, i) => {
+      const btn = button('', () => edit(i), 'roll-card');
+      const head = rollEl('span', 'roll-card-head');
+      head.append(rollEl('strong', '', r.title || 'Untitled'), rollEl('span', 'meta', [r.subtitle, framesLabel(r.frames.length), 'Edit'].filter(Boolean).join(' · ')));
+      btn.append(head);
+      if (r.frames.length) btn.append(rollStrip(r.frames.slice(0, 6).map(f => ({ src: src(f.src), alt: '' })), 0, () => rollEl('span')));
+      const k = undescribed(r);
+      if (k) btn.append(rollEl('span', 'meta needs', undescribedText(k)));
+      return btn;
     });
-    const layoutLabel = bookEl('div');
-    layoutLabel.style.display = 'grid'; layoutLabel.style.gap = '6px';
-    layoutLabel.append(bookEl('span', '', 'Layout'), layouts);
-
-    // Moving sits next to the page title so it stays in reach on a phone, above the long settings.
-    const head = bookEl('div', 'props-head');
-    const up = button('Earlier', () => movePage(sel, sel - 1), 'mini');
-    const down = button('Later', () => movePage(sel, sel + 1), 'mini');
-    up.setAttribute('aria-label', 'Move page earlier');
-    down.setAttribute('aria-label', 'Move page later');
-    up.disabled = sel === 0;
-    down.disabled = sel === b.pages.length - 1;
-    const moves = bookEl('span', 'toolbar');
-    moves.append(up, down);
-    head.append(bookEl('h3', '', 'Page ' + (sel + 1) + ' of ' + b.pages.length), moves);
-
-    const n = BOOK_LAYOUTS[p.layout || 'single'].slots;
-    const alts = [];
-    for (let i = 0; i < n; i++) {
-      if (!(p.photos || [])[i]) continue;
-      alts.push(field(n > 1 ? 'Describe photo ' + (i + 1) : 'Describe the photo', (p.alts || [])[i], v => { p.alts = p.alts || []; p.alts[i] = v; }));
-    }
-    if (alts.length) alts.unshift(bookEl('p', 'meta', 'For people using screen readers. If left empty, the caption is used.'));
-
-    // Margins: medium is the layout's own spacing. Full-bleed pages have no margins to set.
-    const margins = bookEl('div');
-    margins.style.display = 'grid'; margins.style.gap = '6px';
-    if (p.layout !== 'bleed') {
-      const group = bookEl('div', 'choice');
-      group.setAttribute('role', 'group');
-      group.setAttribute('aria-label', 'Margins');
-      BOOK_MARGINS.forEach(m => {
-        const btn = button(m[0].toUpperCase() + m.slice(1), () => { p.margin = m; redraw(); drawProps(); });
-        btn.setAttribute('aria-pressed', (p.margin || 'medium') === m);
-        group.append(btn);
-      });
-      const all = button('Use on every page', () => {
-        b.pages.forEach(o => { o.margin = p.margin || 'medium'; });
-        redraw();
-        $('#ed-status').textContent = 'Every page now has ' + (p.margin || 'medium') + ' margins.';
-      }, 'mini');
-      margins.append(bookEl('span', '', 'Margins'), group, all);
-    }
-
-    props.replaceChildren(
-      head,
-      layoutLabel,
-      margins,
-      field(p.layout === 'text' ? 'Text' : 'Caption (optional)', p.text, v => p.text = v, 'textarea'),
-      ...alts,
-      bookEl('p', 'meta', 'Click a photo spot on the page to choose a photo, or drop an image file on it. Drag pages in the strip, or select one and press Alt with an arrow key, to reorder.'),
-      button('Duplicate page', () => { b.pages.splice(sel + 1, 0, structuredClone(p)); sel++; changed(); drawEditor(); }),
-      button('Delete page', () => {
-        if (b.pages.length === 1) return alert('A book needs at least one page.');
-        b.pages.splice(sel, 1);
-        sel = Math.min(sel, b.pages.length - 1);
-        changed(); drawEditor();
-      }, 'danger'),
-    );
+    const add = button('+ New roll', () => {
+      rolls.push({ id: '', title: 'New roll', subtitle: String(new Date().getFullYear()), frames: [] });
+      changed();
+      edit(rolls.length - 1);
+    }, 'add-roll');
+    $('#roll-list').replaceChildren(...items, add);
   }
+
+  // ---------- Roll editor ----------
+  function edit(i) {
+    cur = i;
+    $('#shelf').hidden = true;
+    $('#editor').hidden = false;
+    $('#ed-status').textContent = '';
+    const r = roll();
+    $('#ed-fields').replaceChildren(field('Title', r.title, v => r.title = v), field('Subtitle (the year, or a place)', r.subtitle, v => r.subtitle = v));
+    drawFrames();
+    $('#editor').scrollIntoView({ block: 'start' });
+  }
+  $('#ed-back').onclick = drawShelf;
+
+  function field(label, value, oninput) {
+    const l = rollEl('label'), input = rollEl('input');
+    input.value = value || '';
+    input.oninput = () => { oninput(input.value); changed(); };
+    l.append(rollEl('span', '', label), input);
+    return l;
+  }
+  function drawNotes() {
+    const k = undescribed(roll());
+    $('#ed-desc').textContent = k ? undescribedText(k) + '. Screen readers read the description aloud, and it shows under the enlarged photo.' : '';
+  }
+
+  // `focus` is [frame index, button class] to keep the keyboard where it was after a redraw.
+  function drawFrames(focus) {
+    const r = roll(), list = $('#frames');
+    list.replaceChildren(...r.frames.map((f, i) => {
+      const li = rollEl('li', 'ed-frame' + (f.alt ? '' : ' needs-alt'));
+      const img = rollEl('img');
+      img.src = src(f.src); img.alt = ''; img.draggable = true;
+      const alt = rollEl('textarea');
+      alt.rows = 3; alt.value = f.alt || ''; alt.placeholder = 'Describe the photo';
+      alt.setAttribute('aria-label', 'Describe frame ' + (i + 1));
+      alt.oninput = () => { f.alt = alt.value; li.classList.toggle('needs-alt', !f.alt); changed(); drawNotes(); };
+      const up = button('←', () => move(i, i - 1, 'up'), 'mini up'), down = button('→', () => move(i, i + 1, 'down'), 'mini down');
+      up.setAttribute('aria-label', 'Move frame ' + (i + 1) + ' earlier');
+      down.setAttribute('aria-label', 'Move frame ' + (i + 1) + ' later');
+      up.disabled = i === 0;
+      down.disabled = i === r.frames.length - 1;
+      const del = button('Remove', () => { r.frames.splice(i, 1); changed(); drawFrames(); }, 'danger mini');
+      del.setAttribute('aria-label', 'Remove frame ' + (i + 1));
+      const top = rollEl('div', 'ed-frame-top'), ctl = rollEl('span', 'toolbar');
+      ctl.append(up, down, del);
+      top.append(rollEl('span', 'num', String(i + 1).padStart(2, '0')), ctl);
+      li.append(img, top, alt);
+      // Dragging the photo moves the frame; dropping on the left or right half puts it before or after.
+      li.ondragstart = e => { if (e.target !== img) return e.preventDefault(); e.dataTransfer.setData('text/x-frame', i); e.dataTransfer.effectAllowed = 'move'; };
+      li.ondragover = e => {
+        if (isFileDrag(e)) return;
+        e.preventDefault();
+        const after = e.offsetX > li.offsetWidth / 2 && e.target === li || (e.target !== li && e.clientX > li.getBoundingClientRect().left + li.offsetWidth / 2);
+        li.classList.toggle('drop-after', after);
+        li.classList.toggle('drop-before', !after);
+      };
+      li.ondragleave = e => { if (!li.contains(e.relatedTarget)) li.classList.remove('drop-after', 'drop-before'); };
+      li.ondrop = e => {
+        if (isFileDrag(e)) return;
+        e.preventDefault();
+        const after = li.classList.contains('drop-after');
+        li.classList.remove('drop-after', 'drop-before');
+        const from = +e.dataTransfer.getData('text/x-frame');
+        let to = i + (after ? 1 : 0);
+        if (from < to) to--;
+        move(from, to);
+      };
+      return li;
+    }));
+    if (!r.frames.length) list.append(rollEl('li', 'ed-empty meta', 'No frames yet. Add photos from your library, or drop image files here.'));
+    drawNotes();
+    if (focus) {
+      const btns = list.children[focus[0]]?.querySelectorAll('button');
+      ([...(btns || [])].find(b => b.classList.contains(focus[1]) && !b.disabled) || btns?.[2])?.focus();
+    }
+  }
+
+  function move(from, to, dir) {
+    const fr = roll().frames;
+    if (to < 0 || to >= fr.length || from === to) return;
+    fr.splice(to, 0, fr.splice(from, 1)[0]);
+    changed();
+    drawFrames(dir && [to, dir]);
+  }
+
+  $('#ed-add').onclick = async () => {
+    const picked = await pick(true);
+    if (!picked || !picked.length) return;
+    roll().frames.push(...picked.map(path => ({ src: path, alt: '' })));
+    changed(); drawFrames();
+  };
+  $('#ed-delete').onclick = () => {
+    const r = roll();
+    if (!confirm('Delete "' + (r.title || 'Untitled') + '"? It disappears from the site once you save. The photos stay in your library.')) return;
+    rolls.splice(cur, 1);
+    changed(); drawShelf();
+  };
 
   // ---------- Save ----------
   $('#save').onclick = async () => {
     const btn = $('#save');
-    // Give each book a stable, unique id for its share link; drop photos hidden by a smaller layout.
+    // Each roll keeps a stable, unique id for its link (/photography/#id).
     const ids = new Set();
-    books.forEach(b => {
-      if (!b.id) {
-        let id = slug(b.title) || 'book', n = 1;
-        while (books.some(o => o !== b && o.id === id) || ids.has(id)) id = (slug(b.title) || 'book') + '-' + ++n;
-        b.id = id;
+    rolls.forEach(r => {
+      if (!r.id) {
+        let id = slug(r.title) || 'roll', n = 1;
+        while (rolls.some(o => o !== r && o.id === id) || ids.has(id)) id = (slug(r.title) || 'roll') + '-' + ++n;
+        r.id = id;
       }
-      ids.add(b.id);
-      b.pages.forEach(p => {
-        const n = BOOK_LAYOUTS[p.layout]?.slots ?? 1;
-        p.photos = (p.photos || []).slice(0, n);
-        if (p.alts) p.alts = p.alts.slice(0, n);
-      });
+      ids.add(r.id);
+      r.frames = r.frames.filter(f => f.src);
     });
     btn.disabled = true;
     $('#save-status').textContent = 'Saving…';
     try {
-      booksSha = await saveFile('_data/books.json', JSON.stringify(books, null, 2) + '\n', booksSha, 'Update photo books', btn.dataset.force);
-      savedJSON = JSON.stringify(books);
+      rollsSha = await saveFile('_data/rolls.json', JSON.stringify(rolls, null, 2) + '\n', rollsSha, 'Update rolls', btn.dataset.force);
+      savedJSON = JSON.stringify(rolls);
       delete btn.dataset.force;
       btn.textContent = 'Save & publish';
-      $('#save-status').textContent = 'Saved. Your photo books update on the site in about a minute.';
+      $('#save-status').textContent = 'Saved. Your rolls update on the site in about a minute.';
       setTimeout(() => { $('#savebar').hidden = !dirty(); }, 3000);
     } catch (err) {
       $('#save-status').textContent = failText(err);
@@ -636,8 +430,8 @@ wide: true
     btn.disabled = false;
   };
   $('#discard').onclick = () => {
-    if (!confirm('Discard all unsaved changes to your photo books?')) return;
-    books = JSON.parse(savedJSON);
+    if (!confirm('Discard all unsaved changes to your rolls?')) return;
+    rolls = JSON.parse(savedJSON);
     changed(); drawShelf();
   };
 
@@ -651,26 +445,27 @@ wide: true
   }
 
   function usedIn(path) {
-    return books.filter(b => b.cover === path || b.pages.some(p => (p.photos || []).includes(path))).map(b => b.title || 'Untitled');
+    return rolls.filter(r => r.frames.some(f => f.src === path)).map(r => r.title || 'Untitled');
   }
 
   function drawLibrary() {
     $('#lib').replaceChildren(...library.map(f => {
-      const fig = bookEl('figure');
-      const img = bookEl('img');
+      const fig = rollEl('figure');
+      const img = rollEl('img');
       img.src = src(f.path); img.alt = ''; img.loading = 'lazy';
       const del = button('Delete', async () => {
         const used = usedIn(f.path);
-        const msg = 'Delete ' + f.name + ' from GitHub? This can\'t be undone here.' + (used.length ? ' It is used in: ' + used.join(', ') + ', where it will show as an empty spot.' : '');
+        const msg = 'Delete ' + f.name + ' from GitHub? This can\'t be undone here.' + (used.length ? ' It is used in: ' + used.join(', ') + '. It will be taken off those rolls; save the rolls afterwards.' : '');
         if (!confirm(msg)) return;
         try {
           await gh(f.path.slice(1), { method: 'DELETE', body: { message: 'Delete photo ' + f.name, sha: f.sha } });
           library = library.filter(x => x !== f);
+          if (used.length) { rolls.forEach(r => { r.frames = r.frames.filter(x => x.src !== f.path); }); changed(); if (!$('#editor').hidden) drawFrames(); }
           drawLibrary();
         } catch (err) { $('#lib-status').textContent = 'Not deleted. ' + err.message; }
       }, 'danger mini');
       del.setAttribute('aria-label', 'Delete ' + f.name);
-      fig.append(img, bookEl('span', '', f.name), del);
+      fig.append(img, rollEl('span', '', f.name), del);
       return fig;
     }));
     if (!library.length) $('#lib').textContent = 'No photos yet.';
@@ -725,6 +520,12 @@ wide: true
   addEventListener('dragover', e => { if (isFileDrag(e)) e.preventDefault(); });
   addEventListener('drop', e => { if (isFileDrag(e)) e.preventDefault(); });
   dropZone($('[data-panel="library"]'), files => upload(files, $('#lib-status')));
+  // Image files dropped on a roll's frames are uploaded and added to the end of that roll.
+  dropZone($('#frames'), async files => {
+    const r = roll(), paths = await upload(files, $('#ed-status'));
+    r.frames.push(...paths.map(path => ({ src: path, alt: '' })));
+    if (paths.length) { changed(); if (roll() === r) drawFrames(); }
+  });
   let pickFiles = null; // set while the picker is open
   dropZone($('#picker'), files => pickFiles && pickFiles(files));
 
@@ -732,7 +533,7 @@ wide: true
   // Resolves to an array of chosen paths, or null if cancelled. Single mode returns on the first click.
   function pick(multi, current = '') {
     const dlg = $('#picker'), grid = $('#pick-grid'), chosen = [];
-    $('#pick-title').textContent = multi ? 'Choose photos (one page each)' : 'Choose a photo';
+    $('#pick-title').textContent = multi ? 'Choose photos to add as frames' : 'Choose a photo';
     $('#pick-ok').hidden = !multi;
     $('#pick-status').textContent = library.length ? '' : 'Your library is empty. Upload a photo to get started.';
     return new Promise(resolve => {
@@ -743,11 +544,11 @@ wide: true
           const at = chosen.indexOf(f.path);
           at < 0 ? chosen.push(f.path) : chosen.splice(at, 1);
           btn.setAttribute('aria-pressed', at < 0);
-          $('#pick-ok').textContent = 'Add ' + chosen.length + ' page' + (chosen.length === 1 ? '' : 's');
+          $('#pick-ok').textContent = 'Add ' + chosen.length + ' frame' + (chosen.length === 1 ? '' : 's');
         });
         btn.setAttribute('aria-pressed', multi ? chosen.includes(f.path) : f.path === current);
         btn.setAttribute('aria-label', f.name + (!multi && f.path === current ? ' (current photo)' : ''));
-        const img = bookEl('img');
+        const img = rollEl('img');
         img.src = src(f.path); img.alt = ''; img.loading = 'lazy';
         btn.append(img);
         return btn;
@@ -802,19 +603,19 @@ wide: true
   function cvStructure() { drawCv(); cvChanged(); }
 
   function cvField(obj, key, label, { multiline = false, placeholder = '' } = {}) {
-    const l = bookEl('label');
-    const input = bookEl(multiline ? 'textarea' : 'input');
+    const l = rollEl('label');
+    const input = rollEl(multiline ? 'textarea' : 'input');
     input.value = obj[key] || '';
     input.placeholder = placeholder;
     if (multiline) { input.rows = 2; input.style.minHeight = 'auto'; }
     input.oninput = () => { obj[key] = input.value; cvChanged(); };
-    l.append(bookEl('span', '', label), input);
+    l.append(rollEl('span', '', label), input);
     return l;
   }
 
   // ↑ ↓ × controls for item `i` of `arr`.
   function cvControls(arr, i, what) {
-    const box = bookEl('span', 'toolbar cv-ctl');
+    const box = rollEl('span', 'toolbar cv-ctl');
     const mk = (t, label, fn, cls) => { const b = button(t, fn, 'mini ' + (cls || '')); b.setAttribute('aria-label', label); return b; };
     const up = mk('↑', 'Move ' + what + ' up', () => { arr.splice(i - 1, 0, arr.splice(i, 1)[0]); cvStructure(); });
     const down = mk('↓', 'Move ' + what + ' down', () => { arr.splice(i + 1, 0, arr.splice(i, 1)[0]); cvStructure(); });
@@ -825,27 +626,27 @@ wide: true
   }
 
   function cvLine(field, controls) {
-    const line = bookEl('div', 'cv-line');
+    const line = rollEl('div', 'cv-line');
     line.append(field, controls);
     return line;
   }
 
   function drawCv() {
     const form = $('#cv-form');
-    const head = bookEl('div', 'cv-card');
-    head.append(bookEl('h3', '', 'Header'), cvField(cv, 'name', 'Name'), cvField(cv, 'role', 'Title'),
+    const head = rollEl('div', 'cv-card');
+    head.append(rollEl('h3', '', 'Header'), cvField(cv, 'name', 'Name'), cvField(cv, 'role', 'Title'),
       cvField(cv, 'intro', 'Short intro, a sentence or two in your own words (optional; left out of the PDF)', { multiline: true }));
-    const contact = bookEl('div', 'cv-list');
-    contact.append(bookEl('span', 'meta', 'Contact & links (leave the link empty for plain text)'));
+    const contact = rollEl('div', 'cv-list');
+    contact.append(rollEl('span', 'meta', 'Contact & links (leave the link empty for plain text)'));
     cv.contact.forEach((c, i) => {
-      const g = bookEl('div', 'cv-grid');
+      const g = rollEl('div', 'cv-grid');
       g.append(cvField(c, 'label', 'Text'), cvField(c, 'url', 'Link', { placeholder: 'https://…, mailto:… or tel:…' }));
-      const only = bookEl('label', 'check');
-      const box = bookEl('input');
+      const only = rollEl('label', 'check');
+      const box = rollEl('input');
       box.type = 'checkbox';
       box.checked = !!c.printOnly;
       box.onchange = () => { if (box.checked) c.printOnly = true; else delete c.printOnly; cvChanged(); };
-      only.append(box, bookEl('span', '', 'PDF only (hidden on the website, but still in its source code)'));
+      only.append(box, rollEl('span', '', 'PDF only (hidden on the website, but still in its source code)'));
       g.append(only);
       contact.append(cvLine(g, cvControls(cv.contact, i, 'link')));
     });
@@ -853,46 +654,46 @@ wide: true
     head.append(contact);
 
     const sections = cv.sections.map((s, si) => {
-      const card = bookEl('details', 'cv-card');
+      const card = rollEl('details', 'cv-card');
       card.open = !collapsed.has(s);
       card.ontoggle = () => card.open ? collapsed.delete(s) : collapsed.add(s);
-      const sum = bookEl('summary', '', (s.title || 'Untitled section'));
-      sum.append(bookEl('span', 'meta', ' · ' + SECTION_TYPES[s.type || 'entries']));
+      const sum = rollEl('summary', '', (s.title || 'Untitled section'));
+      sum.append(rollEl('span', 'meta', ' · ' + SECTION_TYPES[s.type || 'entries']));
       card.append(sum, cvLine(cvField(s, 'title', 'Section title'), cvControls(cv.sections, si, 'section')));
       s.items = s.items || [];
 
       if (s.type === 'tags') {
-        const l = bookEl('label');
-        const ta = bookEl('textarea');
+        const l = rollEl('label');
+        const ta = rollEl('textarea');
         ta.rows = 2; ta.style.minHeight = 'auto';
         ta.value = s.items.join(', ');
         ta.oninput = () => { s.items = ta.value.split(',').map(t => t.trim()).filter(Boolean); cvChanged(); };
-        l.append(bookEl('span', '', 'Items, separated by commas'), ta);
+        l.append(rollEl('span', '', 'Items, separated by commas'), ta);
         card.append(l);
       } else if (s.type === 'pairs') {
         s.items.forEach((p, i) => {
-          const g = bookEl('div', 'cv-grid');
+          const g = rollEl('div', 'cv-grid');
           g.append(cvField(p, 'title', 'Name'), cvField(p, 'right', 'Detail'));
           card.append(cvLine(g, cvControls(s.items, i, 'row')));
         });
         card.append(button('+ Add row', () => { s.items.push({ title: '', right: '' }); cvStructure(); }, 'mini'));
       } else {
         s.items.forEach((it, i) => {
-          const item = bookEl('div', 'cv-item');
-          const top = bookEl('div', 'cv-item-head');
-          top.append(bookEl('strong', '', it.title || 'New entry'), cvControls(s.items, i, 'entry'));
-          const g = bookEl('div', 'cv-grid');
+          const item = rollEl('div', 'cv-item');
+          const top = rollEl('div', 'cv-item-head');
+          top.append(rollEl('strong', '', it.title || 'New entry'), cvControls(s.items, i, 'entry'));
+          const g = rollEl('div', 'cv-grid');
           g.append(
             cvField(it, 'title', 'Title', { placeholder: 'Company, school…' }), cvField(it, 'right', 'Right side', { placeholder: 'Location, year…' }),
             cvField(it, 'subtitle', 'Subtitle', { placeholder: 'Role, degree…' }), cvField(it, 'subright', 'Right side', { placeholder: 'Jan 2024 – Present' }),
           );
           item.append(top, g, cvField(it, 'text', 'Description (optional)', { multiline: true }));
           it.bullets = it.bullets || [];
-          const bl = bookEl('div', 'cv-list');
-          bl.append(bookEl('span', 'meta', 'Bullet points'));
+          const bl = rollEl('div', 'cv-list');
+          bl.append(rollEl('span', 'meta', 'Bullet points'));
           it.bullets.forEach((b, bi) => {
-            const l = bookEl('label');
-            const ta = bookEl('textarea');
+            const l = rollEl('label');
+            const ta = rollEl('textarea');
             ta.rows = 2; ta.style.minHeight = 'auto';
             ta.value = b;
             ta.setAttribute('aria-label', 'Bullet ' + (bi + 1));
@@ -912,11 +713,11 @@ wide: true
       return card;
     });
 
-    const add = bookEl('div', 'cv-card');
-    const type = bookEl('select');
+    const add = rollEl('div', 'cv-card');
+    const type = rollEl('select');
     type.setAttribute('aria-label', 'New section type');
-    Object.entries(SECTION_TYPES).forEach(([k, v]) => { const o = bookEl('option', '', v); o.value = k; type.append(o); });
-    const row = bookEl('div', 'toolbar');
+    Object.entries(SECTION_TYPES).forEach(([k, v]) => { const o = rollEl('option', '', v); o.value = k; type.append(o); });
+    const row = rollEl('div', 'toolbar');
     row.append(type, button('+ Add section', () => {
       cv.sections.push({ title: 'New section', type: type.value, items: [] });
       cvStructure();
