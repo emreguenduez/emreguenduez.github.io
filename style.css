@@ -28,7 +28,7 @@
   --danger: #a63a26;
   --field: #8f877a;     /* input borders, 3:1 on paper */
   --needs: #9a4a1e;     /* things still to do in the editor */
-  /* the darkroom band and the photography page are always dark */
+  /* the darkroom band, film strips and lightbox are always dark */
   --dr-bg: #1a1715; --dr-film: #2a2420; --dr-text: #ece4d8; --dr-muted: #a39887; --dr-light: #ff6a45; --dr-edge: #e8a33d;
   --display: "Instrument Serif", Georgia, serif;
   --serif: var(--display);
@@ -43,7 +43,7 @@
     --danger: #ee8c77; --field: #6e675c; --needs: #e0a070; color-scheme: dark;
   }
 }
-:root[data-theme="dark"], :root[data-darkroom] {
+:root[data-theme="dark"] {
   --bg: #131110; --text: #ece4d8; --soft: #cfc6b8; --muted: #a39887; --accent: #ff6a45; --line: #3a332d;
   --danger: #ee8c77; --field: #6e675c; --needs: #e0a070; color-scheme: dark;
 }
@@ -117,6 +117,9 @@ p { margin: 6px 0 0; }
 }
 .dl:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 a.dl { display: inline-block; text-decoration: none; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.dl.ghost { color: var(--text); background: none; border-color: var(--text); }
+.dl.ghost:hover { color: var(--accent); background: none; border-color: var(--accent); }
 
 /* Home: the newest roll sits in a darkroom band, full width, under the safelight */
 .darkroom-band {
@@ -132,12 +135,12 @@ a.dl { display: inline-block; text-decoration: none; }
 .safelight::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px 1px currentColor; }
 .strip-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; margin-bottom: 12px; font: 0.875rem var(--mono); }
 /* 35 mm film: the base is a translucent amber-brown, and the perforations are real holes (a mask),
-   rounded rectangles at the standard pitch of 4.75 mm, scaled to about 4.6 px per mm */
+   upright rounded rectangles at the standard pitch of 4.75 mm, scaled to about 4.6 px per mm */
 .film { --base: #2c2119; filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.45)); }
 .film::before, .film::after {
   content: ""; display: block; height: 26px;
   background: linear-gradient(var(--base), var(--base)), linear-gradient(90deg, rgb(255 255 255 / 0.04), transparent 30% 70%, rgb(255 255 255 / 0.04));
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='26'%3E%3Cpath fill='%23fff' fill-rule='evenodd' d='M0 0h22v26H0z M6 8.5h10a1.6 1.6 0 0 1 1.6 1.6v5.8a1.6 1.6 0 0 1-1.6 1.6H6a1.6 1.6 0 0 1-1.6-1.6v-5.8A1.6 1.6 0 0 1 6 8.5z'/%3E%3C/svg%3E") 0 0 / 22px 26px repeat-x; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='26'%3E%3Cpath fill='%23fff' fill-rule='evenodd' d='M0 0h22v26H0z M6 8.5h10a1.6 1.6 0 0 1 1.6 1.6v5.8a1.6 1.6 0 0 1-1.6 1.6H6a1.6 1.6 0 0 1-1.6-1.6v-5.8A1.6 1.6 0 0 1 6 8.5z'/%3E%3C/svg%3E") 0 0 / 22px 26px repeat-x;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='26'%3E%3Cpath fill='%23fff' fill-rule='evenodd' d='M0 0h22v26H0z M8.3 6.5h5.4a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5H8.3a1.5 1.5 0 0 1-1.5-1.5V8a1.5 1.5 0 0 1 1.5-1.5z'/%3E%3C/svg%3E") 0 0 / 22px 26px repeat-x; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='26'%3E%3Cpath fill='%23fff' fill-rule='evenodd' d='M0 0h22v26H0z M8.3 6.5h5.4a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5H8.3a1.5 1.5 0 0 1-1.5-1.5V8a1.5 1.5 0 0 1 1.5-1.5z'/%3E%3C/svg%3E") 0 0 / 22px 26px repeat-x;
 }
 .film .frames { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 9px; padding: 0 9px; background: var(--base); }
 .frame { display: block; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; text-decoration: none; }
@@ -175,12 +178,12 @@ a.dl { display: inline-block; text-decoration: none; }
 /* "Download PDF" serves a pre-built file; these rules are what prints it onto one A4 sheet */
 @page { size: A4; margin: 10mm 13mm; }
 @media print {
-  :root, :root[data-theme], :root[data-darkroom] {
+  :root, :root[data-theme] {
     --bg: #fff; --text: #1c1b18; --soft: #1c1b18; --muted: #55504a; --accent: #b33a1a; --line: #b9b2a5;
   }
   body { font-size: 8.4pt; line-height: 1.24; overflow: visible; }
   main { max-width: none; padding: 0; }
-  .dl, a.dl, .intro, .screen-only, .now { display: none; }
+  .dl, a.dl, .actions, .intro, .screen-only, .now { display: none; }
   .print-only { display: inline; }
   a { text-decoration: underline; text-decoration-thickness: 0.5pt; text-underline-offset: 1.5pt; text-decoration-color: currentColor; }
   header h1 { font-size: 24pt; line-height: 1; }
@@ -238,7 +241,6 @@ nav .langs-switch a[aria-current] { text-underline-offset: 6px; }
 }
 .theme:hover { color: var(--accent); }
 .theme .lamp { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-:root[data-darkroom] .theme { display: none; }
 footer {
   width: min(1060px, 100% - 2 * max(20px, env(safe-area-inset-left), env(safe-area-inset-right))); margin: 96px auto 0; padding: 18px 0 max(40px, env(safe-area-inset-bottom)); border-top: 1px solid var(--text);
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; font-size: 0.8125rem; color: var(--muted);
@@ -399,7 +401,8 @@ footer nav a { padding: 12px 0; }
   #resume > section > h2, .band-head h2 { margin: 0; padding-top: 1px; }
   header:has(> .now) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 48px; }
   header:has(> .now) > * { grid-column: 1; }
-  header > .now { grid-column: 2; grid-row: 1 / span 4; align-self: end; margin-top: 0; }
+  /* now.txt starts level with the intro paragraph */
+  header > .now { grid-column: 2; grid-row: 3 / span 2; align-self: start; margin-top: 14px; }
   .project { grid-template-columns: 260px minmax(0, 1fr); column-gap: 56px; }
   .project:has(> img) { grid-template-columns: 260px minmax(0, 1fr) 200px; }
   .project > .row { grid-column: 1; grid-row: 1 / span 4; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; }

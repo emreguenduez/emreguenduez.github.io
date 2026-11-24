@@ -2,7 +2,7 @@
 {%- assign t = site.data.i18n[lang] -%}
 {%- assign langs = "en,de" | split: "," -%}
 <!doctype html>
-<html lang="{{ lang }}"{% if page.darkroom %} data-darkroom{% endif %}>
+<html lang="{{ lang }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -47,7 +47,7 @@
 </div>
 </main>
 <footer>
-  <span>© {{ site.time | date: "%Y" }} · {{ t.built_with }} · bonn</span>
+  <span>© {{ site.time | date: "%Y" }} · bonn</span>
   <nav aria-label="Contact">
     {% for c in site.data.resume.contact %}{% if c.url and c.url != "" and c.printOnly != true %}<a href="{{ c.url }}">{% if c.url contains "mailto:" %}{{ t.email }}{% else %}{{ c.label }}{% endif %}</a>{% endif %}{% endfor %}
   </nav>

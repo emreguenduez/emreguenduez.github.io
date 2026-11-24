@@ -75,21 +75,29 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
     links.append(resumeLink({ url: siteUrl, label: siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '') }, (window.T && T.website_label) || 'Personal Website'));
     links.lastChild.classList.add('print-only');
   }
-  if (downloadButton) {
-    // A real file works on every phone; print() does nothing in many mobile and in-app browsers.
-    const dl = resumeEl(pdfUrl ? 'a' : 'button', 'dl', (window.T && T.download_pdf) || 'Download PDF');
-    if (pdfUrl) { dl.href = pdfUrl; dl.download = (window.T && T.pdf_file) || 'M-Emre-Guenduez-Resume.pdf'; }
-    else { dl.type = 'button'; dl.onclick = () => print(); }
-    links.append(dl);
-  }
   header.append(links);
   // now.txt: what's current, as a terminal would print it (screen only)
   const now = (cv.now || []).filter(n => n.k && n.v);
+  let box = null;
   if (now.length) {
-    const box = resumeEl('div', 'now screen-only'), dl = resumeEl('dl');
-    now.forEach(n => { const dd = resumeEl('dd'); dd.append(resumeInline(n.v)); dl.append(resumeEl('dt', '', n.k), dd); });
-    box.append(resumeEl('div', 'now-cmd', '~ $ cat now.txt'), dl);
+    box = resumeEl('div', 'now screen-only');
+    const list = resumeEl('dl');
+    now.forEach(n => { const dd = resumeEl('dd'); dd.append(resumeInline(n.v)); list.append(resumeEl('dt', '', n.k), dd); });
+    box.append(resumeEl('div', 'now-cmd', '~ $ cat now.txt'), list);
     header.append(box);
+  }
+  if (downloadButton) {
+    // The PDF as a file name, and GitHub beside it; they sit under now.txt, or under the links without it.
+    const actions = resumeEl('div', 'actions');
+    // A real file works on every phone; print() does nothing in many mobile and in-app browsers.
+    const dl = resumeEl(pdfUrl ? 'a' : 'button', 'dl', (window.T && T.pdf_name) || 'resume.pdf');
+    dl.setAttribute('aria-label', dl.textContent + ', ' + ((window.T && T.download_pdf) || 'Download PDF')); // keeps the visible name first
+    if (pdfUrl) { dl.href = pdfUrl; dl.download = (window.T && T.pdf_file) || 'M-Emre-Guenduez-Resume.pdf'; }
+    else { dl.type = 'button'; dl.onclick = () => print(); }
+    actions.append(dl);
+    const gh = (cv.contact || []).find(c => /github\.com/.test(c.url || '') && SAFE_URL.test(c.url));
+    if (gh) { const a = resumeEl('a', 'dl ghost', 'github'); a.href = gh.url; actions.append(a); }
+    if (box) box.append(actions); else links.after(actions);
   }
   const parts = [header];
 
