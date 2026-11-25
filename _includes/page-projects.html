@@ -14,7 +14,7 @@
   <li class="project">
     <div class="row"><h2>{{ p.name }}</h2>{% if p.year %}<span class="meta">{{ p.year }}</span>{% endif %}</div>
     {%- if desc %}<p>{{ desc }}</p>{% endif %}
-    {%- if p.tags %}<p class="meta tagline">{{ p.tags | join: " · " }}</p>{% endif %}
+    {%- if p.tags %}<p class="meta tagline">{% for tag in p.tags %}<span>{{ tag }}{% unless forloop.last %} ·{% endunless %}</span> {% endfor %}</p>{% endif %}
     {%- if p.url or p.repo %}
     <p class="plinks">
       {%- if p.url %}<a href="{{ p.url }}">{{ t.website }}</a>{% endif %}

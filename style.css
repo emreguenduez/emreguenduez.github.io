@@ -41,11 +41,13 @@
   :root:not([data-theme="light"]) {
     --bg: #131110; --text: #ece4d8; --soft: #cfc6b8; --muted: #a39887; --accent: #ff6a45; --line: #3a332d;
     --danger: #ee8c77; --field: #6e675c; --needs: #e0a070; color-scheme: dark;
+    --dr-bg: #0b0a09; --band-edge: #2e2823; /* the darkroom band sits deeper than the dark page */
   }
 }
 :root[data-theme="dark"] {
   --bg: #131110; --text: #ece4d8; --soft: #cfc6b8; --muted: #a39887; --accent: #ff6a45; --line: #3a332d;
   --danger: #ee8c77; --field: #6e675c; --needs: #e0a070; color-scheme: dark;
+  --dr-bg: #0b0a09; --band-edge: #2e2823;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -91,6 +93,9 @@ h2 { margin: 0 0 18px; font: 400 2.125rem/1.1 var(--display); color: var(--text)
 .row.meta, .row.sub { margin-top: 2px; }
 .subtitle { font-weight: 500; color: var(--soft); }
 .row.sub .meta { font-size: 0.8125rem; }
+/* Phones: the date or place always takes its own line, instead of only when the title is long */
+@media screen and (max-width: 640px) { #resume .row { flex-direction: column; align-items: flex-start; gap: 0; } }
+@media screen { :lang(de) .item li, :lang(de) .item p, :lang(de) header .intro { hyphens: auto; hyphenate-limit-chars: 10 4 4; } }
 .print-only { display: none; }
 ul { margin: 10px 0 0; padding-left: 18px; }
 li + li { margin-top: 6px; }
@@ -125,7 +130,9 @@ a.dl { display: inline-block; text-decoration: none; }
 .darkroom-band {
   border-top: 0; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
   background: var(--dr-bg); color: var(--dr-text); padding: 56px 0 64px;
+  border-block: 1px solid var(--band-edge, transparent);
 }
+.darkroom-band + section { border-top: 0; } /* the band already separates them */
 .darkroom-band > .inner { max-width: 1100px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left)); }
 .darkroom-band h2 { color: var(--dr-text); }
 .darkroom-band .cmd, .darkroom-band .meta { color: var(--dr-muted); }
@@ -149,8 +156,13 @@ a.dl { display: inline-block; text-decoration: none; }
 .frame .neg { position: relative; display: block; }
 .frame .neg::after { content: ""; position: absolute; inset: 0; background: #c9773a; mix-blend-mode: multiply; opacity: 0.55; transition: opacity 0.35s ease; pointer-events: none; }
 .frame img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 1.5px; filter: invert(1); transition: filter 0.35s ease; }
-.frame:hover img, .frame:focus-visible img, .frame.positive img { filter: none; }
-.frame:hover .neg::after, .frame:focus-visible .neg::after, .frame.positive .neg::after { opacity: 0; }
+.frame:hover img, .frame:focus-visible img { filter: none; }
+.frame:hover .neg::after, .frame:focus-visible .neg::after { opacity: 0; }
+/* Touch screens have no hover to develop with, so they get the positives straight away */
+@media (hover: none) {
+  .frame img { filter: none; }
+  .frame .neg::after { opacity: 0; }
+}
 .frame:focus-visible { outline: 2px solid var(--dr-light); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .frame img, .frame .neg::after { transition: none; } }
 .also { margin-top: 14px; font: 0.875rem var(--mono); color: var(--dr-muted); }
@@ -164,15 +176,22 @@ a.dl { display: inline-block; text-decoration: none; }
 .roll-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 16px; margin-bottom: 14px; }
 .roll-head h2 { margin: 0; }
 .roll .film + .film { margin-top: 14px; }
-.lightbox { border: 0; padding: 16px; margin: auto; width: 100vw; height: 100vh; max-width: none; max-height: none; background: transparent; color: var(--dr-text); }
+.lightbox { border: 0; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); margin: auto; width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; background: transparent; color: var(--dr-text); }
 .lightbox::backdrop { background: rgb(10 9 8 / 0.95); }
 .lightbox[open] { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
-.lightbox figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 0; cursor: zoom-out; }
-.lightbox img { max-width: 100%; max-height: calc(100vh - 140px); object-fit: contain; }
+.lightbox figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 0; }
+.lightbox img { max-width: 100%; max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); object-fit: contain; touch-action: pan-y; user-select: none; -webkit-user-drag: none; }
 .lightbox figcaption { max-width: 44em; text-align: center; color: var(--dr-muted); font-size: 0.9375rem; }
 .lightbox .count { margin-right: 8px; color: var(--dr-edge); }
 .lb-controls { display: flex; gap: 10px; }
 .lb-controls button { min-height: 44px; padding: 8px 16px; font: 0.875rem var(--mono); color: var(--dr-text); background: none; border: 1px solid var(--dr-muted); cursor: pointer; }
+/* Phones: the photo takes the middle of the screen and the controls sit at the bottom, under the thumb */
+@media (max-width: 640px) {
+  .lightbox[open] { justify-content: space-between; }
+  .lightbox figure { flex: 1; justify-content: center; width: 100%; }
+  .lb-controls { width: 100%; }
+  .lb-controls button { flex: 1; padding: 8px; }
+}
 .lb-controls button:hover { border-color: var(--dr-light); color: var(--dr-light); }
 
 /* "Download PDF" serves a pre-built file; these rules are what prints it onto one A4 sheet */
@@ -232,6 +251,11 @@ nav .prompt { color: var(--muted); margin-right: 8px; }
 nav a.path::before { content: "./" / ""; }
 nav a[aria-current] { color: var(--text); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 8px; }
 .navtools { margin-left: auto; display: flex; align-items: center; gap: 4px 20px; }
+/* Phones: the prompt gives way, so the name and resume.pdf make the first screen */
+@media (max-width: 640px) {
+  nav { margin-bottom: 28px; gap: 0 20px; }
+  nav .prompt { display: none; }
+}
 .langs-switch { display: flex; gap: 12px; font-size: 0.8125rem; }
 .langs-switch a { padding: 12px 2px; min-width: 24px; text-align: center; }
 nav .langs-switch a[aria-current] { text-underline-offset: 6px; }
@@ -261,6 +285,7 @@ footer nav a { padding: 12px 0; }
 .project p { margin: 0; color: var(--soft); }
 .project .meta { color: var(--muted); }
 .project .tagline { font-size: 0.8125rem; }
+.project .tagline span { white-space: nowrap; } /* a wrapped line never starts with a dot */
 .project .plinks { display: flex; gap: 18px; margin-top: 6px; font: 0.875rem var(--mono); }
 .project .plinks a { padding: 6px 0; }
 .project img { grid-column: 2; grid-row: 1 / span 4; width: 168px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 4px; }
@@ -390,6 +415,11 @@ footer nav a { padding: 12px 0; }
 .admin .choice button:hover:not(:disabled) { background: none; color: var(--text); }
 .admin .choice button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
 
+/* Tablets and up: section titles take a left column, like a printed CV */
+@media screen and (min-width: 760px) {
+  #resume > section:not(.darkroom-band), .darkroom-band > .inner { display: grid; grid-template-columns: clamp(200px, 22vw, 220px) minmax(0, 1fr); column-gap: clamp(32px, 4.5vw, 56px); }
+  #resume > section > h2, .band-head h2 { margin: 0; padding-top: 1px; }
+}
 /* Every page shares the photography width. To keep lines readable at that width,
    section titles take a left column (like a printed CV) and the content runs beside them. */
 @media screen and (min-width: 900px) {
@@ -397,12 +427,11 @@ footer nav a { padding: 12px 0; }
   header .intro { max-width: 36em; }
   /* long lines get hard to follow; keep resume text near 75 characters while dates stay right-aligned */
   #resume .item > p, #resume .item > ul { max-width: 75ch; }
-  #resume > section:not(.darkroom-band), .darkroom-band > .inner { display: grid; grid-template-columns: 220px minmax(0, 1fr); column-gap: 56px; }
-  #resume > section > h2, .band-head h2 { margin: 0; padding-top: 1px; }
   header:has(> .now) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 48px; }
   header:has(> .now) > * { grid-column: 1; }
   /* now.txt starts level with the intro paragraph */
-  header > .now { grid-column: 2; grid-row: 3 / span 2; align-self: start; margin-top: 14px; }
+  header > .now { grid-column: 2; grid-row: 3; align-self: start; margin-top: 14px; }
+  header:has(> .now) > .actions { grid-column: 2; grid-row: 4; align-self: start; }
   .project { grid-template-columns: 260px minmax(0, 1fr); column-gap: 56px; }
   .project:has(> img) { grid-template-columns: 260px minmax(0, 1fr) 200px; }
   .project > .row { grid-column: 1; grid-row: 1 / span 4; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; }
@@ -411,11 +440,19 @@ footer nav a { padding: 12px 0; }
 }
 .admin label.check { display: flex; align-items: center; gap: 8px; grid-column: 1 / -1; }
 .admin label.check input { width: 18px; height: 18px; }
-@media (pointer: coarse) { .dl { padding: 12px 18px; } }
+/* Touch: every link and button gets a target of at least 44px; text-run links in sentences are left alone */
+@media (pointer: coarse) {
+  .dl { padding: 12px 18px; }
+  nav a { padding: 11px 0; }
+  .langs-switch { gap: 0; }
+  .langs-switch a { min-width: 44px; }
+  footer nav a { min-width: 44px; text-align: center; }
+  .strip-head a, .also a, .more a, .project .plinks a { display: inline-flex; align-items: center; min-height: 44px; }
+}
 .cv-langs { max-width: 360px; margin: 4px 0 10px; }
 
 /* Skip link: hidden until keyboard focus reaches it */
-.skip { position: absolute; left: 12px; top: -100px; z-index: 50; padding: 10px 16px; border-radius: 6px; background: var(--text); color: var(--bg); font: 0.9375rem var(--sans); text-decoration: none; }
+.skip { position: absolute; left: 12px; top: -100px; z-index: 50; padding: 12px 16px; border-radius: 6px; background: var(--text); color: var(--bg); font: 0.9375rem var(--sans); text-decoration: none; }
 .skip:focus { top: 12px; }
 .skip:hover { color: var(--bg); }
 
@@ -424,7 +461,8 @@ footer nav a { padding: 12px 0; }
 #content:focus { outline: none; }
 
 /* Contact links in the resume header get a comfortable tap height on screen (print keeps its compact line) */
-@media screen { header .links a:not(.print-only):not(.dl) { display: inline-block; padding: 8px 0; } } /* PDF-only links (the phone) must stay hidden */
+@media screen { header .links a:not(.print-only):not(.dl) { display: inline-block; padding: 8px 0; } }
+@media screen and (pointer: coarse) { header .links a:not(.print-only):not(.dl) { display: inline-flex; align-items: center; min-height: 44px; padding: 0; } } /* PDF-only links (the phone) must stay hidden */
 /* Admin tabs: two rows on narrow phones instead of a row that hides "Projects" */
 @media (max-width: 420px) {
   .tabs { display: grid; grid-template-columns: 1fr 1fr; mask-image: none; }

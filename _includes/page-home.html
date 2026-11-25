@@ -19,7 +19,7 @@
 <script id="rolls-data" type="application/json">{{ site.data.rolls | jsonify | replace: "</", "<\/" }}</script>
 <script src="{{ '/rolls.js' | relative_url }}"></script>
 <script>
-  // The newest roll as one strip of negatives; each frame opens its contact sheet on the photography page.
+  // The newest roll as one strip of negatives.
   (() => {
     const rolls = (JSON.parse(document.getElementById('rolls-data').textContent) || []).slice().reverse();
     const r = rolls[0], src = p => '{{ site.baseurl }}' + p;
@@ -28,7 +28,8 @@
     const head = rollEl('div', 'strip-head'), open = rollEl('a', '', T.open_named.replace('{title}', (r.title || 'Untitled').toLowerCase()) + ' →');
     open.href = href(r);
     head.append(rollEl('span', '', [(r.id || 'roll') + '/', frames.length + ' {{ t.frames }}', r.subtitle].filter(Boolean).join(' · ')), open);
-    const strip = rollStrip(frames.slice(0, 6), 0, () => { const a = rollEl('a'); a.href = href(r); return a; });
+    // Each frame opens that photo in the photography page's lightbox (#roll/3).
+    const strip = rollStrip(frames.slice(0, 6), 0, (f, n) => { const a = rollEl('a'); a.href = href(r) + '/' + (n + 1); return a; });
     const parts = [head, strip];
     if (rolls.length > 1) {
       const also = rollEl('p', 'also', '');
@@ -39,7 +40,6 @@
     }
     const peek = document.getElementById('peek');
     peek.append(...parts);
-    rollDevelopOnTap(peek);
   })();
 </script>
 {%- endif %}

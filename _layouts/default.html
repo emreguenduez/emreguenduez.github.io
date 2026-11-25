@@ -59,8 +59,10 @@
   const paint = () => {
     // The button names where it goes: on paper it offers the darkroom, and back.
     const dark = currentTheme() === 'dark';
-    themeBtn.querySelector('.label').textContent = dark ? T.to_light : T.to_dark;
-    themeBtn.setAttribute('aria-label', T.theme + ': ' + (dark ? T.dark : T.light) + '. ' + (dark ? T.switch_to_light : T.switch_to_dark));
+    const label = dark ? T.to_light : T.to_dark;
+    themeBtn.querySelector('.label').textContent = label;
+    // The spoken name starts with the visible word, so voice control can say "click daylight".
+    themeBtn.setAttribute('aria-label', label + ', ' + (dark ? T.switch_to_light : T.switch_to_dark));
   };
   themeBtn.onclick = () => {
     const next = currentTheme() === 'dark' ? 'light' : 'dark';

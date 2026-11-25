@@ -8,7 +8,7 @@
 <p class="empty" id="no-rolls" hidden>{{ t.no_books }}</p>
 
 <dialog class="lightbox" aria-label="{{ t.enlarge }}">
-  <figure><img alt=""><figcaption><span class="count meta"></span> <span class="alt"></span></figcaption></figure>
+  <figure><img alt=""><figcaption aria-live="polite"><span class="count meta"></span> <span class="alt"></span></figcaption></figure>
   <div class="lb-controls">
     <button class="prev" type="button">← {{ t.prev_frame }}</button>
     <button class="close" type="button" autofocus>{{ t.close }}</button>
@@ -19,11 +19,14 @@
 <script id="rolls-data" type="application/json">{{ site.data.rolls | jsonify | replace: "</", "<\/" }}</script>
 <script src="{{ '/rolls.js' | relative_url }}"></script>
 <script>
-  // Newest roll first; each is a contact sheet of six-frame strips, with an anchor (#id) to link to it.
-  const rolls = (JSON.parse(document.getElementById('rolls-data').textContent || '[]') || []).slice().reverse();
-  const src = p => '{{ site.baseurl }}' + p;
+  // Newest roll first; each is a contact sheet of six-frame strips (three on phones), with an anchor (#id) to link to it.
+  // #id/3 opens frame 3 of that roll in the lightbox; the home page links its frames that way.
+  const rolls = (JSON.parse(document.getElementById('rolls-data').textContent || '[]') || []).slice().reverse()
+    .map(r => ({ ...r, frames: (r.frames || []).map(f => ({ ...f, src: '{{ site.baseurl }}' + f.src })) }))
+    .filter(r => r.frames.length);
   const root = document.getElementById('rolls');
   const lb = document.querySelector('.lightbox'), lbImg = lb.querySelector('img');
+  const narrow = matchMedia('(max-width: 640px)');
   let shown = null, at = 0;
 
   const show = i => {
@@ -32,35 +35,59 @@
     lb.querySelector('.count').textContent = String(at + 1).padStart(2, '0') + ' / ' + String(shown.length).padStart(2, '0');
     lb.querySelector('.alt').textContent = shown[at].alt;
   };
+  const open = (frames, i) => { shown = frames; show(i); if (!lb.open) lb.showModal(); };
 
-  rolls.forEach((r, ri) => {
-    const frames = (r.frames || []).map(f => ({ ...f, src: src(f.src) }));
-    if (!frames.length) return;
-    const sec = rollEl('section', 'roll');
-    sec.id = r.id;
-    const head = rollEl('div', 'roll-head');
-    head.append(rollEl('h2', '', r.title || 'Untitled'),
-      rollEl('span', 'meta', ['{{ t.roll }} ' + String(rolls.length - ri).padStart(2, '0'), r.subtitle, frames.length + ' {{ t.frames }}'].filter(Boolean).join(' · ')));
-    sec.append(head);
-    for (let i = 0; i < frames.length; i += 6) {
-      sec.append(rollStrip(frames.slice(i, i + 6), i, (f, n) => {
-        const b = rollEl('button');
-        b.type = 'button';
-        b.onclick = () => { shown = frames; show(n); lb.showModal(); };
-        return b;
-      }));
-    }
-    root.append(sec);
-  });
-  document.getElementById('no-rolls').hidden = root.children.length > 0;
-  rollDevelopOnTap(root);
+  const render = () => {
+    const per = narrow.matches ? 3 : 6; // a strip is cut where the row ends, so the sprockets never span two rows
+    root.replaceChildren(...rolls.map((r, ri) => {
+      const sec = rollEl('section', 'roll');
+      sec.id = r.id;
+      const head = rollEl('div', 'roll-head');
+      head.append(rollEl('h2', '', r.title || 'Untitled'),
+        rollEl('span', 'meta', ['{{ t.roll }} ' + String(rolls.length - ri).padStart(2, '0'), r.subtitle, r.frames.length + ' {{ t.frames }}'].filter(Boolean).join(' · ')));
+      sec.append(head);
+      for (let i = 0; i < r.frames.length; i += per) {
+        sec.append(rollStrip(r.frames.slice(i, i + per), i, (f, n) => {
+          const b = rollEl('button');
+          b.type = 'button';
+          b.onclick = () => open(r.frames, n);
+          return b;
+        }));
+      }
+      return sec;
+    }));
+  };
+  render();
+  narrow.addEventListener('change', render);
+  document.getElementById('no-rolls').hidden = rolls.length > 0;
+
+  const fromHash = () => {
+    const m = decodeURIComponent(location.hash).match(/^#(.+)\/(\d+)$/);
+    const r = m && rolls.find(r => r.id === m[1]);
+    if (!r) return;
+    document.getElementById(r.id).scrollIntoView();
+    open(r.frames, Math.min(+m[2], r.frames.length) - 1);
+  };
+  fromHash();
+  addEventListener('hashchange', fromHash);
 
   lb.querySelector('.prev').onclick = () => show(at - 1);
   lb.querySelector('.next').onclick = () => show(at + 1);
   lb.querySelector('.close').onclick = () => lb.close();
-  lb.addEventListener('click', e => { if (e.target === lb || e.target.closest('figure')) lb.close(); });
+  // Only the dark surround closes it, so a stray tap on the photo doesn't.
+  lb.addEventListener('click', e => { if (!e.target.closest('img, figcaption, button')) lb.close(); });
   lb.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') show(at - 1);
     if (e.key === 'ArrowRight') show(at + 1);
   });
+  // Swipe left or right on the photo for the next or previous frame.
+  let x0 = null;
+  lbImg.addEventListener('pointerdown', e => { x0 = e.clientX; });
+  lbImg.addEventListener('pointerup', e => {
+    if (x0 === null) return;
+    const dx = e.clientX - x0;
+    x0 = null;
+    if (Math.abs(dx) > 40) show(at + (dx < 0 ? 1 : -1));
+  });
+  lbImg.addEventListener('pointercancel', () => { x0 = null; });
 </script>

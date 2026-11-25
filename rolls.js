@@ -26,16 +26,3 @@ function rollStrip(frames, start, frameEl) {
   film.append(row);
   return film;
 }
-
-// Touch screens have no hover: the first tap develops a frame, the next one opens it.
-function rollDevelopOnTap(root) {
-  if (!matchMedia('(hover: none)').matches) return;
-  root.addEventListener('click', e => {
-    const f = e.target.closest('.frame');
-    if (f && !f.classList.contains('positive')) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      f.classList.add('positive');
-    }
-  }, true);
-}

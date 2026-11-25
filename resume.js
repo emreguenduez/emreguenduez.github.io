@@ -78,16 +78,16 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
   header.append(links);
   // now.txt: what's current, as a terminal would print it (screen only)
   const now = (cv.now || []).filter(n => n.k && n.v);
-  let box = null;
   if (now.length) {
-    box = resumeEl('div', 'now screen-only');
+    const box = resumeEl('div', 'now screen-only');
     const list = resumeEl('dl');
     now.forEach(n => { const dd = resumeEl('dd'); dd.append(resumeInline(n.v)); list.append(resumeEl('dt', '', n.k), dd); });
     box.append(resumeEl('div', 'now-cmd', '~ $ cat now.txt'), list);
     header.append(box);
   }
   if (downloadButton) {
-    // The PDF as a file name, and GitHub beside it; they sit under now.txt, or under the links without it.
+    // The PDF as a file name, and GitHub beside it. In the markup they follow the role, so a phone shows them
+    // on the first screen; wide screens move them under now.txt (style.css).
     const actions = resumeEl('div', 'actions');
     // A real file works on every phone; print() does nothing in many mobile and in-app browsers.
     const dl = resumeEl(pdfUrl ? 'a' : 'button', 'dl', (window.T && T.pdf_name) || 'resume.pdf');
@@ -97,7 +97,7 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
     actions.append(dl);
     const gh = (cv.contact || []).find(c => /github\.com/.test(c.url || '') && SAFE_URL.test(c.url));
     if (gh) { const a = resumeEl('a', 'dl ghost', 'github'); a.href = gh.url; actions.append(a); }
-    if (box) box.append(actions); else links.after(actions);
+    header.querySelector('.role').after(actions);
   }
   const parts = [header];
 
