@@ -165,6 +165,11 @@ a.dl { display: inline-block; text-decoration: none; }
 }
 .frame:focus-visible { outline: 2px solid var(--dr-light); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .frame img, .frame .neg::after { transition: none; } }
+/* Browsers without aspect-ratio (Firefox before 89) keep every frame 3:2 the old way */
+@supports not (aspect-ratio: 1) {
+  .frame .neg { padding-top: 66.667%; }
+  .frame img { position: absolute; top: 0; left: 0; height: 100%; }
+}
 .also { margin-top: 14px; font: 0.875rem var(--mono); color: var(--dr-muted); }
 @media (max-width: 640px) {
   .film .frames { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -281,7 +286,7 @@ footer nav a { padding: 12px 0; }
 .project { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px 28px; padding: 26px 0; border-top: 1px solid var(--line); }
 .project:last-child { border-bottom: 1px solid var(--line); }
 .project > * { grid-column: 1; }
-.project:has(> img) { grid-template-columns: minmax(0, 1fr) auto; }
+.project.has-img { grid-template-columns: minmax(0, 1fr) auto; }
 .project .row h2 { margin: 0; font: 400 2rem/1.1 var(--display); }
 .project p { margin: 0; color: var(--soft); }
 .project .meta { color: var(--muted); }
@@ -432,13 +437,13 @@ footer nav a { padding: 12px 0; }
   header .intro { max-width: 36em; }
   /* long lines get hard to follow; keep resume text near 75 characters while dates stay right-aligned */
   #resume .item > p, #resume .item > ul { max-width: 75ch; }
-  header:has(> .now) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 48px; }
-  header:has(> .now) > * { grid-column: 1; }
+  header.has-now { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 48px; }
+  header.has-now > * { grid-column: 1; }
   /* now.txt starts level with the intro paragraph */
   header > .now { grid-column: 2; grid-row: 3; align-self: start; margin-top: 14px; }
-  header:has(> .now) > .actions { grid-column: 2; grid-row: 4; align-self: start; }
+  header.has-now > .actions { grid-column: 2; grid-row: 4; align-self: start; }
   .project { grid-template-columns: 260px minmax(0, 1fr); column-gap: 56px; }
-  .project:has(> img) { grid-template-columns: 260px minmax(0, 1fr) 200px; }
+  .project.has-img { grid-template-columns: 260px minmax(0, 1fr) 200px; }
   .project > .row { grid-column: 1; grid-row: 1 / span 4; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 4px; }
   .project > :not(.row):not(img) { grid-column: 2; }
   .project img { grid-column: 3; width: 100%; }

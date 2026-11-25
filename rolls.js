@@ -48,6 +48,8 @@ function rollLightbox() {
   controls.append(prev, close, next);
   lb.append(fig, controls);
   document.body.append(lb);
+  // Browsers without <dialog> (Firefox before 98) open the photo itself instead.
+  if (typeof lb.showModal !== 'function') return (frames, i) => { location.href = frames[i].src; };
 
   let shown = [], at = 0;
   const show = i => {

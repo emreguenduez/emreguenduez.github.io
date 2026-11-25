@@ -11,7 +11,7 @@
 <ol class="plist">
 {%- for p in site.data.projects %}
   {%- assign desc = p[dkey] | default: p.description %}
-  <li class="project">
+  <li class="project{% if p.image %} has-img{% endif %}">
     <div class="row"><h2>{{ p.name }}</h2>{% if p.year %}<span class="meta">{{ p.year }}</span>{% endif %}</div>
     {%- if desc %}<p>{{ desc }}</p>{% endif %}
     {%- if p.tags %}<p class="meta tagline">{% for tag in p.tags %}<span>{{ tag }}{% unless forloop.last %} ·{% endunless %}</span> {% endfor %}</p>{% endif %}

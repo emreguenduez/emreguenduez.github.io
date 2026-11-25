@@ -80,6 +80,7 @@ function renderResume(root, cv, { downloadButton = true, siteUrl = location.orig
   const now = (cv.now || []).filter(n => n.k && n.v);
   if (now.length) {
     const box = resumeEl('div', 'now screen-only');
+    header.classList.add('has-now'); // a class, not :has(), so older browsers (Firefox before 121) get the layout too
     const list = resumeEl('dl');
     now.forEach(n => { const dd = resumeEl('dd'); dd.append(resumeInline(n.v)); list.append(resumeEl('dt', '', n.k), dd); });
     box.append(resumeEl('div', 'now-cmd', '~ $ cat now.txt'), list);
