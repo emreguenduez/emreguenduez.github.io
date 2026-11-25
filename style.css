@@ -179,8 +179,9 @@ a.dl { display: inline-block; text-decoration: none; }
 .lightbox { border: 0; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); margin: auto; width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; background: transparent; color: var(--dr-text); }
 .lightbox::backdrop { background: rgb(10 9 8 / 0.95); }
 .lightbox[open] { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
-.lightbox figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 0; }
-.lightbox img { max-width: 100%; max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); object-fit: contain; touch-action: pan-y; user-select: none; -webkit-user-drag: none; }
+/* The figure gets a definite width: sized to fit its photo instead, Safari can lay the photo out tiny before it loads */
+.lightbox figure { margin: 0; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 0; }
+.lightbox img { width: auto; height: auto; max-width: 100%; max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); object-fit: contain; touch-action: pan-y; user-select: none; -webkit-user-drag: none; }
 .lightbox figcaption { max-width: 44em; text-align: center; color: var(--dr-muted); font-size: 0.9375rem; }
 .lightbox .count { margin-right: 8px; color: var(--dr-edge); }
 .lb-controls { display: flex; gap: 10px; }
@@ -188,7 +189,7 @@ a.dl { display: inline-block; text-decoration: none; }
 /* Phones: the photo takes the middle of the screen and the controls sit at the bottom, under the thumb */
 @media (max-width: 640px) {
   .lightbox[open] { justify-content: space-between; }
-  .lightbox figure { flex: 1; justify-content: center; width: 100%; }
+  .lightbox figure { flex: 1; justify-content: center; }
   .lb-controls { width: 100%; }
   .lb-controls button { flex: 1; padding: 8px; }
 }
@@ -417,8 +418,12 @@ footer nav a { padding: 12px 0; }
 
 /* Tablets and up: section titles take a left column, like a printed CV */
 @media screen and (min-width: 760px) {
-  #resume > section:not(.darkroom-band), .darkroom-band > .inner { display: grid; grid-template-columns: clamp(200px, 22vw, 220px) minmax(0, 1fr); column-gap: clamp(32px, 4.5vw, 56px); }
-  #resume > section > h2, .band-head h2 { margin: 0; padding-top: 1px; }
+  #resume > section:not(.darkroom-band) { display: grid; grid-template-columns: clamp(200px, 22vw, 220px) minmax(0, 1fr); column-gap: clamp(32px, 4.5vw, 56px); }
+  #resume > section > h2 { margin: 0; padding-top: 1px; }
+  /* The photos take the full width of the page: beside a title column the frames shrink to thumbnails */
+  .band-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; margin-bottom: 20px; }
+  .band-head h2 { margin: 0; }
+  .band-head .safelight { margin-top: 0; }
 }
 /* Every page shares the photography width. To keep lines readable at that width,
    section titles take a left column (like a printed CV) and the content runs beside them. */

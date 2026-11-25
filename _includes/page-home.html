@@ -28,8 +28,14 @@
     const head = rollEl('div', 'strip-head'), open = rollEl('a', '', T.open_named.replace('{title}', (r.title || 'Untitled').toLowerCase()) + ' →');
     open.href = href(r);
     head.append(rollEl('span', '', [(r.id || 'roll') + '/', frames.length + ' {{ t.frames }}', r.subtitle].filter(Boolean).join(' · ')), open);
-    // Each frame opens that photo in the photography page's lightbox (#roll/3).
-    const strip = rollStrip(frames.slice(0, 6), 0, (f, n) => { const a = rollEl('a'); a.href = href(r) + '/' + (n + 1); return a; });
+    // Each frame opens that photo large, here on the resume; the link (#roll/3) is for new tabs and no-JS.
+    const view = rollLightbox();
+    const strip = rollStrip(frames.slice(0, 6), 0, (f, n) => {
+      const a = rollEl('a');
+      a.href = href(r) + '/' + (n + 1);
+      a.onclick = e => { if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); view(frames, n); };
+      return a;
+    });
     const parts = [head, strip];
     if (rolls.length > 1) {
       const also = rollEl('p', 'also', '');

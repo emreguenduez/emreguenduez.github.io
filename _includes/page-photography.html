@@ -7,35 +7,17 @@
 <div id="rolls"></div>
 <p class="empty" id="no-rolls" hidden>{{ t.no_books }}</p>
 
-<dialog class="lightbox" aria-label="{{ t.enlarge }}">
-  <figure><img alt=""><figcaption aria-live="polite"><span class="count meta"></span> <span class="alt"></span></figcaption></figure>
-  <div class="lb-controls">
-    <button class="prev" type="button">← {{ t.prev_frame }}</button>
-    <button class="close" type="button" autofocus>{{ t.close }}</button>
-    <button class="next" type="button">{{ t.next_frame }} →</button>
-  </div>
-</dialog>
-
 <script id="rolls-data" type="application/json">{{ site.data.rolls | jsonify | replace: "</", "<\/" }}</script>
 <script src="{{ '/rolls.js' | relative_url }}"></script>
 <script>
   // Newest roll first; each is a contact sheet of six-frame strips (three on phones), with an anchor (#id) to link to it.
-  // #id/3 opens frame 3 of that roll in the lightbox; the home page links its frames that way.
+  // #id/3 opens frame 3 of that roll in the lightbox.
   const rolls = (JSON.parse(document.getElementById('rolls-data').textContent || '[]') || []).slice().reverse()
     .map(r => ({ ...r, frames: (r.frames || []).map(f => ({ ...f, src: '{{ site.baseurl }}' + f.src })) }))
     .filter(r => r.frames.length);
   const root = document.getElementById('rolls');
-  const lb = document.querySelector('.lightbox'), lbImg = lb.querySelector('img');
   const narrow = matchMedia('(max-width: 640px)');
-  let shown = null, at = 0;
-
-  const show = i => {
-    at = (i + shown.length) % shown.length;
-    lbImg.src = shown[at].src; lbImg.alt = shown[at].alt;
-    lb.querySelector('.count').textContent = String(at + 1).padStart(2, '0') + ' / ' + String(shown.length).padStart(2, '0');
-    lb.querySelector('.alt').textContent = shown[at].alt;
-  };
-  const open = (frames, i) => { shown = frames; show(i); if (!lb.open) lb.showModal(); };
+  const open = rollLightbox();
 
   const render = () => {
     const per = narrow.matches ? 3 : 6; // a strip is cut where the row ends, so the sprockets never span two rows
@@ -70,24 +52,4 @@
   };
   fromHash();
   addEventListener('hashchange', fromHash);
-
-  lb.querySelector('.prev').onclick = () => show(at - 1);
-  lb.querySelector('.next').onclick = () => show(at + 1);
-  lb.querySelector('.close').onclick = () => lb.close();
-  // Only the dark surround closes it, so a stray tap on the photo doesn't.
-  lb.addEventListener('click', e => { if (!e.target.closest('img, figcaption, button')) lb.close(); });
-  lb.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft') show(at - 1);
-    if (e.key === 'ArrowRight') show(at + 1);
-  });
-  // Swipe left or right on the photo for the next or previous frame.
-  let x0 = null;
-  lbImg.addEventListener('pointerdown', e => { x0 = e.clientX; });
-  lbImg.addEventListener('pointerup', e => {
-    if (x0 === null) return;
-    const dx = e.clientX - x0;
-    x0 = null;
-    if (Math.abs(dx) > 40) show(at + (dx < 0 ? 1 : -1));
-  });
-  lbImg.addEventListener('pointercancel', () => { x0 = null; });
 </script>
